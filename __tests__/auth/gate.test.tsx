@@ -1,12 +1,10 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react-native';
+import { render, screen, waitFor } from '@testing-library/react-native';
 import { useSessionStore } from '@/store/sessionStore';
 import AuthGate from '../../app/index';
 
 const mockReplace = jest.fn();
 const mockRedirect = jest.fn();
-const mockSignOut = jest.fn();
 let mockPendingEmail: string | null | undefined = null;
-let mockSignOutError: { message: string } | null = null;
 
 jest.mock('expo-router', () => ({
   useRouter: () => ({ replace: mockReplace, push: jest.fn(), back: jest.fn() }),
@@ -22,7 +20,7 @@ jest.mock('@/features/auth/hooks', () => ({
   useLogin: () => ({}),
   useConfirmCode: () => ({}),
   useResendCode: () => ({}),
-  useSignOut: () => ({ signOut: mockSignOut, status: 'idle', error: mockSignOutError }),
+  useSignOut: () => ({ signOut: jest.fn(), status: 'idle', error: null }),
   usePendingEmail: () => ({ email: mockPendingEmail, error: null }),
 }));
 
@@ -42,7 +40,6 @@ let mockProfileQuery: { data?: unknown; isPending: boolean } = { data: undefined
 beforeEach(() => {
   jest.clearAllMocks();
   mockPendingEmail = null;
-  mockSignOutError = null;
   mockProfileQuery = { data: undefined, isPending: true };
   useSessionStore.setState({ session: null, status: 'loading' });
 });
@@ -73,21 +70,6 @@ describe('AuthGate', () => {
     });
   });
 
-  it('shows the session stub with a working logout for authed users', async () => {
-    mockProfileQuery = {
-      isPending: false,
-      data: { ok: true, data: { profile: COMPLETE_PROFILE, photos: [{ id: 'p1' }] } },
-    };
-    useSessionStore.setState({
-      session: { user: { email: 'amine@example.dz' } } as never,
-      status: 'authed',
-    });
-    await render(<AuthGate />);
-    expect(screen.getByText(/amine@example.dz/)).toBeTruthy();
-    await fireEvent.press(screen.getByTestId('gate-logout'));
-    expect(mockSignOut).toHaveBeenCalledTimes(1);
-  });
-
   it('sends authed users with incomplete profiles to onboarding', async () => {
     mockProfileQuery = {
       isPending: false,
@@ -96,7 +78,19 @@ describe('AuthGate', () => {
     useSessionStore.setState({ session: { user: {} } as never, status: 'authed' });
     await render(<AuthGate />);
     await waitFor(() => {
-      expect(mockRedirect).toHaveBeenCalledWith('/(onboarding)');
+      expect(mockRedirect).toHaveBeenCalledWith('/setup');
+    });
+  });
+
+  it('sends authed users with complete profiles to discovery', async () => {
+    mockProfileQuery = {
+      isPending: false,
+      data: { ok: true, data: { profile: COMPLETE_PROFILE, photos: [{ id: 'p1' }] } },
+    };
+    useSessionStore.setState({ session: { user: {} } as never, status: 'authed' });
+    await render(<AuthGate />);
+    await waitFor(() => {
+      expect(mockRedirect).toHaveBeenCalledWith('/discover');
     });
   });
 
@@ -116,21 +110,5 @@ describe('AuthGate', () => {
     await render(<AuthGate />);
     expect(screen.getByTestId('gate-profile-error')).toBeTruthy();
     expect(mockRedirect).not.toHaveBeenCalled();
-  });
-
-  it('surfaces sign-out failures with a retry path', async () => {
-    mockSignOutError = { message: 'Déconnexion impossible.' };
-    mockProfileQuery = {
-      isPending: false,
-      data: { ok: true, data: { profile: COMPLETE_PROFILE, photos: [{ id: 'p1' }] } },
-    };
-    useSessionStore.setState({
-      session: { user: { email: 'amine@example.dz' } } as never,
-      status: 'authed',
-    });
-    await render(<AuthGate />);
-    expect(screen.getByTestId('gate-logout-error')).toBeTruthy();
-    await fireEvent.press(screen.getByTestId('gate-logout'));
-    expect(mockSignOut).toHaveBeenCalledTimes(1);
   });
 });

@@ -95,12 +95,18 @@ export function validateEnv(source: Record<string, string | undefined>): EnvConf
     ['development', 'staging', 'production'] as const,
     'development',
   );
-  // Loopback HTTP is allowed outside production so `supabase start` works
-  // (API gateway at http://localhost:54321). Everything else must be https.
+  // Loopback + private-LAN HTTP are allowed outside production so `supabase
+  // start` works locally (API gateway at http://localhost:54321) and Expo Go
+  // devices reach it over the LAN (e.g. http://192.168.1.198:54321).
+  // Everything else must be https; production is https-only, always.
   const isLoopback = /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?\/?/.test(supabaseUrl);
-  if (!/^https:\/\/.+/.test(supabaseUrl) && !(isLoopback && appEnv !== 'production')) {
+  const isPrivateLan =
+    /^http:\/\/(10\.\d{1,3}\.\d{1,3}\.\d{1,3}|172\.(1[6-9]|2\d|3[01])\.\d{1,3}\.\d{1,3}|192\.168\.\d{1,3}\.\d{1,3})(:\d+)?\/?/.test(
+      supabaseUrl,
+    );
+  if (!/^https:\/\/.+/.test(supabaseUrl) && !((isLoopback || isPrivateLan) && appEnv !== 'production')) {
     throw new Error(
-      '[config] EXPO_PUBLIC_SUPABASE_URL must be an https:// URL (http://localhost:* is allowed outside production).',
+      '[config] EXPO_PUBLIC_SUPABASE_URL must be an https:// URL (http://localhost:* and private-LAN http://10/172.16/192.168:* are allowed outside production).',
     );
   }
 

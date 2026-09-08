@@ -44,6 +44,14 @@ cp .env.staging .env        # pick one; .env is gitignored, templates stay clean
 npx expo start -c           # -c clears the Metro cache so new vars load
 ```
 
+> **Precedence trap (learned the hard way):** Expo resolves dotenv files with
+> `.env.development` overriding `.env`, and `.env.local` overriding both.
+> Real machine-specific values (like your LAN IP for Expo Go) belong in
+> gitignored `.env.local` — otherwise the committed placeholder templates
+> silently win and the app talks to the wrong backend. `lib/config.ts`
+> additionally allows private-LAN `http://` outside production for exactly
+> this device-testing case (production stays https-only).
+
 For EAS builds, set the same `EXPO_PUBLIC_*` keys per profile in
 `eas.json` (create when needed) instead of committing values.
 

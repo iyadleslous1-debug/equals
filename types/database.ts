@@ -408,6 +408,18 @@ export type Database = {
         };
         Returns: boolean;
       };
+      get_discovery_candidates: {
+        Args: { p_limit?: number };
+        Returns: {
+          age: number;
+          bio: string;
+          card_photo_url: string;
+          display_name: string;
+          gender: string;
+          user_id: string;
+          wilaya: number;
+        }[];
+      };
       is_active: { Args: never; Returns: boolean };
       is_conversation_participant: {
         Args: { convo_id: string };

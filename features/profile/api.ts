@@ -2,6 +2,7 @@ import * as FileSystem from 'expo-file-system';
 import { MAX_PHOTOS } from '@/constants/app';
 import { supabase } from '@/lib/supabase';
 import { createLogger } from '@/lib/logger';
+import { resolveStorageUrl } from '@/lib/storage-url';
 import { err, ok, toAppError, type ApiResult } from '@/lib/result';
 import type { Database } from '@/types/database';
 import { parseWith, profileSchema, type ProfileInput } from '@/lib/validation/schemas';
@@ -166,10 +167,5 @@ export async function deleteMyPhoto(photoId: string): Promise<ApiResult<void>> {
 
 /** Seed-style absolute URLs pass through; bucket paths become signed URLs. */
 export async function photoDisplayUrl(pathOrUrl: string): Promise<ApiResult<string>> {
-  if (pathOrUrl.startsWith('http')) return ok(pathOrUrl);
-  const { data, error } = await supabase.storage.from(BUCKET).createSignedUrl(pathOrUrl, SIGNED_URL_TTL_SEC);
-  if (error !== null || data === null) {
-    return err('profile/photo-url-failed', 'Photo illisible. Réessayez.', toAppError(error));
-  }
-  return ok(data.signedUrl);
+  return resolveStorageUrl(BUCKET, pathOrUrl, SIGNED_URL_TTL_SEC);
 }

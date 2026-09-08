@@ -6,6 +6,21 @@ section below is idempotent (`IF EXISTS`) and ordered so dependents drop before
 parents. Test every reversal on a scratch branch (`supabase db reset` on a
 copy), never on the shared staging project directly.
 
+## 0007 `20260908063210_discovery.sql`
+
+Reverses: deck function + swipe/request rate triggers.
+
+```sql
+DROP TRIGGER IF EXISTS friend_requests_rate_limit ON public.friend_requests;
+DROP TRIGGER IF EXISTS swipe_actions_rate_limit ON public.swipe_actions;
+DROP FUNCTION IF EXISTS public.enforce_request_rate_limit();
+DROP FUNCTION IF EXISTS public.enforce_swipe_rate_limit();
+DROP FUNCTION IF EXISTS public.get_discovery_candidates(INTEGER);
+```
+
+Data impact: none (read path + guards only). Without the triggers, send-heavy
+actions are unthrottled until re-applied — treat as emergency-only.
+
 ## 0006 `20260908042827_photo-hardening.sql`
 
 Reverses: moderation self-write trigger + atomic card-switch function.

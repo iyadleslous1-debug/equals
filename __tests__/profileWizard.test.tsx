@@ -1,5 +1,5 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react-native';
-import OnboardingScreen from '../app/(onboarding)/index';
+import OnboardingScreen from '../app/(onboarding)/setup';
 
 const mockReplace = jest.fn();
 const mockMutate = jest.fn();

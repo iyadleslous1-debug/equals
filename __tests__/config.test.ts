@@ -39,6 +39,21 @@ describe('validateEnv', () => {
     expect(config.supabaseUrl).toBe('http://localhost:54321');
   });
 
+  it('allows private-LAN HTTP outside production (Expo Go device testing)', () => {
+    for (const url of ['http://192.168.1.198:54321', 'http://10.0.0.5:54321', 'http://172.20.10.3:54321']) {
+      expect(validateEnv({ ...BASE, EXPO_PUBLIC_SUPABASE_URL: url }).supabaseUrl).toBe(url);
+    }
+  });
+
+  it('still rejects public HTTP and LAN HTTP in production', () => {
+    expect(() => validateEnv({ ...BASE, EXPO_PUBLIC_SUPABASE_URL: 'http://203.0.113.5:54321' })).toThrow(
+      /https:\/\//,
+    );
+    expect(() => validateEnv({ ...PROD, EXPO_PUBLIC_SUPABASE_URL: 'http://192.168.1.198:54321' })).toThrow(
+      /https:\/\//,
+    );
+  });
+
   it('rejects unknown enum values instead of silently defaulting', () => {
     expect(() => validateEnv({ ...BASE, EXPO_PUBLIC_SMS_PROVIDER: 'pigeon' })).toThrow(/twilio/);
     expect(() => validateEnv({ ...BASE, EXPO_PUBLIC_APP_ENV: 'qa' })).toThrow(/development/);
