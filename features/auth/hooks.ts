@@ -45,14 +45,19 @@ export function useSignUp(): {
   const run = useCallback(async (email: string, password: string) => {
     setStatus('pending');
     setError(null);
-    const result = await signUp(email, password);
-    if (!result.ok) {
-      setError(result.error);
+    try {
+      const result = await signUp(email, password);
+      if (!result.ok) {
+        setError(result.error);
+        setStatus('error');
+        return;
+      }
+      setNeedsConfirmation(result.data.needsConfirmation);
+      setStatus('success');
+    } catch {
+      setError({ code: 'auth/signup-failed', message: 'Création impossible. Réessayez.' });
       setStatus('error');
-      return;
     }
-    setNeedsConfirmation(result.data.needsConfirmation);
-    setStatus('success');
   }, []);
 
   return { signUp: run, reset, status, error, needsConfirmation };
@@ -75,13 +80,18 @@ export function useLogin(): {
   const run = useCallback(async (email: string, password: string) => {
     setStatus('pending');
     setError(null);
-    const result = await logIn(email, password);
-    if (!result.ok) {
-      setError(result.error);
+    try {
+      const result = await logIn(email, password);
+      if (!result.ok) {
+        setError(result.error);
+        setStatus('error');
+        return;
+      }
+      setStatus('success');
+    } catch {
+      setError({ code: 'auth/signin-failed', message: 'Connexion impossible. Réessayez.' });
       setStatus('error');
-      return;
     }
-    setStatus('success');
   }, []);
 
   return { logIn: run, reset, status, error };
@@ -116,6 +126,9 @@ export function useConfirmCode(): {
         return;
       }
       setStatus('success');
+    } catch {
+      setError({ code: 'auth/otp-verify-failed', message: 'Vérification impossible. Réessayez.' });
+      setStatus('error');
     } finally {
       busy.current = false;
     }
@@ -152,16 +165,21 @@ export function useResendCode(): {
       if (secondsLeft > 0) return;
       setStatus('pending');
       setError(null);
-      const result = await resendCode(email);
-      if (!result.ok) {
-        setError(result.error);
+      try {
+        const result = await resendCode(email);
+        if (!result.ok) {
+          setError(result.error);
+          setStatus('error');
+          const wait = retryAfterSec(result.error);
+          if (wait !== null) start(wait);
+          return;
+        }
+        setStatus('success');
+        start(OTP_COOLDOWN_SECONDS);
+      } catch {
+        setError({ code: 'auth/resend-failed', message: 'Envoi impossible. Réessayez.' });
         setStatus('error');
-        const wait = retryAfterSec(result.error);
-        if (wait !== null) start(wait);
-        return;
       }
-      setStatus('success');
-      start(OTP_COOLDOWN_SECONDS);
     },
     [secondsLeft, start],
   );
@@ -180,15 +198,20 @@ export function useSignOut(): {
   const run = useCallback(async () => {
     setStatus('pending');
     setError(null);
-    const result = await libSignOut();
-    if (!result.ok) {
-      setError(result.error);
+    try {
+      const result = await libSignOut();
+      if (!result.ok) {
+        setError(result.error);
+        setStatus('error');
+        return;
+      }
+      await clearPendingEmail();
+      queryClient.clear();
+      setStatus('idle');
+    } catch {
+      setError({ code: 'auth/signout-failed', message: 'Déconnexion impossible. Réessayez.' });
       setStatus('error');
-      return;
     }
-    await clearPendingEmail();
-    queryClient.clear();
-    setStatus('idle');
   }, []);
 
   return { signOut: run, status, error };

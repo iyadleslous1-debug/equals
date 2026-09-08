@@ -54,4 +54,16 @@ describe('useDeckActions settle', () => {
     expect(onDone).not.toHaveBeenCalled();
     expect(result.current.error).toBe('Ralentissez.');
   });
+
+  it('recovers to error state when the api throws (audit S3)', async () => {
+    mockSend.mockRejectedValue(new Error('radio silence'));
+    const onDone = jest.fn();
+    const { result } = await renderHook(() => useDeckActions(onDone));
+    await act(async () => {
+      result.current.request('u-2');
+    });
+    expect(onDone).not.toHaveBeenCalled();
+    expect(result.current.error).toBe('Action impossible. Réessayez.');
+    expect(result.current.acting).toBe(false);
+  });
 });

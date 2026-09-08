@@ -162,18 +162,22 @@ export function useMessages(conversationId: string) {
   const loadMore = useCallback(() => {
     const oldest = messages[messages.length - 1];
     if (!valid || oldest === undefined) return;
-    void fetchMessages(conversationId, { created_at: oldest.created_at, id: oldest.id }).then((page) => {
-      if (!page.ok) return;
-      setLastFetchCount(page.data.length);
-      client.setQueryData<{ ok: boolean; data?: MessageRow[] }>(
-        [...CHAT_KEY, 'thread', conversationId],
-        (cached) => {
-          if (!cached || cached.ok !== true || !cached.data) return cached;
-          const known = new Set(cached.data.map((m) => m.id));
-          return { ok: true, data: [...cached.data, ...page.data.filter((m) => !known.has(m.id))] };
-        },
-      );
-    });
+    void fetchMessages(conversationId, { created_at: oldest.created_at, id: oldest.id })
+      .then((page) => {
+        if (!page.ok) return;
+        setLastFetchCount(page.data.length);
+        client.setQueryData<{ ok: boolean; data?: MessageRow[] }>(
+          [...CHAT_KEY, 'thread', conversationId],
+          (cached) => {
+            if (!cached || cached.ok !== true || !cached.data) return cached;
+            const known = new Set(cached.data.map((m) => m.id));
+            return { ok: true, data: [...cached.data, ...page.data.filter((m) => !known.has(m.id))] };
+          },
+        );
+      })
+      // Deliberate: silent page-load failure leaves existing messages in
+      // place; the user retries by scrolling. No error surface in the design.
+      .catch(() => undefined);
   }, [client, conversationId, valid, messages]);
 
   return {
@@ -233,11 +237,15 @@ export function useMarkRead(conversationId: string, signature: string | null): v
   useEffect(() => {
     if (signature === null) return;
     let cancelled = false;
-    void markRead(conversationId).then((result) => {
-      if (!cancelled && result.ok) {
-        void client.invalidateQueries({ queryKey: [...CHAT_KEY, 'list'] });
-      }
-    });
+    void markRead(conversationId)
+      .then((result) => {
+        if (!cancelled && result.ok) {
+          void client.invalidateQueries({ queryKey: [...CHAT_KEY, 'list'] });
+        }
+      })
+      // Deliberate: a failed read-receipt just means the badge refreshes on
+      // the next foreground return; never blocks or errors the thread view.
+      .catch(() => undefined);
     return () => {
       cancelled = true;
     };

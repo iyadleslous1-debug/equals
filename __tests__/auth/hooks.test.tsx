@@ -1,8 +1,8 @@
 import { act, renderHook } from '@testing-library/react-native';
 import { err, ok } from '@/lib/result';
-import { usePendingEmail, useResendCode } from '@/features/auth/hooks';
+import { useLogin, usePendingEmail, useResendCode } from '@/features/auth/hooks';
 import { getPendingEmail } from '@/features/auth/pendingEmail';
-import { resendCode } from '@/features/auth/api';
+import { logIn, resendCode } from '@/features/auth/api';
 
 jest.useFakeTimers();
 
@@ -29,9 +29,22 @@ jest.mock('@react-native-community/netinfo', () => ({
 
 const mockResend = resendCode as jest.Mock;
 const mockGetPending = getPendingEmail as jest.Mock;
+const mockLogIn = logIn as jest.Mock;
 
 beforeEach(() => {
   jest.clearAllMocks();
+});
+
+describe('useLogin throw-path (audit S3)', () => {
+  it('leaves pending and surfaces an error when the api throws', async () => {
+    mockLogIn.mockRejectedValue(new Error('SecureStore locked'));
+    const { result } = await renderHook(() => useLogin());
+    await act(async () => {
+      result.current.logIn('a@b.co', 'Seedpass123!');
+    });
+    expect(result.current.status).toBe('error');
+    expect(result.current.error?.message).toBe('Connexion impossible. Réessayez.');
+  });
 });
 
 describe('useResendCode', () => {

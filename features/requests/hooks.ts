@@ -48,9 +48,14 @@ export function useRespond(): {
 
   const settle = useCallback(
     async (work: Promise<{ ok: boolean; error?: { message: string } }>, done: string) => {
-      const result = await work;
-      if (!result.ok) {
-        setError(result.error?.message ?? 'Action impossible. Réessayez.');
+      try {
+        const result = await work;
+        if (!result.ok) {
+          setError(result.error?.message ?? 'Action impossible. Réessayez.');
+          return;
+        }
+      } catch {
+        setError('Action impossible. Réessayez.');
         return;
       }
       setError(null);

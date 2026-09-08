@@ -64,6 +64,16 @@ describe('useSafety', () => {
     expect(result.current.status).toBe('error');
     expect(result.current.error).toBe('Blocage impossible.');
   });
+
+  it('recovers to error state when the api throws (audit S3)', async () => {
+    mockSubmit.mockRejectedValue(new Error('store exploded'));
+    const { result } = await renderHook(() => useSafety(), { wrapper });
+    await act(async () => {
+      await result.current.report('u-9', 'Spam', '');
+    });
+    expect(result.current.status).toBe('error');
+    expect(result.current.error).toBe('Signalement impossible. Réessayez.');
+  });
 });
 
 describe('useIsBlocked', () => {
