@@ -14,7 +14,12 @@ import { useMarkRead, useMessages, useOutbox, useSendMessage } from '@/features/
 import { BlockConfirm } from '@/features/safety/components/BlockConfirm';
 import { ReportSheet } from '@/features/safety/components/ReportSheet';
 import { useIsBlocked, useSafety } from '@/features/safety/hooks';
+import type { MessageRow } from '@/features/chat/api';
 import { useSessionStore } from '@/store/sessionStore';
+
+function messageKey(item: MessageRow): string {
+  return item.id;
+}
 
 export default function ThreadScreen(): React.JSX.Element {
   const router = useRouter();
@@ -67,6 +72,19 @@ export default function ThreadScreen(): React.JSX.Element {
   const myUserId = useSessionStore((s) => s.session?.user?.id ?? '');
   const [locked, setLocked] = useState(false);
   const missing = conversationId === '';
+
+  // Stable identities so memoized MessageBubble rows skip on new arrivals.
+  const renderMessage = useCallback(
+    ({ item }: { item: MessageRow }) => (
+      <MessageBubble
+        text={item.content_text}
+        mine={item.sender_id === myUserId}
+        failed={false}
+        testID={`thread-msg-${item.id}`}
+      />
+    ),
+    [myUserId],
+  );
 
   const loaded = threadQuery.data;
   const serverNewestFirst = loaded?.ok ? loaded.data : [];
@@ -143,7 +161,7 @@ export default function ThreadScreen(): React.JSX.Element {
         <FlatList
           inverted
           data={serverNewestFirst}
-          keyExtractor={(item) => item.id}
+          keyExtractor={messageKey}
           className="flex-1 px-4"
           contentContainerClassName="py-4"
           onEndReached={() => threadQuery.loadMore()}
@@ -158,14 +176,7 @@ export default function ThreadScreen(): React.JSX.Element {
               />
             ) : null
           }
-          renderItem={({ item }) => (
-            <MessageBubble
-              text={item.content_text}
-              mine={item.sender_id === myUserId}
-              failed={false}
-              testID={`thread-msg-${item.id}`}
-            />
-          )}
+          renderItem={renderMessage}
         />
       )}
       {pending.map((entry) => (

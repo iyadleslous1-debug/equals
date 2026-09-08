@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { Pressable, Text, View } from 'react-native';
 import { Avatar } from '@/components/Avatar';
 
@@ -11,7 +12,8 @@ export interface ConversationRowProps {
   testID?: string;
 }
 
-export function ConversationRow({
+/** Memoized: chat list re-renders on every preview update; untouched rows skip. */
+export const ConversationRow = memo(function ConversationRow({
   name,
   preview,
   time,
@@ -53,4 +55,4 @@ export function ConversationRow({
       </View>
     </Pressable>
   );
-}
+});

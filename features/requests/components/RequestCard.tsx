@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { Text, View } from 'react-native';
 import { Avatar } from '@/components/Avatar';
 import { Badge } from '@/components/Badge';
@@ -34,7 +35,15 @@ const STATUS_CHIP = {
   canceled: { label: 'Annulée', variant: 'destructive' },
 } as const;
 
-export function RequestCard({ request, direction, acting, onAccept, onDecline, testID }: RequestCardProps) {
+/** Memoized: inbox re-renders on acting/notice churn; idle rows skip. */
+export const RequestCard = memo(function RequestCard({
+  request,
+  direction,
+  acting,
+  onAccept,
+  onDecline,
+  testID,
+}: RequestCardProps) {
   const t = (id: string): string => (testID ? `${testID}-${id}` : '');
   const name =
     request.profile && request.profile.age !== null
@@ -75,4 +84,4 @@ export function RequestCard({ request, direction, acting, onAccept, onDecline, t
       ) : null}
     </View>
   );
-}
+});

@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { Image, Text, View } from 'react-native';
 import { wilayaLabel } from '@/constants/wilayas';
 import { Button } from '@/components/Button';
@@ -14,7 +15,15 @@ export interface UserCardProps {
   testID?: string;
 }
 
-export function UserCard({ profile, photoUrl, acting, onRequest, onSkip, onMore, testID }: UserCardProps) {
+export const UserCard = memo(function UserCard({
+  profile,
+  photoUrl,
+  acting,
+  onRequest,
+  onSkip,
+  onMore,
+  testID,
+}: UserCardProps) {
   const t = (id: string): string => (testID ? `${testID}-${id}` : '');
   return (
     <View testID={testID} className="overflow-hidden rounded-2xl border border-border bg-ink">
@@ -64,4 +73,4 @@ export function UserCard({ profile, photoUrl, acting, onRequest, onSkip, onMore,
       </View>
     </View>
   );
-}
+});

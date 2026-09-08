@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { Pressable, Text, View } from 'react-native';
 
 export interface MessageBubbleProps {
@@ -9,7 +10,15 @@ export interface MessageBubbleProps {
   testID?: string;
 }
 
-export function MessageBubble({ text, mine, failed, sending = false, onRetry, testID }: MessageBubbleProps) {
+/** Memoized: thread FlatList re-renders on every arrival; unchanged rows skip. */
+export const MessageBubble = memo(function MessageBubble({
+  text,
+  mine,
+  failed,
+  sending = false,
+  onRetry,
+  testID,
+}: MessageBubbleProps) {
   const t = (id: string): string => (testID ? `${testID}-${id}` : '');
   return (
     <View testID={testID} className={`my-1 max-w-[80%] ${mine ? 'self-end' : 'self-start'}`}>
@@ -35,4 +44,4 @@ export function MessageBubble({ text, mine, failed, sending = false, onRetry, te
       </View>
     </View>
   );
-}
+});
