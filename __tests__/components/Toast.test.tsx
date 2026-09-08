@@ -14,23 +14,23 @@ function Trigger() {
 }
 
 describe('Toast', () => {
-  it('shows the message, auto-dismisses, and supports manual dismiss', () => {
-    render(
+  it('shows the message, auto-dismisses, and supports manual dismiss', async () => {
+    await render(
       <ToastProvider>
         <Trigger />
       </ToastProvider>,
     );
     expect(() => screen.getByTestId('toast-message')).toThrow();
 
-    fireEvent.press(screen.getByTestId('trigger'));
+    await fireEvent.press(screen.getByTestId('trigger'));
     expect(screen.getByText('Saved')).toBeTruthy();
 
-    fireEvent.press(screen.getByTestId('toast-dismiss'));
+    await fireEvent.press(screen.getByTestId('toast-dismiss'));
     expect(() => screen.getByTestId('toast-message')).toThrow();
 
-    fireEvent.press(screen.getByTestId('trigger'));
+    await fireEvent.press(screen.getByTestId('trigger'));
     expect(screen.getByText('Saved')).toBeTruthy();
-    act(() => {
+    await act(async () => {
       jest.advanceTimersByTime(3000);
     });
     expect(() => screen.getByTestId('toast-message')).toThrow();

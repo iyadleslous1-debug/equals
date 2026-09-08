@@ -35,7 +35,7 @@ describe('useSignOut', () => {
     mockSignOut.mockResolvedValue({ ok: true, data: undefined });
     queryClient.setQueryData(['profiles', 'x'], { cached: true });
 
-    const { result } = renderHook(() => useSignOut());
+    const { result } = await renderHook(() => useSignOut());
     await act(async () => {
       await result.current.signOut();
     });

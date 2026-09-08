@@ -4,42 +4,46 @@ import { Badge } from '../../components/Badge';
 import { Chip } from '../../components/Chip';
 
 describe('Avatar', () => {
-  it('shows initials when there is no photo', () => {
-    render(<Avatar name="Amine Benali" testID="avatar" />);
+  it('shows initials when there is no photo', async () => {
+    await render(<Avatar name="Amine Benali" testID="avatar" />);
     expect(screen.getByText('AB')).toBeTruthy();
   });
 
-  it('renders the photo when a uri is given', () => {
-    render(<Avatar name="Amine Benali" uri="https://picsum.photos/200" testID="avatar" />);
+  it('renders the photo when a uri is given', async () => {
+    await render(<Avatar name="Amine Benali" uri="https://picsum.photos/200" testID="avatar" />);
     expect(screen.getByTestId('avatar-image')).toBeTruthy();
   });
 });
 
 describe('Badge', () => {
-  it('renders its label in every variant', () => {
+  it('renders its label in every variant', async () => {
     const variants = ['info', 'success', 'warning', 'destructive'] as const;
     for (const variant of variants) {
-      const { unmount } = render(<Badge label="Pending" variant={variant} testID={`badge-${variant}`} />);
+      const { unmount } = await render(
+        <Badge label="Pending" variant={variant} testID={`badge-${variant}`} />,
+      );
       expect(screen.getByText('Pending')).toBeTruthy();
-      unmount();
+      await unmount();
     }
   });
 });
 
 describe('Chip', () => {
-  it('toggles and announces selected state', () => {
+  it('toggles and announces selected state', async () => {
     const onPress = jest.fn();
-    render(<Chip label="Alger" selected={false} onPress={onPress} testID="chip" />);
-    fireEvent.press(screen.getByTestId('chip'));
+    await render(<Chip label="Alger" selected={false} onPress={onPress} testID="chip" />);
+    await fireEvent.press(screen.getByTestId('chip'));
     expect(onPress).toHaveBeenCalledTimes(1);
 
-    const { unmount } = render(<Chip label="Alger" selected onPress={() => undefined} testID="chip-on" />);
+    const { unmount } = await render(
+      <Chip label="Alger" selected onPress={() => undefined} testID="chip-on" />,
+    );
     expect(screen.getByRole('button', { name: 'Alger' })).toBeTruthy();
-    unmount();
+    await unmount();
   });
 
-  it('falls back to a placeholder for an empty name', () => {
-    render(<Avatar name="" testID="avatar-empty" />);
+  it('falls back to a placeholder for an empty name', async () => {
+    await render(<Avatar name="" testID="avatar-empty" />);
     expect(screen.getByText('?')).toBeTruthy();
   });
 });

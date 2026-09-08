@@ -53,28 +53,28 @@ beforeEach(() => {
 });
 
 async function fillIdentity() {
-  fireEvent.changeText(screen.getByTestId('onboarding-identity-name'), 'Amine Benali');
-  fireEvent.changeText(screen.getByTestId('onboarding-identity-age'), '24');
-  fireEvent.press(screen.getByTestId('onboarding-identity-gender-male'));
-  fireEvent.press(screen.getByTestId('onboarding-identity-wilaya-open'));
-  fireEvent.changeText(screen.getByTestId('onboarding-identity-wilaya-search'), 'alger');
-  fireEvent.press(screen.getByText(/16 — Alger/));
+  await fireEvent.changeText(screen.getByTestId('onboarding-identity-name'), 'Amine Benali');
+  await fireEvent.changeText(screen.getByTestId('onboarding-identity-age'), '24');
+  await fireEvent.press(screen.getByTestId('onboarding-identity-gender-male'));
+  await fireEvent.press(screen.getByTestId('onboarding-identity-wilaya-open'));
+  await fireEvent.changeText(screen.getByTestId('onboarding-identity-wilaya-search'), 'alger');
+  await fireEvent.press(screen.getByText(/16 — Alger/));
 }
 
 describe('OnboardingScreen', () => {
   it('blocks invalid identity and never calls the API', async () => {
-    render(<OnboardingScreen />);
+    await render(<OnboardingScreen />);
     await screen.findByTestId('onboarding-identity-submit');
-    fireEvent.press(screen.getByTestId('onboarding-identity-submit'));
+    await fireEvent.press(screen.getByTestId('onboarding-identity-submit'));
     expect(screen.getByTestId('onboarding-identity-errors')).toBeTruthy();
     expect(mockMutate).not.toHaveBeenCalled();
   });
 
   it('saves valid identity, persists the draft and advances to photos', async () => {
-    render(<OnboardingScreen />);
+    await render(<OnboardingScreen />);
     await screen.findByTestId('onboarding-identity-submit');
     await fillIdentity();
-    fireEvent.press(screen.getByTestId('onboarding-identity-submit'));
+    await fireEvent.press(screen.getByTestId('onboarding-identity-submit'));
     expect(mockMutate).toHaveBeenCalledWith(
       expect.objectContaining({ display_name: 'Amine Benali', age: 24, wilaya: 16 }),
       expect.anything(),
@@ -85,7 +85,7 @@ describe('OnboardingScreen', () => {
 
   it('resumes a half-finished wizard at the saved step', async () => {
     mockDraft = { step: 1, fields: { display_name: 'Amine' } };
-    render(<OnboardingScreen />);
+    await render(<OnboardingScreen />);
     await screen.findByTestId('onboarding-photos-grid-add');
     expect(screen.getByText('Étape 2/3')).toBeTruthy();
   });
@@ -96,9 +96,9 @@ describe('OnboardingScreen', () => {
       profile: { display_name: 'Amine', age: 24, gender: 'male', wilaya: 16 },
       photos: [{ id: 'p1' }],
     };
-    render(<OnboardingScreen />);
+    await render(<OnboardingScreen />);
     await screen.findByTestId('onboarding-review-done');
-    fireEvent.press(screen.getByTestId('onboarding-review-done'));
+    await fireEvent.press(screen.getByTestId('onboarding-review-done'));
     await waitFor(() => {
       expect(mockClearDraft).toHaveBeenCalledTimes(1);
       expect(mockReplace).toHaveBeenCalledWith('/');

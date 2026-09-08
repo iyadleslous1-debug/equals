@@ -13,8 +13,8 @@ const photo = (overrides: Partial<PhotoRow> = {}): PhotoRow => ({
 });
 
 describe('PhotoGrid', () => {
-  it('shows pending-review state instead of hiding unapproved photos', () => {
-    render(
+  it('shows pending-review state instead of hiding unapproved photos', async () => {
+    await render(
       <PhotoGrid
         photos={[photo({ id: 'p2', is_card_photo: false, moderation_status: 'pending' })]}
         urls={{ p2: 'https://picsum.photos/201' }}
@@ -31,9 +31,9 @@ describe('PhotoGrid', () => {
     expect(screen.getByText('En révision')).toBeTruthy();
   });
 
-  it('marks the card photo and wires set-card on the others', () => {
+  it('marks the card photo and wires set-card on the others', async () => {
     const onSetCard = jest.fn();
-    render(
+    await render(
       <PhotoGrid
         photos={[photo(), photo({ id: 'p2', is_card_photo: false, moderation_status: 'approved' })]}
         urls={{ p1: 'https://picsum.photos/200', p2: 'https://picsum.photos/201' }}
@@ -48,11 +48,11 @@ describe('PhotoGrid', () => {
       />,
     );
     expect(screen.getByTestId('grid-card-badge-p1')).toBeTruthy();
-    fireEvent.press(screen.getByTestId('grid-set-card-p2'));
+    await fireEvent.press(screen.getByTestId('grid-set-card-p2'));
     expect(onSetCard).toHaveBeenCalledWith('p2');
   });
 
-  it('lists failed uploads with retry and caps additions at six', () => {
+  it('lists failed uploads with retry and caps additions at six', async () => {
     const failed: FailedUpload[] = [
       { uri: 'file://x.jpg', mimeType: 'image/jpeg', error: 'Envoi impossible.' },
     ];
@@ -61,7 +61,7 @@ describe('PhotoGrid', () => {
     const six = Array.from({ length: 6 }, (_, i) =>
       photo({ id: `p${i}`, is_card_photo: i === 0, moderation_status: 'approved' }),
     );
-    const { unmount } = render(
+    const { unmount } = await render(
       <PhotoGrid
         photos={[photo()]}
         urls={{ p1: 'https://picsum.photos/200' }}
@@ -75,11 +75,11 @@ describe('PhotoGrid', () => {
         testID="grid"
       />,
     );
-    fireEvent.press(screen.getByTestId('grid-retry-0'));
+    await fireEvent.press(screen.getByTestId('grid-retry-0'));
     expect(onRetry).toHaveBeenCalledWith(0);
-    unmount();
+    await unmount();
 
-    render(
+    await render(
       <PhotoGrid
         photos={six}
         urls={{}}
@@ -97,9 +97,9 @@ describe('PhotoGrid', () => {
     expect(screen.getByText(/6\/6/)).toBeTruthy();
   });
 
-  it('badges rejected photos distinctly and retries dead signed URLs', () => {
+  it('badges rejected photos distinctly and retries dead signed URLs', async () => {
     const onRetryUrl = jest.fn();
-    render(
+    await render(
       <PhotoGrid
         photos={[
           photo({ id: 'p9', is_card_photo: false, moderation_status: 'rejected' }),
@@ -119,7 +119,7 @@ describe('PhotoGrid', () => {
       />,
     );
     expect(screen.getByText('Refusée — remplacez-la')).toBeTruthy();
-    fireEvent.press(screen.getByTestId('grid-retry-url-p8'));
+    await fireEvent.press(screen.getByTestId('grid-retry-url-p8'));
     expect(onRetryUrl).toHaveBeenCalledWith('p8');
   });
 });

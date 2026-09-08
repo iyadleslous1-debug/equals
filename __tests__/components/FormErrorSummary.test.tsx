@@ -7,16 +7,16 @@ describe('FormErrorSummary', () => {
     { field: 'password', message: 'Use 8+ characters' },
   ];
 
-  it('lists every error and routes taps to the field', () => {
+  it('lists every error and routes taps to the field', async () => {
     const onSelect = jest.fn();
-    render(<FormErrorSummary errors={errors} onSelect={onSelect} testID="form-errors" />);
+    await render(<FormErrorSummary errors={errors} onSelect={onSelect} testID="form-errors" />);
     expect(screen.getByRole('button', { name: 'Enter a valid email. Go to field.' })).toBeTruthy();
-    fireEvent.press(screen.getByTestId('form-errors-email'));
+    await fireEvent.press(screen.getByTestId('form-errors-email'));
     expect(onSelect).toHaveBeenCalledWith('email');
   });
 
-  it('renders nothing when there are no errors', () => {
-    render(<FormErrorSummary errors={[]} onSelect={() => undefined} testID="form-errors" />);
+  it('renders nothing when there are no errors', async () => {
+    await render(<FormErrorSummary errors={[]} onSelect={() => undefined} testID="form-errors" />);
     expect(() => screen.getByTestId('form-errors')).toThrow();
   });
 });

@@ -34,20 +34,20 @@ beforeEach(() => {
 });
 
 describe('SignupScreen', () => {
-  it('shows inline errors for empty fields on submit', () => {
-    render(<SignupScreen />);
-    fireEvent.press(screen.getByTestId('signup-submit'));
+  it('shows inline errors for empty fields on submit', async () => {
+    await render(<SignupScreen />);
+    await fireEvent.press(screen.getByTestId('signup-submit'));
     expect(screen.getByTestId('signup-email-error')).toBeTruthy();
     expect(screen.getByTestId('signup-errors')).toBeTruthy();
     expect(mockSignUp).not.toHaveBeenCalled();
   });
 
-  it('submits valid credentials and routes to confirm on success', () => {
+  it('submits valid credentials and routes to confirm on success', async () => {
     mockHookState = { status: 'success', error: null, needsConfirmation: true };
-    render(<SignupScreen />);
-    fireEvent.changeText(screen.getByTestId('signup-email'), 'Amine@Example.DZ');
-    fireEvent.changeText(screen.getByTestId('signup-password'), 'Seedpass123!');
-    fireEvent.press(screen.getByTestId('signup-submit'));
+    await render(<SignupScreen />);
+    await fireEvent.changeText(screen.getByTestId('signup-email'), 'Amine@Example.DZ');
+    await fireEvent.changeText(screen.getByTestId('signup-password'), 'Seedpass123!');
+    await fireEvent.press(screen.getByTestId('signup-submit'));
     expect(mockSignUp).toHaveBeenCalledWith('amine@example.dz', 'Seedpass123!');
     expect(mockReplace).toHaveBeenCalledWith({
       pathname: '/confirm',
@@ -55,24 +55,24 @@ describe('SignupScreen', () => {
     });
   });
 
-  it('offers sign-in instead when the email is registered', () => {
+  it('offers sign-in instead when the email is registered', async () => {
     mockHookState = {
       status: 'error',
       error: { code: 'auth/email-registered', message: 'Un compte existe déjà.' },
       needsConfirmation: false,
     };
-    render(<SignupScreen />);
-    fireEvent.press(screen.getByTestId('signup-signin-link'));
+    await render(<SignupScreen />);
+    await fireEvent.press(screen.getByTestId('signup-signin-link'));
     expect(mockReplace).toHaveBeenCalledWith('/login');
   });
 
-  it('shows a spinner state while signing up', () => {
+  it('shows a spinner state while signing up', async () => {
     mockHookState = { status: 'pending', error: null, needsConfirmation: false };
-    render(<SignupScreen />);
+    await render(<SignupScreen />);
     expect(screen.getByTestId('signup-submit-loading')).toBeTruthy();
   });
 
-  it('ok/err helpers stay compatible with the hook contract', () => {
+  it('ok/err helpers stay compatible with the hook contract', async () => {
     expect(ok({ needsConfirmation: true }).ok).toBe(true);
     expect(err('auth/signup-failed', 'x').ok).toBe(false);
   });

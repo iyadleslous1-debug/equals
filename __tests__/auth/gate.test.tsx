@@ -48,15 +48,15 @@ beforeEach(() => {
 });
 
 describe('AuthGate', () => {
-  it('shows loading while the session resolves', () => {
-    render(<AuthGate />);
+  it('shows loading while the session resolves', async () => {
+    await render(<AuthGate />);
     expect(screen.getByText('Chargement…')).toBeTruthy();
   });
 
   it('resumes an unconfirmed signup at the code screen', async () => {
     mockPendingEmail = 'amine@example.dz';
     useSessionStore.setState({ session: null, status: 'guest' });
-    render(<AuthGate />);
+    await render(<AuthGate />);
     await waitFor(() => {
       expect(mockRedirect).toHaveBeenCalledWith({
         pathname: '/confirm',
@@ -67,13 +67,13 @@ describe('AuthGate', () => {
 
   it('sends fresh guests to login', async () => {
     useSessionStore.setState({ session: null, status: 'guest' });
-    render(<AuthGate />);
+    await render(<AuthGate />);
     await waitFor(() => {
       expect(mockRedirect).toHaveBeenCalledWith('/login');
     });
   });
 
-  it('shows the session stub with a working logout for authed users', () => {
+  it('shows the session stub with a working logout for authed users', async () => {
     mockProfileQuery = {
       isPending: false,
       data: { ok: true, data: { profile: COMPLETE_PROFILE, photos: [{ id: 'p1' }] } },
@@ -82,9 +82,9 @@ describe('AuthGate', () => {
       session: { user: { email: 'amine@example.dz' } } as never,
       status: 'authed',
     });
-    render(<AuthGate />);
+    await render(<AuthGate />);
     expect(screen.getByText(/amine@example.dz/)).toBeTruthy();
-    fireEvent.press(screen.getByTestId('gate-logout'));
+    await fireEvent.press(screen.getByTestId('gate-logout'));
     expect(mockSignOut).toHaveBeenCalledTimes(1);
   });
 
@@ -94,31 +94,31 @@ describe('AuthGate', () => {
       data: { ok: true, data: { profile: COMPLETE_PROFILE, photos: [] } },
     };
     useSessionStore.setState({ session: { user: {} } as never, status: 'authed' });
-    render(<AuthGate />);
+    await render(<AuthGate />);
     await waitFor(() => {
       expect(mockRedirect).toHaveBeenCalledWith('/(onboarding)');
     });
   });
 
-  it('holds a skeleton while the profile loads', () => {
+  it('holds a skeleton while the profile loads', async () => {
     mockProfileQuery = { data: undefined, isPending: true };
     useSessionStore.setState({ session: { user: {} } as never, status: 'authed' });
-    render(<AuthGate />);
+    await render(<AuthGate />);
     expect(screen.getByText('Chargement…')).toBeTruthy();
   });
 
-  it('shows a retryable error instead of misrouting on profile failure', () => {
+  it('shows a retryable error instead of misrouting on profile failure', async () => {
     mockProfileQuery = {
       isPending: false,
       data: { ok: false, error: { code: 'profile/load-failed', message: 'Profil introuvable.' } },
     };
     useSessionStore.setState({ session: { user: {} } as never, status: 'authed' });
-    render(<AuthGate />);
+    await render(<AuthGate />);
     expect(screen.getByTestId('gate-profile-error')).toBeTruthy();
     expect(mockRedirect).not.toHaveBeenCalled();
   });
 
-  it('surfaces sign-out failures with a retry path', () => {
+  it('surfaces sign-out failures with a retry path', async () => {
     mockSignOutError = { message: 'Déconnexion impossible.' };
     mockProfileQuery = {
       isPending: false,
@@ -128,9 +128,9 @@ describe('AuthGate', () => {
       session: { user: { email: 'amine@example.dz' } } as never,
       status: 'authed',
     });
-    render(<AuthGate />);
+    await render(<AuthGate />);
     expect(screen.getByTestId('gate-logout-error')).toBeTruthy();
-    fireEvent.press(screen.getByTestId('gate-logout'));
+    await fireEvent.press(screen.getByTestId('gate-logout'));
     expect(mockSignOut).toHaveBeenCalledTimes(1);
   });
 });

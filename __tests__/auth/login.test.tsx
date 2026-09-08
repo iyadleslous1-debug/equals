@@ -30,66 +30,66 @@ beforeEach(() => {
 });
 
 describe('LoginScreen', () => {
-  it('requires a password before calling the API', () => {
-    render(<LoginScreen />);
-    fireEvent.changeText(screen.getByTestId('login-email'), 'a@b.co');
-    fireEvent.press(screen.getByTestId('login-submit'));
+  it('requires a password before calling the API', async () => {
+    await render(<LoginScreen />);
+    await fireEvent.changeText(screen.getByTestId('login-email'), 'a@b.co');
+    await fireEvent.press(screen.getByTestId('login-submit'));
     expect(screen.getByTestId('login-password-error')).toBeTruthy();
     expect(mockLogIn).not.toHaveBeenCalled();
   });
 
-  it('routes to the app on success', () => {
+  it('routes to the app on success', async () => {
     mockHookState = { status: 'success', error: null };
-    render(<LoginScreen />);
-    fireEvent.changeText(screen.getByTestId('login-email'), 'a@b.co');
-    fireEvent.changeText(screen.getByTestId('login-password'), 'Seedpass123!');
-    fireEvent.press(screen.getByTestId('login-submit'));
+    await render(<LoginScreen />);
+    await fireEvent.changeText(screen.getByTestId('login-email'), 'a@b.co');
+    await fireEvent.changeText(screen.getByTestId('login-password'), 'Seedpass123!');
+    await fireEvent.press(screen.getByTestId('login-submit'));
     expect(mockLogIn).toHaveBeenCalledWith('a@b.co', 'Seedpass123!');
     expect(mockReplace).toHaveBeenCalledWith('/');
   });
 
-  it('offers the code screen for unconfirmed emails', () => {
+  it('offers the code screen for unconfirmed emails', async () => {
     mockHookState = {
       status: 'error',
       error: { code: 'auth/email-not-confirmed', message: 'Confirmez votre email.' },
     };
-    render(<LoginScreen />);
-    fireEvent.changeText(screen.getByTestId('login-email'), 'a@b.co');
-    fireEvent.changeText(screen.getByTestId('login-password'), 'Seedpass123!');
-    fireEvent.press(screen.getByTestId('login-submit'));
-    fireEvent.press(screen.getByTestId('login-confirm-action'));
+    await render(<LoginScreen />);
+    await fireEvent.changeText(screen.getByTestId('login-email'), 'a@b.co');
+    await fireEvent.changeText(screen.getByTestId('login-password'), 'Seedpass123!');
+    await fireEvent.press(screen.getByTestId('login-submit'));
+    await fireEvent.press(screen.getByTestId('login-confirm-action'));
     expect(mockReplace).toHaveBeenCalledWith({
       pathname: '/confirm',
       params: { email: 'a@b.co' },
     });
   });
 
-  it('clears a stale server error when the email changes', () => {
+  it('clears a stale server error when the email changes', async () => {
     mockHookState = {
       status: 'error',
       error: { code: 'auth/email-not-confirmed', message: 'Confirmez votre email.' },
     };
-    render(<LoginScreen />);
+    await render(<LoginScreen />);
     expect(screen.getByTestId('login-confirm-action')).toBeTruthy();
-    fireEvent.changeText(screen.getByTestId('login-email'), 'other@b.co');
+    await fireEvent.changeText(screen.getByTestId('login-email'), 'other@b.co');
     expect(mockReset).toHaveBeenCalled();
   });
 
-  it('shows throttled and generic errors as plain messages', () => {
+  it('shows throttled and generic errors as plain messages', async () => {
     mockHookState = {
       status: 'error',
       error: { code: 'auth/rate-limited', message: 'Trop de tentatives.' },
     };
-    const { unmount } = render(<LoginScreen />);
+    const { unmount } = await render(<LoginScreen />);
     expect(screen.getByTestId('login-error')).toBeTruthy();
     expect(() => screen.getByTestId('login-confirm-action')).toThrow();
-    unmount();
+    await unmount();
 
     mockHookState = {
       status: 'error',
       error: { code: 'auth/signin-failed', message: 'Email ou mot de passe incorrect.' },
     };
-    render(<LoginScreen />);
+    await render(<LoginScreen />);
     expect(screen.getByText('Email ou mot de passe incorrect.')).toBeTruthy();
   });
 });
