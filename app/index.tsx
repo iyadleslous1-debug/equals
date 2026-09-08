@@ -22,12 +22,20 @@ export default function AuthGate(): React.JSX.Element {
 
   if (status === 'loading') return <LoadingState label="Chargement…" />;
   if (status === 'authed') {
-    if (profileQuery.isPending) return <LoadingState label="Chargement…" />;
-    if (profileQuery.data !== undefined && !profileQuery.data.ok) {
+    // Never decide on a stale snapshot mid-refetch (e.g. right after the
+    // wizard saved): a stale "incomplete" would bounce back to onboarding.
+    if (profileQuery.isPending || (profileQuery.isFetching && profileQuery.isStale)) {
+      return <LoadingState label="Chargement…" />;
+    }
+    if (profileQuery.isError || (profileQuery.data !== undefined && !profileQuery.data.ok)) {
       return (
         <View className="flex-1 bg-void">
           <ErrorState
-            message={profileQuery.data.error.message}
+            message={
+              profileQuery.data !== undefined && !profileQuery.data.ok
+                ? profileQuery.data.error.message
+                : 'Profil illisible. Réessayez.'
+            }
             onRetry={() => profileQuery.refetch()}
             testID="gate-profile-error"
           />

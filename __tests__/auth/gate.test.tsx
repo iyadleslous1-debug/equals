@@ -35,7 +35,14 @@ jest.mock('@/features/profile/hooks', () => ({
   usePhotoUrls: () => ({}),
 }));
 
-let mockProfileQuery: { data?: unknown; isPending: boolean } = { data: undefined, isPending: true };
+let mockProfileQuery: {
+  data?: unknown;
+  isPending: boolean;
+  isFetching?: boolean;
+  isStale?: boolean;
+  isError?: boolean;
+  refetch?: () => void;
+} = { data: undefined, isPending: true };
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -99,6 +106,27 @@ describe('AuthGate', () => {
     useSessionStore.setState({ session: { user: {} } as never, status: 'authed' });
     await render(<AuthGate />);
     expect(screen.getByText('Chargement…')).toBeTruthy();
+  });
+
+  it('holds a skeleton on stale data mid-refetch instead of misrouting', async () => {
+    mockProfileQuery = {
+      data: { ok: true, data: { profile: null, photos: [] } },
+      isPending: false,
+      isFetching: true,
+      isStale: true,
+    };
+    useSessionStore.setState({ session: { user: {} } as never, status: 'authed' });
+    await render(<AuthGate />);
+    expect(screen.getByText('Chargement…')).toBeTruthy();
+    expect(mockRedirect).not.toHaveBeenCalled();
+  });
+
+  it('shows a retryable error on query failure instead of misrouting', async () => {
+    mockProfileQuery = { data: undefined, isPending: false, isError: true, refetch: jest.fn() };
+    useSessionStore.setState({ session: { user: {} } as never, status: 'authed' });
+    await render(<AuthGate />);
+    expect(screen.getByTestId('gate-profile-error')).toBeTruthy();
+    expect(mockRedirect).not.toHaveBeenCalled();
   });
 
   it('shows a retryable error instead of misrouting on profile failure', async () => {

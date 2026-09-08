@@ -103,18 +103,28 @@ export default function OnboardingScreen(): React.JSX.Element {
     setStep(2);
   };
 
-  const done = (): void => {
+  const done = async (): Promise<void> => {
     setFinishing(true);
-    // Draft is best-effort cache: always leave onboarding, surface failures.
-    clearDraft()
-      .catch((failure: unknown) => {
+    try {
+      // Never navigate on a stale snapshot: the photo-upload invalidation may
+      // still be refetching, and the gate would bounce back here on old data.
+      const fresh = await profileQuery.refetch();
+      const data = fresh.data;
+      const profile = data?.ok ? data.data.profile : null;
+      const photos = data?.ok ? data.data.photos : [];
+      if (profile === null || !isProfileComplete(profile, countVisiblePhotos(photos))) {
+        setServerError('Profil incomplet. Vérifiez vos infos et votre photo.');
+        return;
+      }
+      try {
+        await clearDraft();
+      } catch (failure: unknown) {
         log.warn('Draft not cleared.', { failure });
-        setServerError('Nettoyage impossible. Réessayez.');
-      })
-      .finally(() => {
-        setFinishing(false);
-        router.replace('/');
-      });
+      }
+      router.replace('/');
+    } finally {
+      setFinishing(false);
+    }
   };
 
   return (

@@ -18,7 +18,7 @@ jest.mock('@/features/profile/hooks', () => ({
   useMyProfile: () => ({
     data: { ok: true, data: mockProfileData },
     isPending: false,
-    refetch: jest.fn(),
+    refetch: () => Promise.resolve({ data: { ok: true, data: mockProfileData } }),
   }),
   useUpdateProfile: () => ({ mutate: mockMutate, status: 'idle', data: undefined }),
   useUploadPhoto: () => ({ mutate: jest.fn(), status: 'idle' }),
@@ -103,5 +103,18 @@ describe('OnboardingScreen', () => {
       expect(mockClearDraft).toHaveBeenCalledTimes(1);
       expect(mockReplace).toHaveBeenCalledWith('/');
     });
+  });
+
+  it('stays on review with an error when the fresh profile is incomplete', async () => {
+    mockDraft = { step: 2, fields: { display_name: 'Amine', age: 24, gender: 'male', wilaya: 16 } };
+    mockProfileData = {
+      profile: { display_name: 'Amine', age: 24, gender: 'male', wilaya: 16 },
+      photos: [],
+    };
+    await render(<OnboardingScreen />);
+    await screen.findByTestId('onboarding-review-done');
+    await fireEvent.press(screen.getByTestId('onboarding-review-done'));
+    await screen.findByText('Profil incomplet. Vérifiez vos infos et votre photo.');
+    expect(mockReplace).not.toHaveBeenCalled();
   });
 });
