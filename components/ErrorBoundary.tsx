@@ -5,9 +5,12 @@
  * (retry + report ID) instead of a dead app. Reports flow through
  * `lib/reporting.ts`, so Sentry arrives with one env change, not a refactor.
  */
+import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
-import { Pressable, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
+import { COLORS } from '../constants/theme';
 import { reportError } from '../lib/reporting';
+import { Button } from './Button';
 
 interface Props {
   children: React.ReactNode;
@@ -20,19 +23,19 @@ interface State {
 function Fallback({ error, onRetry }: { error: Error; onRetry: () => void }): React.JSX.Element {
   return (
     <View className="flex-1 items-center justify-center bg-void px-8">
-      <Text className="text-4xl">🛸</Text>
-      <Text className="mt-4 text-center text-xl font-bold text-white">Something broke on our side.</Text>
-      <Text className="mt-2 text-center text-sm text-white/60">
-        Your data is safe. Restart this screen — and if it keeps happening, contact support.
+      <Ionicons name="alert-circle" size={48} color={COLORS.muted} />
+      <Text className="mt-4 text-center text-xl font-bold text-text">Quelque chose a mal tourné.</Text>
+      <Text className="mt-2 text-center text-sm text-muted">
+        Vos données sont en sécurité. Réessayez — si le problème persiste, contactez le support.
       </Text>
       {__DEV__ ? (
-        <Text className="mt-3 text-xs text-white/40" numberOfLines={4}>
+        <Text className="mt-3 text-xs text-faint" numberOfLines={4}>
           {error.message}
         </Text>
       ) : null}
-      <Pressable onPress={onRetry} className="mt-6 rounded-2xl bg-white px-6 py-3">
-        <Text className="font-bold text-void">Try again</Text>
-      </Pressable>
+      <View className="mt-6">
+        <Button title="Réessayer" onPress={onRetry} testID="error-boundary-retry" />
+      </View>
     </View>
   );
 }

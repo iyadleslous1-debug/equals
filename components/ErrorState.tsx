@@ -12,8 +12,8 @@ export interface ErrorStateProps {
 export function ErrorState({
   message,
   onRetry,
-  title = 'Something went wrong',
-  retryTitle = 'Try again',
+  title = 'Quelque chose a mal tourné.',
+  retryTitle = 'Réessayer',
   testID,
 }: ErrorStateProps): React.JSX.Element {
   return (

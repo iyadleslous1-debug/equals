@@ -35,18 +35,17 @@ export async function signUpWithEmail(
     const { data, error } = await timed('auth.signup', () =>
       withRetry(() => supabase.auth.signUp({ email: email.data, password: valid.data })),
     );
-    if (error !== null) return err('auth/signup-failed', friendly(error.message), toAppError(error));
+    if (error !== null) {
+      const mapped = friendly(error.message, 'auth/signup-failed');
+      return err(mapped.code, mapped.message, toAppError(error));
+    }
     // Supabase returns a session only when confirmation is OFF; with
     // confirmation ON the user must verify first.
     const needsConfirmation = data.session === null;
     log.info('Signup requested.', { needsConfirmation });
     return ok({ needsConfirmation });
   } catch (error) {
-    return err(
-      'auth/signup-failed',
-      'Could not create the account. Check your connection.',
-      toAppError(error),
-    );
+    return err('auth/signup-failed', 'Création impossible. Vérifiez votre connexion.', toAppError(error));
   }
 }
 
@@ -54,19 +53,20 @@ export async function signUpWithEmail(
 export async function signInWithEmail(rawEmail: string, password: string): Promise<ApiResult<Session>> {
   const email = normalizeEmail(rawEmail);
   if (!email.ok) return email;
-  if (password === '') return err('auth/password-empty', 'Enter your password.');
+  if (password === '') return err('auth/password-empty', 'Entrez votre mot de passe.');
 
   try {
     const { data, error } = await timed('auth.signin', () =>
       supabase.auth.signInWithPassword({ email: email.data, password }),
     );
     if (error !== null || data.session === null) {
-      return err('auth/signin-failed', friendly(error?.message ?? ''), error ? toAppError(error) : undefined);
+      const mapped = friendly(error?.message ?? '', 'auth/signin-failed');
+      return err(mapped.code, mapped.message, error ? toAppError(error) : undefined);
     }
     log.info('Signed in with email.');
     return ok(data.session);
   } catch (error) {
-    return err('auth/signin-failed', 'Could not sign in. Check your connection.', toAppError(error));
+    return err('auth/signin-failed', 'Connexion impossible. Vérifiez votre connexion.', toAppError(error));
   }
 }
 
@@ -75,7 +75,7 @@ export async function verifyEmailOtp(rawEmail: string, token: string): Promise<A
   const email = normalizeEmail(rawEmail);
   if (!email.ok) return email;
   const code = token.trim();
-  if (!/^\d{6}$/.test(code)) return err('auth/otp-invalid', 'Enter the 6-digit code from the email.');
+  if (!/^\d{6}$/.test(code)) return err('auth/otp-invalid', 'Entrez le code à 6 chiffres reçu par email.');
 
   try {
     const { data, error } = await supabase.auth.verifyOtp({
@@ -84,16 +84,17 @@ export async function verifyEmailOtp(rawEmail: string, token: string): Promise<A
       type: 'signup',
     });
     if (error !== null || data.session === null) {
-      return err(
-        'auth/otp-verify-failed',
-        friendly(error?.message ?? ''),
-        error ? toAppError(error) : undefined,
-      );
+      const mapped = friendly(error?.message ?? '', 'auth/otp-verify-failed');
+      return err(mapped.code, mapped.message, error ? toAppError(error) : undefined);
     }
     log.info('Email confirmed — session established.');
     return ok(data.session);
   } catch (error) {
-    return err('auth/otp-verify-failed', 'Verification failed. Check your connection.', toAppError(error));
+    return err(
+      'auth/otp-verify-failed',
+      'Vérification impossible. Vérifiez votre connexion.',
+      toAppError(error),
+    );
   }
 }
 
@@ -104,32 +105,49 @@ export async function resendSignupConfirmation(rawEmail: string): Promise<ApiRes
 
   const allowance = consumeOtpAllowance(`email:${email.data}`);
   if (!allowance.allowed) {
-    return err('auth/resend-throttled', `Too many emails. Try again in ${allowance.retryAfterSec}s.`, {
+    return err('auth/resend-throttled', `Trop d'emails. Réessayez dans ${allowance.retryAfterSec} s.`, {
       retryAfterSec: allowance.retryAfterSec,
     });
   }
 
   const { error } = await supabase.auth.resend({ type: 'signup', email: email.data });
-  if (error !== null) return err('auth/resend-failed', friendly(error.message), toAppError(error));
+  if (error !== null) {
+    const mapped = friendly(error.message, 'auth/resend-failed');
+    return err(mapped.code, mapped.message, toAppError(error));
+  }
   log.info('Confirmation email resent.');
   return ok(undefined);
 }
 
-/** Map Supabase messages to DZ-friendly copy (never leak internals). */
-function friendly(raw: string): string {
+/**
+ * Map Supabase messages to stable codes + French-simple copy (never leak
+ * internals). UI routes on `code`, never on message text — localizing copy
+ * must not break navigation.
+ */
+function friendly(raw: string, fallbackCode: string): { code: string; message: string } {
   if (/already registered|already exists|duplicate/i.test(raw)) {
-    return 'An account with this email already exists. Try signing in.';
+    return {
+      code: 'auth/email-registered',
+      message: 'Un compte existe déjà avec cet email. Connectez-vous.',
+    };
   }
-  if (/invalid login|invalid credentials/i.test(raw)) return 'Wrong email or password.';
+  if (/invalid login|invalid credentials/i.test(raw)) {
+    return { code: 'auth/signin-failed', message: 'Email ou mot de passe incorrect.' };
+  }
   if (/email not confirmed|not confirmed/i.test(raw)) {
-    return 'Confirm your email first — check your inbox for the code.';
+    return {
+      code: 'auth/email-not-confirmed',
+      message: 'Confirmez votre email pour continuer. Le code est dans votre boîte mail.',
+    };
   }
-  if (/rate limit/i.test(raw)) return 'Too many attempts. Wait a few minutes and try again.';
+  if (/rate limit/i.test(raw)) {
+    return { code: 'auth/rate-limited', message: 'Trop de tentatives. Attendez quelques minutes.' };
+  }
   if (/expired|invalid.*token|invalid.*code/i.test(raw)) {
-    return 'That code is wrong or expired. Request a fresh one.';
+    return { code: 'auth/otp-invalid', message: 'Code incorrect ou expiré. Demandez-en un nouveau.' };
   }
   if (/password/i.test(raw) && /weak|short|length/i.test(raw)) {
-    return 'That password is too weak. Use at least 8 characters.';
+    return { code: fallbackCode, message: 'Mot de passe trop faible. Utilisez au moins 8 caractères.' };
   }
-  return 'Something went wrong. Please try again.';
+  return { code: fallbackCode, message: 'Une erreur est survenue. Réessayez.' };
 }

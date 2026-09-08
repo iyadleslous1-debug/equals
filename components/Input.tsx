@@ -1,4 +1,5 @@
-import { Text, TextInput, View, type TextInputProps } from 'react-native';
+import { forwardRef } from 'react';
+import { Text, TextInput, View, type TextInput as RNTextInput, type TextInputProps } from 'react-native';
 
 export interface InputProps extends Pick<
   TextInputProps,
@@ -25,19 +26,16 @@ export interface InputProps extends Pick<
   testID?: string;
 }
 
-export function Input({
-  label,
-  hint,
-  error,
-  testID,
-  editable = true,
-  ...rest
-}: InputProps): React.JSX.Element {
+export const Input = forwardRef<RNTextInput, InputProps>(function Input(
+  { label, hint, error, testID, editable = true, ...rest },
+  ref,
+) {
   const described = error ?? hint;
   return (
     <View>
       <Text className="mb-2 text-sm font-semibold text-text">{label}</Text>
       <TextInput
+        ref={ref}
         testID={testID}
         editable={editable}
         accessibilityLabel={error ? `${label}, ${error}` : label}
@@ -58,4 +56,4 @@ export function Input({
       ) : null}
     </View>
   );
-}
+});

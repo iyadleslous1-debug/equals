@@ -27,7 +27,7 @@ export const FormErrorSummary = forwardRef<View, FormErrorSummaryProps>(function
       accessibilityRole="alert"
       className="rounded-xl border border-destructive bg-ink p-4"
     >
-      <Text className="text-sm font-bold text-text">Please fix the following:</Text>
+      <Text className="text-sm font-bold text-text">Veuillez corriger :</Text>
       {errors.map((item) => (
         <Pressable
           key={item.field}

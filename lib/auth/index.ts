@@ -18,7 +18,7 @@ export { MIN_PASSWORD_LENGTH, normalizeEmail, validatePassword } from './validat
 
 export async function signOut(): Promise<ApiResult<void>> {
   const { error } = await supabase.auth.signOut();
-  if (error !== null) return err('auth/signout-failed', 'Could not sign out.', toAppError(error));
+  if (error !== null) return err('auth/signout-failed', 'Déconnexion impossible.', toAppError(error));
   return ok(undefined);
 }
 

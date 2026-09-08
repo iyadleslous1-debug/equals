@@ -3,8 +3,11 @@ module.exports = {
   preset: 'jest-expo',
   setupFiles: ['<rootDir>/jest.setup.js'],
   testMatch: ['**/__tests__/**/*.test.ts', '**/__tests__/**/*.test.tsx'],
-  // expo-font is native-only; tests stub it so @expo/vector-icons can render.
-  moduleNameMapper: { '^expo-font$': '<rootDir>/__tests__/mocks/expo-font.js' },
+  // `@/` path alias (mirrors tsconfig.json) so feature tests import like app code.
+  moduleNameMapper: {
+    '^@/(.*)$': '<rootDir>/$1',
+    '^expo-font$': '<rootDir>/__tests__/mocks/expo-font.js',
+  },
   transform: { '^.+\\.[jt]sx?$': 'babel-jest', '^.+\\.mjs$': 'babel-jest' },
   collectCoverageFrom: ['lib/**/*.ts', 'hooks/**/*.ts', 'store/**/*.ts', '!**/*.d.ts'],
   coverageThreshold: {
