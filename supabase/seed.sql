@@ -1,0 +1,17 @@
+-- ============================================================================
+-- MVP0 seed — intentionally empty of user data.
+-- ============================================================================
+-- No fake users/profiles/messages are seeded: rows in `users` must correspond
+-- to real Supabase Auth identities (created by the `on_auth_user_created`
+-- trigger), and RLS ties every row to `auth.uid()`. Seeding fabricated people
+-- would break that invariant and leak into discovery later.
+--
+-- Local dev flow instead:
+--   1. `supabase start` → create a user via Studio Auth (phone helper).
+--   2. Insert your own profile row as that user to exercise RLS.
+--
+-- Example (run as the logged-in dev user, NOT as service_role):
+--   INSERT INTO public.profiles (user_id, display_name, age, gender, wilaya)
+--   VALUES (auth.uid(), 'Dev', 25, 'male', 16);
+-- ============================================================================
+SELECT 1;

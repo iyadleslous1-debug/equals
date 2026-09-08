@@ -1,0 +1,35 @@
+# Supabase local-dev config (CLI). Secrets stay in dashboard / .env — never here.
+project_id = "dz-connect"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+
+[db]
+port = 54322
+shadow_port = 54320
+major_version = 15
+
+[db.pooler]
+enabled = false
+
+[auth]
+enabled = true
+site_url = "dzconnect://"
+enable_signup = true
+
+[auth.phone]
+enabled = true
+
+[storage]
+enabled = false
+
+[edge_runtime]
+enabled = true
+
+[studio]
+enabled = true
+port = 54323

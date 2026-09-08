@@ -1,0 +1,10 @@
+node_modules
+.expo
+dist
+coverage
+package-lock.json
+supabase/.temp
+.opencode/
+# SQL migrations are append-only and must never be auto-rewritten;
+# no SQL formatter plugin is installed, so keep prettier off them.
+*.sql

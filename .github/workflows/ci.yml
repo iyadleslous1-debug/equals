@@ -1,0 +1,38 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm run test:ci
+
+      - name: Secret scan (whole tree)
+        run: node scripts/scan-secrets.mjs --all
+
+      - name: Audit gate (fail on NEW high/critical vulns)
+        # Allowlisted upstream-toolchain advisories live in scripts/audit-gate.mjs.
+        run: node scripts/audit-gate.mjs
+
+      - name: Service-role key must never reach client code
+        # scripts/ and docs are intentionally excluded (server-only tooling).
+        run: >
+          ! grep -rn 'SERVICE_ROLE\|service_role' lib app hooks store constants
+          components features types --include='*.ts' --include='*.tsx' ||
+          (echo 'service-role reference found in client code' && exit 1)
+
+      - name: Secret scan (tracked files)
+        run: node scripts/scan-secrets.mjs --all

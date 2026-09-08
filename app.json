@@ -1,0 +1,29 @@
+{
+  "expo": {
+    "name": "DZ Connect",
+    "slug": "dz-connect",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "scheme": "dzconnect",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "splash": {
+      "resizeMode": "contain",
+      "backgroundColor": "#0f0b1e"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.dzconnect.app"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#0f0b1e"
+      },
+      "package": "com.dzconnect.app"
+    },
+    "plugins": ["expo-router", "expo-secure-store"],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}

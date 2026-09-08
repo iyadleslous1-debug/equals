@@ -1,0 +1,76 @@
+{
+  "name": "dz-connect",
+  "version": "0.1.0",
+  "description": "Social discovery app for Algeria — MVP0 foundation (Expo + Supabase)",
+  "main": "expo-router/entry",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint . --max-warnings 0",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --check .",
+    "format:write": "prettier --write .",
+    "test": "jest",
+    "test:ci": "jest --ci --coverage",
+    "prepare": "husky",
+    "gen:types": "supabase gen types typescript --linked > types/database.ts",
+    "db:new": "supabase migration new",
+    "db:reset": "supabase db reset",
+    "seed:dev": "node scripts/seed-dev.mjs"
+  },
+  "dependencies": {
+    "@react-native-community/netinfo": "12.0.1",
+    "@supabase/supabase-js": "2.116.0",
+    "@tanstack/react-query": "5.102.8",
+    "expo": "~52.0.0",
+    "expo-constants": "17.0.8",
+    "expo-linking": "7.0.5",
+    "expo-router": "4.0.22",
+    "expo-secure-store": "14.0.1",
+    "expo-status-bar": "2.0.1",
+    "libphonenumber-js": "1.13.12",
+    "nativewind": "4.2.6",
+    "react": "18.3.1",
+    "react-native": "0.76.5",
+    "react-native-reanimated": "3.16.7",
+    "react-native-safe-area-context": "4.12.0",
+    "react-native-screens": "4.4.0",
+    "react-native-url-polyfill": "4.0.0",
+    "tailwindcss": "3.4.19",
+    "zod": "4.5.4",
+    "zustand": "5.0.15"
+  },
+  "devDependencies": {
+    "@babel/core": "7.29.7",
+    "@types/jest": "30.0.0",
+    "@types/react": "18.3.31",
+    "eslint": "9.39.5",
+    "eslint-config-expo": "57.0.2",
+    "eslint-config-prettier": "10.1.8",
+    "husky": "9.1.7",
+    "jest": "29.7.0",
+    "jest-expo": "52.0.6",
+    "lint-staged": "17.5.0",
+    "prettier": "3.9.6",
+    "typescript": "5.9.3",
+    "typescript-eslint": "8.70.0"
+  },
+  "private": true,
+  "overrides": {
+    "@xmldom/xmldom": "^0.9.12"
+  },
+  "lint-staged": {
+    "*": [
+      "node scripts/scan-secrets.mjs"
+    ],
+    "*.{ts,tsx,js,jsx}": [
+      "eslint --fix --max-warnings 0",
+      "prettier --write"
+    ],
+    "*.{json,md,yml,yaml,css,sql}": [
+      "prettier --write"
+    ]
+  }
+}

@@ -1,0 +1,33 @@
+# deps
+node_modules/
+
+# expo / native
+.expo/
+dist/
+web-build/
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+
+# env — never commit real secrets
+.env
+.env.local
+.env.*.local
+/.npmrc
+
+# local database backups (contain user data — never commit)
+backups/
+
+# supabase local state (keep migrations + seed, ignore runtime)
+supabase/.branches
+supabase/.temp
+supabase/config.toml.bak
+
+# tooling
+.husky/_
+coverage/
+*.log
+.DS_Store
+Thumbs.db
