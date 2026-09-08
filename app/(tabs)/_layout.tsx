@@ -23,6 +23,20 @@ export default function TabsLayout(): React.JSX.Element {
           tabBarIcon: ({ color, size }) => <Ionicons name="compass" size={size} color={color} />,
         }}
       />
+      <Tabs.Screen
+        name="requests"
+        options={{
+          title: 'Demandes',
+          tabBarIcon: ({ color, size }) => <Ionicons name="people" size={size} color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="chat"
+        options={{
+          title: 'Messages',
+          tabBarIcon: ({ color, size }) => <Ionicons name="chatbubbles" size={size} color={color} />,
+        }}
+      />
     </Tabs>
   );
 }
