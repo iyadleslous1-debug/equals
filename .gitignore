@@ -24,6 +24,7 @@ backups/
 supabase/.branches
 supabase/.temp
 supabase/config.toml.bak
+supabase/snippets/
 
 # tooling
 .husky/_

@@ -168,6 +168,6 @@ await say(c2, 3, 'Azul Riyad ! Oui, presque chaque mois. On s’organise une sor
 }
 
 console.log(
-  'seed complete: 8 users, 8 profiles, 24 photos, swipes, 3 requests, 2 convos, 7 messages, 1 block.',
+  'seed complete: 8 users, 8 profiles, 24 photos, swipes, 3 requests, 2 convos, 5 messages, 1 block.',
 );
 console.log('log in with any dev-0X@seed.local / Seedpass123!');
