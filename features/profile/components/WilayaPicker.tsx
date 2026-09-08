@@ -2,17 +2,12 @@ import { useState } from 'react';
 import { FlatList, Pressable, Text, View } from 'react-native';
 import { Input } from '@/components/Input';
 import { Sheet } from '@/components/Sheet';
-import { WILAYAS } from '@/constants/wilayas';
+import { WILAYAS, wilayaLabel } from '@/constants/wilayas';
 
 export interface WilayaPickerProps {
   value: number | null;
   onSelect: (code: number) => void;
   testID?: string;
-}
-
-export function labelFor(code: number): string {
-  const found = WILAYAS.find((w) => w.code === code);
-  return found ? `${found.code} — ${found.name}` : 'Choisir la wilaya';
 }
 
 export function WilayaPicker({ value, onSelect, testID }: WilayaPickerProps): React.JSX.Element {
@@ -43,7 +38,7 @@ export function WilayaPicker({ value, onSelect, testID }: WilayaPickerProps): Re
         className="rounded-xl border border-border bg-ink px-4 py-3"
       >
         <Text className={`text-base ${value === null ? 'text-faint' : 'text-text'}`}>
-          {value === null ? 'Choisir la wilaya' : labelFor(value)}
+          {value === null ? 'Choisir la wilaya' : wilayaLabel(value)}
         </Text>
       </Pressable>
       <Sheet

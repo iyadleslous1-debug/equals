@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { supabase } from '@/lib/supabase';
+import { getCurrentUserId as currentUserId } from '@/lib/auth';
 import { err, ok, toAppError, type ApiResult } from '@/lib/result';
 import { parseWith, messageSchema } from '@/lib/validation/schemas';
 import type { Database } from '@/types/database';
@@ -52,14 +53,6 @@ function assertConversationId(conversationId: string): ApiResult<void> {
   return ok(undefined);
 }
 
-async function currentUserId(): Promise<ApiResult<string>> {
-  const { data, error } = await supabase.auth.getUser();
-  if (error !== null || data.user === null) {
-    return err('auth/not-signed-in', 'Connectez-vous pour continuer.');
-  }
-  return ok(data.user.id);
-}
-
 /**
  * My conversations with counterpart display data + last message + unread —
  * one rpc (profiles are owner-only under RLS, so no client join possible).
@@ -103,12 +96,11 @@ export async function fetchMessages(
     .order('id', { ascending: false })
     .limit(MESSAGE_PAGE_SIZE);
   if (before !== undefined) {
-    // Keyset on (created_at, id) — timestamp-only cursors skip same-ms ties.
+    // Keyset on (created_at, id) - timestamp-only cursors skip same-ms ties.
     query = query.or(
       `created_at.lt.${before.created_at},and(created_at.eq.${before.created_at},id.lt.${before.id})`,
     );
   }
-  if (before !== undefined) query = query.lt('created_at', before);
   const { data, error } = await query;
   if (error !== null || data === null) {
     return err('chat/messages-failed', 'Messages illisibles. Réessayez.', toAppError(error));

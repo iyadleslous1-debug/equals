@@ -6,6 +6,7 @@ import {
   resetOtpThrottle,
   type ThrottleState,
 } from '../lib/otp-throttle';
+import { OTP_COOLDOWN_SECONDS, OTP_MAX_ATTEMPTS, OTP_WINDOW_MINUTES } from '../constants/app';
 
 const NOW = 1_000_000;
 
@@ -52,5 +53,13 @@ describe('consumeOtpAllowance', () => {
     expect(consumeOtpAllowance('+213555000001', NOW).allowed).toBe(true);
     expect(consumeOtpAllowance('+213555000001', NOW).allowed).toBe(false); // cooldown
     expect(consumeOtpAllowance('+213555000002', NOW).allowed).toBe(true); // other number unaffected
+  });
+});
+
+describe('OTP budget parity (audit S1)', () => {
+  it('keeps constants/app.ts mirrors in sync with OTP_LIMITS', () => {
+    expect(OTP_MAX_ATTEMPTS).toBe(OTP_LIMITS.maxAttempts);
+    expect(OTP_WINDOW_MINUTES).toBe(OTP_LIMITS.windowMs / 60_000);
+    expect(OTP_COOLDOWN_SECONDS).toBe(OTP_LIMITS.cooldownMs / 1000);
   });
 });

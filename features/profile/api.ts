@@ -2,7 +2,7 @@ import * as FileSystem from 'expo-file-system';
 import { MAX_PHOTOS } from '@/constants/app';
 import { supabase } from '@/lib/supabase';
 import { createLogger } from '@/lib/logger';
-import { resolveStorageUrl } from '@/lib/storage-url';
+import { getCurrentUserId as currentUserId } from '@/lib/auth';
 import { err, ok, toAppError, type ApiResult } from '@/lib/result';
 import type { Database } from '@/types/database';
 import { parseWith, profileSchema, type ProfileInput } from '@/lib/validation/schemas';
@@ -12,7 +12,6 @@ export type ProfileRow = Database['public']['Tables']['profiles']['Row'];
 export type PhotoRow = Database['public']['Tables']['profile_photos']['Row'];
 
 const BUCKET = 'profile-photos';
-const SIGNED_URL_TTL_SEC = 3600;
 
 const log = createLogger('profile/api');
 
@@ -21,14 +20,6 @@ export function buildPhotoPath(userId: string, mimeType: string): string {
   const ext = mimeType === 'image/png' ? 'png' : mimeType === 'image/webp' ? 'webp' : 'jpg';
   const unique = `${Date.now()}-${Math.floor(Math.random() * 1_000_000)}`;
   return `${userId}/${unique}.${ext}`;
-}
-
-async function currentUserId(): Promise<ApiResult<string>> {
-  const { data, error } = await supabase.auth.getUser();
-  if (error !== null || data.user === null) {
-    return err('auth/not-signed-in', 'Connectez-vous pour continuer.');
-  }
-  return ok(data.user.id);
 }
 
 export async function getMyProfile(): Promise<ApiResult<{ profile: ProfileRow | null; photos: PhotoRow[] }>> {
@@ -163,9 +154,4 @@ export async function deleteMyPhoto(photoId: string): Promise<ApiResult<void>> {
     }
   }
   return ok(undefined);
-}
-
-/** Seed-style absolute URLs pass through; bucket paths become signed URLs. */
-export async function photoDisplayUrl(pathOrUrl: string): Promise<ApiResult<string>> {
-  return resolveStorageUrl(BUCKET, pathOrUrl, SIGNED_URL_TTL_SEC);
 }

@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase';
+import { getCurrentUserId as currentUserId } from '@/lib/auth';
 import { err, ok, toAppError, type ApiResult } from '@/lib/result';
 
 export interface DeckProfile {
@@ -54,14 +55,6 @@ async function recordSwipe(
     return err(mapped.code, mapped.message, toAppError(error));
   }
   return ok(undefined);
-}
-
-async function currentUserId(): Promise<ApiResult<string>> {
-  const { data, error } = await supabase.auth.getUser();
-  if (error !== null || data.user === null) {
-    return err('auth/not-signed-in', 'Connectez-vous pour continuer.');
-  }
-  return ok(data.user.id);
 }
 
 /**

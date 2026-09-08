@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/supabase';
 import { createLogger } from '@/lib/logger';
+import { getCurrentUserId } from '@/lib/auth';
 import { err, ok, toAppError, type ApiResult } from '@/lib/result';
 import { canonicalPair } from '@/lib/pair';
 import type { Database } from '@/types/database';
@@ -87,9 +88,10 @@ export async function acceptRequest(requestId: string): Promise<ApiResult<{ conv
   if (readError !== null || row === null) {
     return err('requests/not-found', 'Demande introuvable.', toAppError(readError));
   }
-  const { data: user } = await supabase.auth.getUser();
-  if (user.user === null || user.user.id !== row.receiver_id || row.status !== 'pending') {
-    if (row.status === 'accepted' && user.user !== null) {
+  const user = await getCurrentUserId();
+  if (!user.ok) return user;
+  if (user.data !== row.receiver_id || row.status !== 'pending') {
+    if (row.status === 'accepted') {
       const existing = await findConversation(row.sender_id, row.receiver_id);
       if (existing.ok) return ok({ conversationId: existing.data });
     }
@@ -168,13 +170,13 @@ async function findConversation(a: string, b: string): Promise<ApiResult<string>
 
 /** Decline is personal: only the acted row flips, the mirror (if any) stays. */
 export async function declineRequest(requestId: string): Promise<ApiResult<void>> {
-  const { data: user } = await supabase.auth.getUser();
-  if (user.user === null) return err('auth/not-signed-in', 'Connectez-vous pour continuer.');
+  const user = await getCurrentUserId();
+  if (!user.ok) return user;
   const { error } = await supabase
     .from('friend_requests')
     .update({ status: 'declined' })
     .eq('id', requestId)
-    .eq('receiver_id', user.user.id)
+    .eq('receiver_id', user.data)
     .eq('status', 'pending');
   if (error !== null) {
     return err('requests/decline-failed', 'Refus impossible. Réessayez.', toAppError(error));

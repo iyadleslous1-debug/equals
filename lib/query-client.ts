@@ -16,6 +16,7 @@
  */
 import NetInfo from '@react-native-community/netinfo';
 import { onlineManager, QueryClient } from '@tanstack/react-query';
+import { LIST_STALE_TIME_MS } from '@/constants/app';
 
 onlineManager.setEventListener((setOnline) => {
   const unsubscribe = NetInfo.addEventListener((state) => {
@@ -27,7 +28,7 @@ onlineManager.setEventListener((setOnline) => {
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 60 * 1000,
+      staleTime: LIST_STALE_TIME_MS,
       gcTime: 10 * 60 * 1000,
       retry: 2,
       refetchOnWindowFocus: false,

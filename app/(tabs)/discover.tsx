@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { AppState, Pressable, ScrollView, Text, View } from 'react-native';
+import { useCallback, useState } from 'react';
+import { Pressable, ScrollView, Text, View } from 'react-native';
 import { EmptyState } from '@/components/EmptyState';
 import { ErrorState } from '@/components/ErrorState';
 import { LoadingState } from '@/components/LoadingState';
@@ -11,6 +11,7 @@ import type { DeckProfile } from '@/features/discover/api';
 import { BlockConfirm } from '@/features/safety/components/BlockConfirm';
 import { ReportSheet } from '@/features/safety/components/ReportSheet';
 import { useSafety } from '@/features/safety/hooks';
+import { useForegroundRefetch } from '@/hooks/useForegroundRefetch';
 
 type SafetyView = { mode: 'menu' } | { mode: 'report' } | { mode: 'block' } | null;
 
@@ -27,13 +28,12 @@ export default function DiscoverScreen(): React.JSX.Element {
   const [target, setTarget] = useState<DeckProfile | null>(null);
   const [view, setView] = useState<SafetyView>(null);
 
-  useEffect(() => {
-    const subscription = AppState.addEventListener('change', (state) => {
+  useForegroundRefetch(
+    useCallback(() => {
       // Don't reorder the deck under an open safety sheet (target snapshot).
-      if (state === 'active' && target === null) void refetch();
-    });
-    return () => subscription.remove();
-  }, [refetch, target]);
+      if (target === null) void refetch();
+    }, [refetch, target]),
+  );
 
   if (deckQuery.isPending) return <LoadingState label="Chargement des profils…" />;
   if (loaded && !loaded.ok) {

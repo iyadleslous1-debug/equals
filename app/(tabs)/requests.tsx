@@ -1,11 +1,12 @@
-import { useEffect, useRef } from 'react';
-import { AppState, ScrollView, Text, View } from 'react-native';
+import { useCallback, useEffect, useRef } from 'react';
+import { ScrollView, Text, View } from 'react-native';
 import { EmptyState } from '@/components/EmptyState';
 import { ErrorState } from '@/components/ErrorState';
 import { LoadingState } from '@/components/LoadingState';
 import { useToast } from '@/components/Toast';
 import { RequestCard } from '@/features/requests/components/RequestCard';
 import { useInboxPhotoUrls, useRequests, useRespond } from '@/features/requests/hooks';
+import { useForegroundRefetch } from '@/hooks/useForegroundRefetch';
 import type { InboxItem } from '@/features/requests/api';
 
 function Section({
@@ -50,12 +51,11 @@ export default function RequestsScreen(): React.JSX.Element {
   const { show } = useToast();
   const shownNotice = useRef(0);
 
-  useEffect(() => {
-    const subscription = AppState.addEventListener('change', (state) => {
-      if (state === 'active') void refetch();
-    });
-    return () => subscription.remove();
-  }, [refetch]);
+  useForegroundRefetch(
+    useCallback(() => {
+      void refetch();
+    }, [refetch]),
+  );
 
   useEffect(() => {
     if (notice !== null && notice.id !== shownNotice.current) {

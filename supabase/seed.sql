@@ -6,11 +6,14 @@
 -- trigger), and RLS ties every row to `auth.uid()`. Seeding fabricated people
 -- would break that invariant and leak into discovery later.
 --
--- Local dev flow instead:
---   1. `supabase start` → create a user via Studio Auth (phone helper).
---   2. Insert your own profile row as that user to exercise RLS.
+-- Local dev flow instead (email universe, built by script):
+--   1. `npx supabase start`
+--   2. `npm run seed:dev` (needs SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY in
+--      shell env) → 8 confirmed dev-0X@seed.local users / Seedpass123!,
+--      profiles, photos, swipes, requests, convos, messages, 1 block.
+--      Idempotent: wipes *@seed.local first, then rebuilds.
 --
--- Example (run as the logged-in dev user, NOT as service_role):
+-- Example (run as a logged-in dev user, NOT as service_role):
 --   INSERT INTO public.profiles (user_id, display_name, age, gender, wilaya)
 --   VALUES (auth.uid(), 'Dev', 25, 'male', 16);
 -- ============================================================================

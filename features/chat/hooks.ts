@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { AppState } from 'react-native';
-import { useQueries, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { LIST_STALE_TIME_MS } from '@/constants/app';
 import { supabase } from '@/lib/supabase';
-import { resolveStorageUrl } from '@/lib/storage-url';
+import { useSignedUrls } from '@/hooks/useSignedUrls';
+import { useForegroundRefetch } from '@/hooks/useForegroundRefetch';
 import {
   fetchMessages,
   isConversationId,
@@ -24,25 +24,15 @@ export function useConversations() {
     staleTime: LIST_STALE_TIME_MS,
   });
 }
-
 /** Signed avatar URLs for conversation counterparts (null until resolved). */
 export function usePreviewAvatars(previews: ConversationPreview[]): Record<string, string> {
-  const results = useQueries({
-    queries: previews.map((preview) => ({
-      queryKey: ['chat-avatar-url', preview.conversationId, preview.otherCard],
-      queryFn: () =>
-        preview.otherCard ? resolveStorageUrl('profile-photos', preview.otherCard) : Promise.resolve(null),
-      staleTime: 30 * 60_000,
-    })),
-  });
-  const urls: Record<string, string> = {};
-  previews.forEach((preview, index) => {
-    const data = results[index]?.data;
-    if (data?.ok) urls[preview.conversationId] = data.data;
-  });
-  return urls;
+  return useSignedUrls(
+    'chat-avatar-url',
+    previews,
+    (preview) => preview.conversationId,
+    (preview) => preview.otherCard,
+  ).urls;
 }
-
 export interface OutboxMessage {
   localId: string;
   text: string;
@@ -126,8 +116,9 @@ export function useMessages(conversationId: string) {
     enabled: valid,
   });
 
-  // Realtime prepend (newest-first order kept) + foreground safety net.
-  // No subscription on missing ids (deep-link edge) — nothing to leak to.
+  // Realtime prepend (newest-first order kept). No subscription on missing
+  // ids (deep-link edge) — nothing to leak to. Foreground refetch rides the
+  // shared hook below.
   useEffect(() => {
     if (!valid) return;
     const channel = supabase
@@ -154,16 +145,16 @@ export function useMessages(conversationId: string) {
         },
       )
       .subscribe();
-    const subscription = AppState.addEventListener('change', (state) => {
-      if (state === 'active') {
-        void client.invalidateQueries({ queryKey: [...CHAT_KEY, 'thread', conversationId] });
-      }
-    });
     return () => {
       void supabase.removeChannel(channel);
-      subscription.remove();
     };
   }, [client, conversationId, valid]);
+
+  useForegroundRefetch(
+    useCallback(() => {
+      void client.invalidateQueries({ queryKey: [...CHAT_KEY, 'thread', conversationId] });
+    }, [client, conversationId]),
+  );
 
   const loaded = query.data;
   const messages = useMemo(() => (loaded?.ok ? loaded.data : []), [loaded]);

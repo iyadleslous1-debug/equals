@@ -26,3 +26,13 @@ export async function getSession(): Promise<import('@supabase/supabase-js').Sess
   const { data } = await supabase.auth.getSession();
   return data.session;
 }
+
+/** Signed-in user id or a French not-signed-in error. Single home for the
+ * pattern every feature api duplicated (audit S1). */
+export async function getCurrentUserId(): Promise<ApiResult<string>> {
+  const { data, error } = await supabase.auth.getUser();
+  if (error !== null || data.user === null) {
+    return err('auth/not-signed-in', 'Connectez-vous pour continuer.');
+  }
+  return ok(data.user.id);
+}

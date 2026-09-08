@@ -1,12 +1,13 @@
 import { useRouter } from 'expo-router';
-import { useEffect } from 'react';
-import { AppState, ScrollView, Text, View } from 'react-native';
+import { useCallback } from 'react';
+import { ScrollView, Text, View } from 'react-native';
 import { EmptyState } from '@/components/EmptyState';
 import { ErrorState } from '@/components/ErrorState';
 import { LoadingState } from '@/components/LoadingState';
 import { ConversationRow } from '@/features/chat/components/ConversationRow';
 import { useConversations, usePreviewAvatars } from '@/features/chat/hooks';
 import { previewText } from '@/features/chat/api';
+import { useForegroundRefetch } from '@/hooks/useForegroundRefetch';
 
 function timeLabel(iso: string | null): string | null {
   if (!iso) return null;
@@ -20,12 +21,11 @@ export default function ChatListScreen(): React.JSX.Element {
   const listQuery = useConversations();
   const { refetch } = listQuery;
 
-  useEffect(() => {
-    const subscription = AppState.addEventListener('change', (state) => {
-      if (state === 'active') void refetch();
-    });
-    return () => subscription.remove();
-  }, [refetch]);
+  useForegroundRefetch(
+    useCallback(() => {
+      void refetch();
+    }, [refetch]),
+  );
 
   const loaded = listQuery.data;
   const convos = loaded?.ok ? loaded.data : [];

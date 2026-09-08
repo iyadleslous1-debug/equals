@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase';
+import { getCurrentUserId as currentUserId } from '@/lib/auth';
 import { err, ok, toAppError, type ApiResult } from '@/lib/result';
 
 /** Report reasons (French-simple). Each must satisfy the DB 3+ char CHECK. */
@@ -24,14 +25,6 @@ export function mapSafetyError(error: DbError | null): { code: string; message: 
     return { code: 'safety/already-blocked', message: 'Déjà bloqué.' };
   }
   return { code: 'safety/action-failed', message: 'Action impossible. Réessayez.' };
-}
-
-async function currentUserId(): Promise<ApiResult<string>> {
-  const { data, error } = await supabase.auth.getUser();
-  if (error !== null || data.user === null) {
-    return err('auth/not-signed-in', 'Connectez-vous pour continuer.');
-  }
-  return ok(data.user.id);
 }
 
 /**

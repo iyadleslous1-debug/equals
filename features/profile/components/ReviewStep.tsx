@@ -1,7 +1,6 @@
 import { Text, View } from 'react-native';
 import { Button } from '@/components/Button';
-import { labelFor } from './WilayaPicker';
-import { WILAYAS } from '@/constants/wilayas';
+import { isValidWilaya, wilayaLabel } from '@/constants/wilayas';
 import type { ProfileInput } from '@/lib/validation/schemas';
 
 export interface ReviewStepProps {
@@ -30,9 +29,7 @@ export function ReviewStep({
     ['Genre', fields.gender === 'male' ? 'Homme' : fields.gender === 'female' ? 'Femme' : '—'],
     [
       'Wilaya',
-      fields.wilaya !== undefined && WILAYAS.some((w) => w.code === fields.wilaya)
-        ? labelFor(fields.wilaya)
-        : '—',
+      fields.wilaya !== undefined && isValidWilaya(fields.wilaya) ? wilayaLabel(fields.wilaya) : '—',
     ],
     ['Bio', fields.bio ?? '—'],
     ['Photos', `${photoCount}/6`],

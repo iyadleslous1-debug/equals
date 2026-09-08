@@ -1,14 +1,11 @@
 import { useCallback, useState } from 'react';
-import { useQueries, useQuery } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { LIST_STALE_TIME_MS } from '@/constants/app';
 import { useAct } from '@/hooks/useAct';
-import { resolveStorageUrl } from '@/lib/storage-url';
+import { useSignedUrls } from '@/hooks/useSignedUrls';
 import { fetchDeck, sendRequest, skipProfile, type DeckProfile } from './api';
 
 export const DECK_KEY = ['deck'] as const;
-
-/** Signed-URL cache window — comfortably inside the 1h URL TTL. */
-const PHOTO_URL_STALE_MS = 30 * 60_000;
 
 export function useDeck() {
   return useQuery({ queryKey: DECK_KEY, queryFn: () => fetchDeck(), staleTime: LIST_STALE_TIME_MS });
@@ -16,22 +13,12 @@ export function useDeck() {
 
 /** Signed display URLs for deck card photos (bucket paths stay private). */
 export function useCardPhotoUrls(profiles: DeckProfile[]): Record<string, string> {
-  const results = useQueries({
-    queries: profiles.map((profile) => ({
-      queryKey: ['deck-photo-url', profile.user_id, profile.card_photo_url],
-      queryFn: () =>
-        profile.card_photo_url === null
-          ? Promise.resolve(null)
-          : resolveStorageUrl('profile-photos', profile.card_photo_url),
-      staleTime: PHOTO_URL_STALE_MS,
-    })),
-  });
-  const urls: Record<string, string> = {};
-  profiles.forEach((profile, index) => {
-    const data = results[index]?.data;
-    if (data?.ok) urls[profile.user_id] = data.data;
-  });
-  return urls;
+  return useSignedUrls(
+    'deck-photo-url',
+    profiles,
+    (profile) => profile.user_id,
+    (profile) => profile.card_photo_url,
+  ).urls;
 }
 
 /**

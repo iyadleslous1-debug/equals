@@ -1,8 +1,8 @@
 import { useCallback, useState } from 'react';
-import { useQueries, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { LIST_STALE_TIME_MS } from '@/constants/app';
 import { useAct } from '@/hooks/useAct';
-import { resolveStorageUrl } from '@/lib/storage-url';
+import { useSignedUrls } from '@/hooks/useSignedUrls';
 import { acceptRequest, declineRequest, fetchInbox, type InboxItem } from './api';
 
 export const REQUESTS_KEY = ['requests'] as const;
@@ -13,22 +13,12 @@ export function useRequests() {
 
 /** Signed avatar URLs for inbox counterparts (null until resolved or failed). */
 export function useInboxPhotoUrls(items: InboxItem[]): Record<string, string> {
-  const results = useQueries({
-    queries: items.map((item) => ({
-      queryKey: ['inbox-photo-url', item.id, item.counterpart?.card_photo_url ?? 'none'],
-      queryFn: () =>
-        item.counterpart?.card_photo_url
-          ? resolveStorageUrl('profile-photos', item.counterpart.card_photo_url)
-          : Promise.resolve(null),
-      staleTime: 30 * 60_000,
-    })),
-  });
-  const urls: Record<string, string> = {};
-  items.forEach((item, index) => {
-    const data = results[index]?.data;
-    if (data?.ok) urls[item.id] = data.data;
-  });
-  return urls;
+  return useSignedUrls(
+    'inbox-photo-url',
+    items,
+    (item) => item.id,
+    (item) => item.counterpart?.card_photo_url ?? null,
+  ).urls;
 }
 
 export interface ActionNotice {

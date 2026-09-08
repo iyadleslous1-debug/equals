@@ -1,20 +1,21 @@
-import { useMutation, useQuery, useQueryClient, useQueries } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   deleteMyPhoto,
   getMyProfile,
-  photoDisplayUrl,
   setCardPhoto,
   uploadMyPhoto,
   upsertMyProfile,
   type PhotoRow,
   type PickedPhoto,
 } from './api';
+import { useSignedUrls, type SignedUrlMap } from '@/hooks/useSignedUrls';
+import { LIST_STALE_TIME_MS } from '@/constants/app';
 import type { ProfileInput } from '@/lib/validation/schemas';
 
 export const PROFILE_KEY = ['profile', 'me'] as const;
 
 export function useMyProfile(enabled = true) {
-  return useQuery({ queryKey: PROFILE_KEY, queryFn: getMyProfile, staleTime: 60_000, enabled });
+  return useQuery({ queryKey: PROFILE_KEY, queryFn: getMyProfile, staleTime: LIST_STALE_TIME_MS, enabled });
 }
 
 function useInvalidateProfile() {
@@ -63,29 +64,11 @@ export function useDeletePhoto() {
 }
 
 /** Resolve display URLs (signed for bucket paths, passthrough for legacy). */
-export function usePhotoUrls(photos: PhotoRow[]): {
-  urls: Record<string, string>;
-  failedIds: string[];
-  reload: () => void;
-} {
-  const client = useQueryClient();
-  const results = useQueries({
-    queries: photos.map((photo) => ({
-      queryKey: ['photo-url', photo.id, photo.url],
-      queryFn: () => photoDisplayUrl(photo.url),
-      staleTime: 30 * 60_000,
-    })),
-  });
-  const urls: Record<string, string> = {};
-  const failedIds: string[] = [];
-  photos.forEach((photo, index) => {
-    const data = results[index]?.data;
-    if (data?.ok) urls[photo.id] = data.data;
-    else if (results[index]?.status === 'error' || (data && !data.ok)) failedIds.push(photo.id);
-  });
-  return {
-    urls,
-    failedIds,
-    reload: () => void client.invalidateQueries({ queryKey: ['photo-url'] }),
-  };
+export function usePhotoUrls(photos: PhotoRow[]): SignedUrlMap {
+  return useSignedUrls(
+    'photo-url',
+    photos,
+    (photo) => photo.id,
+    (photo) => photo.url,
+  );
 }

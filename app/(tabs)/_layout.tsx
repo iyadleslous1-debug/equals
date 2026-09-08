@@ -3,8 +3,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '@/constants/theme';
 
 /**
- * Bottom tabs. Screens join one per MVP piece (Discover now; Requests, Chat,
- * Profile later) — never placeholder tabs.
+ * Bottom tabs — Discover, Requests, Chat. Never placeholder tabs: a screen
+ * joins only with its piece, fully working.
  */
 export default function TabsLayout(): React.JSX.Element {
   return (

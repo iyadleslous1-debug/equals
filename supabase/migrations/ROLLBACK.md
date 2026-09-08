@@ -40,6 +40,11 @@ DROP FUNCTION IF EXISTS public.get_request_inbox();
 Data impact: none. The Requests screens lose counterpart display data until
 re-applied (RLS owner-only profiles cannot substitute).
 
+## 0010 `20260908143316_inbox-hardening.sql`
+
+Reverses: profile-less null tolerance, dead/suspended/blocked exclusion,
+stable ordering. Re-apply 0009 (kept in git history) to restore.
+
 ## 0007 `20260908063210_discovery.sql`
 
 Reverses: deck function + swipe/request rate triggers.
@@ -54,6 +59,12 @@ DROP FUNCTION IF EXISTS public.get_discovery_candidates(INTEGER);
 
 Data impact: none (read path + guards only). Without the triggers, send-heavy
 actions are unthrottled until re-applied — treat as emergency-only.
+
+## 0008 `20260908124039_discovery-limits.sql`
+
+Reverses: deck limit clamp ([1,50] + NULL→20) and the least-privilege
+`REVOKE FROM PUBLIC, anon` on the deck function. Re-apply 0007 (kept in git
+history) to restore — the clamp and REVOKE live only in this file.
 
 ## 0006 `20260908042827_photo-hardening.sql`
 
