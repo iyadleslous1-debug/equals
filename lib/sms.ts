@@ -42,7 +42,7 @@ export interface SmsProvider {
 export class TwilioSmsProvider implements SmsProvider {
   readonly name = 'twilio';
 
-  async sendOtp(): Promise<ApiResult<void>> {
+  async sendOtp(_params: SmsSendParams): Promise<ApiResult<void>> {
     // Delivery happens inside Supabase Auth; there is nothing to call here.
     // Kept as an explicit step so onboarding checklists stay honest.
     log.info('OTP delivery delegated to Supabase Auth (Twilio sender).');
