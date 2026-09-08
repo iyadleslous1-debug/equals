@@ -1,4 +1,4 @@
-import { act, renderHook } from '@testing-library/react-native';
+import { act, renderHook, waitFor } from '@testing-library/react-native';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { ReactNode } from 'react';
 import { blockUser, isBlocked, submitReport } from '@/features/safety/api';
@@ -73,11 +73,13 @@ describe('useIsBlocked', () => {
       wrapper,
       initialProps: { id: 'u-9' },
     });
-    await act(async () => undefined);
-    expect(result.current).toBe(true);
+    await waitFor(() => {
+      expect(result.current).toBe(true);
+    });
     mockIsBlocked.mockResolvedValue({ ok: true, data: false });
     await rerender({ id: 'u-8' });
-    await act(async () => undefined);
-    expect(result.current).toBe(false);
+    await waitFor(() => {
+      expect(result.current).toBe(false);
+    });
   });
 });

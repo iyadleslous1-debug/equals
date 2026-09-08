@@ -6,6 +6,26 @@ section below is idempotent (`IF EXISTS`) and ordered so dependents drop before
 parents. Test every reversal on a scratch branch (`supabase db reset` on a
 copy), never on the shared staging project directly.
 
+## 0014 `20260908193334_audit-hardening.sql`
+
+Reverses: message/conversation immutability triggers, search_path pins
+(restore by re-applying the prior bodies from git), least-privilege EXECUTE
+revocations (re-grant PUBLIC), report/profile rate triggers.
+
+```sql
+DROP TRIGGER IF EXISTS messages_immutable_content ON public.messages;
+DROP TRIGGER IF EXISTS conversations_immutable_participants ON public.conversations;
+DROP TRIGGER IF EXISTS reports_rate_limit ON public.reports;
+DROP TRIGGER IF EXISTS profiles_rate_limit ON public.profiles;
+DROP FUNCTION IF EXISTS public.forbid_message_rewrite();
+DROP FUNCTION IF EXISTS public.forbid_conversation_rewrite();
+DROP FUNCTION IF EXISTS public.enforce_misc_rate_limit();
+```
+
+Data impact: none (guards only). Deliberately NO storage trigger existed to
+reverse: the Storage API writes with no caller JWT claims, so any trigger
+would bypass unconditionally (proven by live probe during the audit).
+
 ## 0011 + 0012 chat guards & previews
 
 Reverses: block-lock + message rate triggers, conversation previews fn.
