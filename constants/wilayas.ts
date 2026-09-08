@@ -73,6 +73,12 @@ export function wilayaName(code: number): string {
   return WILAYAS.find((w) => w.code === code)?.name ?? `Wilaya ${code}`;
 }
 
+/** Product display form: code prefix always shown (`16 — Alger`). */
+export function wilayaLabel(code: number): string {
+  const found = WILAYAS.find((w) => w.code === code);
+  return found ? `${found.code} — ${found.name}` : `Wilaya ${code}`;
+}
+
 export function isValidWilaya(code: number): boolean {
   return Number.isInteger(code) && code >= 1 && code <= 58;
 }

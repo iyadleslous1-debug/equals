@@ -1,6 +1,7 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { useQueries, useQuery } from '@tanstack/react-query';
 import { LIST_STALE_TIME_MS } from '@/constants/app';
+import { useAct } from '@/hooks/useAct';
 import { resolveStorageUrl } from '@/lib/storage-url';
 import { fetchDeck, sendRequest, skipProfile, type DeckProfile } from './api';
 
@@ -34,28 +35,11 @@ export function useCardPhotoUrls(profiles: DeckProfile[]): Record<string, string
 }
 
 /**
- * Single in-flight action across all deck buttons. Rapid/double taps while
- * busy are ignored (not queued) — the UNIQUE pair + idempotent mapping are
- * the server backstop, this is the UX frontstop.
+ * Single in-flight action across all deck buttons — shared implementation
+ * lives in `@/hooks/useAct` (re-exported here so existing imports keep
+ * working; new code imports from `@/hooks/useAct` directly).
  */
-export function useAct(): { acting: boolean; run: <T>(fn: () => Promise<T>) => Promise<T | null> } {
-  const [acting, setActing] = useState(false);
-  const busy = useRef(false);
-
-  const run = useCallback(async <T>(fn: () => Promise<T>): Promise<T | null> => {
-    if (busy.current) return null;
-    busy.current = true;
-    setActing(true);
-    try {
-      return await fn();
-    } finally {
-      busy.current = false;
-      setActing(false);
-    }
-  }, []);
-
-  return { acting, run };
-}
+export { useAct } from '@/hooks/useAct';
 
 export function useDeckActions(onDone: (targetUserId: string) => void): {
   acting: boolean;
