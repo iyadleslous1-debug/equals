@@ -1,4 +1,4 @@
-import { ANIMATION, ELEVATION, HIT_SLOP, ICON_SIZE, RADIUS, SPACING } from '../constants/theme';
+import { ANIMATION, COLORS, ELEVATION, HIT_SLOP, ICON_SIZE, RADIUS, SPACING } from '../constants/theme';
 
 describe('theme tokens', () => {
   it('uses a 4dp-based spacing scale with the required tiers', () => {
@@ -30,5 +30,16 @@ describe('theme tokens', () => {
     expect(ELEVATION.card.android).toBeGreaterThanOrEqual(2);
     expect(ELEVATION.modal.android).toBeGreaterThan(ELEVATION.card.android);
     expect(ELEVATION.card.ios.shadowOpacity).toBeGreaterThan(0);
+  });
+
+  it('mirrors tailwind.config.js colors exactly (no drift)', () => {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const tailwindConfig = require('../tailwind.config.js') as {
+      theme: { extend: { colors: Record<string, string> } };
+    };
+    const palette = tailwindConfig.theme.extend.colors;
+    for (const [token, hex] of Object.entries(COLORS)) {
+      expect(palette[token]).toBe(hex);
+    }
   });
 });

@@ -2,10 +2,29 @@
  * Numeric theme tokens — the single source of truth for spacing, shape,
  * elevation, animation and touch targets.
  *
- * Colors live ONLY in `tailwind.config.js` (so a token rename breaks the
- * build instead of drifting silently). This file holds everything numeric
- * that NativeWind classes can't express (iOS shadows, hitSlop, durations).
+ * Hex colors live in `tailwind.config.js`. `COLORS` below mirrors them for
+ * the few props that need raw strings (icon color, spinner color) — and
+ * `__tests__/theme.test.ts` asserts the two stay identical, so drift fails
+ * the build instead of shipping silently.
  */
+
+export const COLORS = {
+  void: '#0f0b1e',
+  ink: '#17122b',
+  elevated: '#241b40',
+  primary: '#d9a441',
+  onPrimary: '#0f0b1e',
+  secondary: '#8b7bc7',
+  text: '#f4f1fa',
+  muted: '#b8b0d1',
+  faint: '#8a83a3',
+  border: '#2e2547',
+  destructive: '#dc2626',
+  onDestructive: '#ffffff',
+  success: '#34d399',
+  warning: '#f59e0b',
+  onWarning: '#0f0b1e',
+} as const;
 
 export const SPACING = {
   xs: 4,
