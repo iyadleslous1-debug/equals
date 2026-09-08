@@ -32,23 +32,23 @@ export function sanitizeText(input: string): string {
 export const displayNameSchema = z
   .string()
   .trim()
-  .min(2, 'Name needs at least 2 characters.')
-  .max(40, 'Name is too long (40 max).');
+  .min(2, 'Le nom doit faire au moins 2 caractères.')
+  .max(40, 'Nom trop long \(40 max\).');
 export const ageSchema = z.coerce
   .number()
-  .int('Age must be a whole number.')
-  .min(18, 'You must be 18 or older.')
-  .max(100, 'That age looks wrong.');
+  .int('L’âge doit être un nombre entier.')
+  .min(18, 'Vous devez avoir 18 ans ou plus.')
+  .max(100, 'Cet âge semble incorrect.');
 export const genderSchema = z.enum(['male', 'female']);
 export const wilayaSchema = z.coerce
   .number()
   .int()
-  .min(1, 'Pick your wilaya.')
-  .max(58, 'Wilaya must be between 1 and 58.');
+  .min(1, 'Choisissez votre wilaya.')
+  .max(58, 'La wilaya doit être entre 1 et 58.');
 export const bioSchema = z
   .string()
   .trim()
-  .max(500, 'Bio is too long (500 max).')
+  .max(500, 'Bio trop longue \(500 max\).')
   .transform(sanitizeText)
   .optional();
 
@@ -66,20 +66,20 @@ export const messageSchema = z.object({
   content: z
     .string()
     .trim()
-    .min(1, 'Message is empty.')
-    .max(1000, 'Message is too long (1000 max).')
+    .min(1, 'Message vide.')
+    .max(1000, 'Message trop long \(1000 max\).')
     .transform(sanitizeText)
-    .refine((value) => value.length >= 1, 'Message is empty.'),
+    .refine((value) => value.length >= 1, 'Message vide.'),
 });
 export type MessageInput = z.infer<typeof messageSchema>;
 
 /** Mirror of `reports` (reason 3–60, description ≤1000). */
 export const reportSchema = z.object({
-  reason: z.string().trim().min(3, 'Pick a reason.').max(60, 'Reason is too long.'),
+  reason: z.string().trim().min(3, 'Choisissez un motif.').max(60, 'Motif trop long.'),
   description: z
     .string()
     .trim()
-    .max(1000, 'Details are too long (1000 max).')
+    .max(1000, 'Détails trop longs (1000 max).')
     .transform(sanitizeText)
     .optional(),
 });
@@ -90,6 +90,6 @@ export function parseWith<T>(schema: z.ZodType<T>, input: unknown): ApiResult<T>
   const result = schema.safeParse(input);
   if (result.success) return ok(result.data);
   const first = result.error.issues[0];
-  const message = first?.message ?? 'Invalid input.';
+  const message = first?.message ?? 'Saisie invalide.';
   return err('validation/failed', message, result.error.issues);
 }

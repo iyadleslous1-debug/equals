@@ -31,7 +31,7 @@ describe('profileSchema', () => {
     if (!wilaya.ok) expect(wilaya.error.code).toBe('validation/failed');
     const name = parseWith(profileSchema, { ...valid, display_name: 'A' });
     expect(name.ok).toBe(false);
-    if (!name.ok) expect(name.error.message).toMatch(/2 characters/);
+    if (!name.ok) expect(name.error.message).toMatch(/2 caractères/);
   });
 });
 

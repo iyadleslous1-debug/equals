@@ -26,6 +26,9 @@ describe('containsSecret', () => {
         'scripts/seed-dev.mjs',
       ),
     ).toEqual([]);
+    expect(containsSecret(`const SLOT = 'dzconnect.onboardingDraft';`, 'features/profile/draft.ts')).toEqual(
+      [],
+    );
   });
 
   it('skips its own source and the lockfile', () => {

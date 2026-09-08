@@ -6,6 +6,38 @@ section below is idempotent (`IF EXISTS`) and ordered so dependents drop before
 parents. Test every reversal on a scratch branch (`supabase db reset` on a
 copy), never on the shared staging project directly.
 
+## 0006 `20260908042827_photo-hardening.sql`
+
+Reverses: moderation self-write trigger + atomic card-switch function.
+
+```sql
+DROP TRIGGER IF EXISTS profile_photos_moderation_guard ON public.profile_photos;
+DROP FUNCTION IF EXISTS public.forbid_moderation_self_write();
+DROP FUNCTION IF EXISTS public.set_card_photo(UUID);
+```
+
+Data impact: none (guardrails only — rows, objects and flags are untouched).
+
+## 0005 `20260908040723_profile-photos.sql`
+
+Reverses: moderation column + private bucket policies + bucket. Uploaded
+objects first (or the bucket delete fails on non-empty buckets).
+
+```sql
+-- objects first, then policies, then the bucket, then the column
+DELETE FROM storage.objects WHERE bucket_id = 'profile-photos';
+DROP POLICY IF EXISTS profile_photos_select_own ON storage.objects;
+DROP POLICY IF EXISTS profile_photos_insert_own ON storage.objects;
+DROP POLICY IF EXISTS profile_photos_update_own ON storage.objects;
+DROP POLICY IF EXISTS profile_photos_delete_own ON storage.objects;
+DELETE FROM storage.buckets WHERE id = 'profile-photos';
+ALTER TABLE public.profile_photos DROP COLUMN IF EXISTS moderation_status;
+```
+
+Data impact: all stored photo objects are destroyed while `profile_photos`
+rows survive with dangling `url` paths (only the column drops, not the
+rows). Only for throwaway environments.
+
 ## 0004 `20260908000400_round3_abuse_privacy.sql`
 
 Reverses: extended allowlist wording (function body) + the view.

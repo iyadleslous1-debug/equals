@@ -5,7 +5,7 @@
     "version": "0.1.0",
     "orientation": "portrait",
     "scheme": "dzconnect",
-    "userInterfaceStyle": "automatic",
+    "userInterfaceStyle": "dark",
     "newArchEnabled": true,
     "splash": {
       "resizeMode": "contain",
@@ -13,7 +13,10 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.dzconnect.app"
+      "bundleIdentifier": "com.dzconnect.app",
+      "infoPlist": {
+        "NSPhotoLibraryUsageDescription": "DZ Connect needs access to your photos so you can add profile pictures."
+      }
     },
     "android": {
       "adaptiveIcon": {
