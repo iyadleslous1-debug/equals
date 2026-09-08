@@ -6,10 +6,6 @@
     "orientation": "portrait",
     "scheme": "dzconnect",
     "userInterfaceStyle": "dark",
-    "splash": {
-      "resizeMode": "contain",
-      "backgroundColor": "#0f0b1e"
-    },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.dzconnect.app",
@@ -23,7 +19,13 @@
       },
       "package": "com.dzconnect.app"
     },
-    "plugins": ["expo-router", "expo-secure-store", "expo-font"],
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      "expo-font",
+      "expo-status-bar",
+      ["expo-splash-screen", { "backgroundColor": "#0f0b1e", "imageWidth": 200 }]
+    ],
     "experiments": {
       "typedRoutes": true
     }
