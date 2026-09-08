@@ -98,7 +98,11 @@ export default function DiscoverScreen(): React.JSX.Element {
               testID="discover"
             />
             {error ? (
-              <Text testID="discover-action-error" className="mt-3 text-center text-sm text-destructive">
+              <Text
+                testID="discover-action-error"
+                accessibilityRole="alert"
+                className="mt-3 text-center text-sm text-destructive"
+              >
                 {error}
               </Text>
             ) : null}
@@ -116,6 +120,8 @@ export default function DiscoverScreen(): React.JSX.Element {
             <Pressable
               testID="discover-safety-report"
               onPress={() => setView({ mode: 'report' })}
+              accessibilityRole="button"
+              accessibilityLabel={`Signaler ${target.display_name}`}
               className="rounded-xl border border-border bg-ink px-4 py-3"
             >
               <Text className="text-base font-semibold text-text">Signaler {target.display_name}</Text>
@@ -123,6 +129,8 @@ export default function DiscoverScreen(): React.JSX.Element {
             <Pressable
               testID="discover-safety-block"
               onPress={() => setView({ mode: 'block' })}
+              accessibilityRole="button"
+              accessibilityLabel={`Bloquer ${target.display_name}`}
               className="rounded-xl border border-border bg-ink px-4 py-3"
             >
               <Text className="text-base font-semibold text-destructive">Bloquer {target.display_name}</Text>
@@ -139,7 +147,11 @@ export default function DiscoverScreen(): React.JSX.Element {
               testID="discover-report"
             />
             {safety.error ? (
-              <Text testID="discover-safety-error" className="mt-2 text-center text-sm text-destructive">
+              <Text
+                testID="discover-safety-error"
+                accessibilityRole="alert"
+                className="mt-2 text-center text-sm text-destructive"
+              >
                 {safety.error}
               </Text>
             ) : null}
@@ -155,7 +167,11 @@ export default function DiscoverScreen(): React.JSX.Element {
               testID="discover-block"
             />
             {safety.error ? (
-              <Text testID="discover-safety-error" className="mt-2 text-center text-sm text-destructive">
+              <Text
+                testID="discover-safety-error"
+                accessibilityRole="alert"
+                className="mt-2 text-center text-sm text-destructive"
+              >
                 {safety.error}
               </Text>
             ) : null}

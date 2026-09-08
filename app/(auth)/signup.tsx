@@ -96,14 +96,23 @@ export default function SignupScreen(): React.JSX.Element {
               testID="signup-password"
             />
             {error && !registered ? (
-              <Text testID="signup-server-error" className="text-sm text-destructive">
+              <Text
+                testID="signup-server-error"
+                accessibilityRole="alert"
+                className="text-sm text-destructive"
+              >
                 {error.message}
               </Text>
             ) : null}
             {registered && error ? (
               <View className="rounded-xl border border-border bg-ink p-4">
                 <Text className="text-sm text-text">{error.message}</Text>
-                <Pressable testID="signup-signin-link" onPress={() => router.replace('/login')}>
+                <Pressable
+                  testID="signup-signin-link"
+                  onPress={() => router.replace('/login')}
+                  accessibilityRole="link"
+                  accessibilityLabel="Se connecter"
+                >
                   <Text className="mt-2 text-sm font-bold text-secondary">Se connecter</Text>
                 </Pressable>
               </View>
@@ -114,7 +123,11 @@ export default function SignupScreen(): React.JSX.Element {
               loading={status === 'pending'}
               testID="signup-submit"
             />
-            <Pressable onPress={() => router.replace('/login')}>
+            <Pressable
+              onPress={() => router.replace('/login')}
+              accessibilityRole="link"
+              accessibilityLabel="Se connecter"
+            >
               <Text className="text-center text-sm text-muted">
                 Déjà un compte ? <Text className="font-bold text-secondary">Se connecter</Text>
               </Text>

@@ -194,7 +194,11 @@ export default function ThreadScreen(): React.JSX.Element {
         </View>
       ))}
       {sendError && !locked ? (
-        <Text testID="thread-send-error" className="px-4 pb-1 text-center text-sm text-destructive">
+        <Text
+          testID="thread-send-error"
+          accessibilityRole="alert"
+          className="px-4 pb-1 text-center text-sm text-destructive"
+        >
           {sendError}
         </Text>
       ) : null}
@@ -219,6 +223,8 @@ export default function ThreadScreen(): React.JSX.Element {
             <Pressable
               testID="thread-safety-report"
               onPress={() => setSafetyView('report')}
+              accessibilityRole="button"
+              accessibilityLabel={`Signaler ${peerName}`}
               className="rounded-xl border border-border bg-ink px-4 py-3"
             >
               <Text className="text-base font-semibold text-text">Signaler {peerName}</Text>
@@ -227,6 +233,8 @@ export default function ThreadScreen(): React.JSX.Element {
               <Pressable
                 testID="thread-safety-unblock"
                 onPress={() => void confirmUnblock()}
+                accessibilityRole="button"
+                accessibilityLabel={`Débloquer ${peerName}`}
                 className="rounded-xl border border-border bg-ink px-4 py-3"
               >
                 <Text className="text-base font-semibold text-secondary">Débloquer {peerName}</Text>
@@ -235,6 +243,8 @@ export default function ThreadScreen(): React.JSX.Element {
               <Pressable
                 testID="thread-safety-block"
                 onPress={() => setSafetyView('block')}
+                accessibilityRole="button"
+                accessibilityLabel={`Bloquer ${peerName}`}
                 className="rounded-xl border border-border bg-ink px-4 py-3"
               >
                 <Text className="text-base font-semibold text-destructive">Bloquer {peerName}</Text>
@@ -252,7 +262,11 @@ export default function ThreadScreen(): React.JSX.Element {
               testID="thread-report"
             />
             {safety.error ? (
-              <Text testID="thread-safety-error" className="mt-2 text-center text-sm text-destructive">
+              <Text
+                testID="thread-safety-error"
+                accessibilityRole="alert"
+                className="mt-2 text-center text-sm text-destructive"
+              >
                 {safety.error}
               </Text>
             ) : null}
@@ -268,7 +282,11 @@ export default function ThreadScreen(): React.JSX.Element {
               testID="thread-block"
             />
             {safety.error ? (
-              <Text testID="thread-safety-error" className="mt-2 text-center text-sm text-destructive">
+              <Text
+                testID="thread-safety-error"
+                accessibilityRole="alert"
+                className="mt-2 text-center text-sm text-destructive"
+              >
                 {safety.error}
               </Text>
             ) : null}

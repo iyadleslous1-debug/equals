@@ -59,7 +59,13 @@ export function ToastProvider({ children }: { children: ReactNode }): React.JSX.
             <Text numberOfLines={2} className="flex-1 text-sm text-text">
               {message}
             </Text>
-            <Pressable testID="toast-dismiss" onPress={dismiss} hitSlop={HIT_SLOP.slop}>
+            <Pressable
+              testID="toast-dismiss"
+              onPress={dismiss}
+              hitSlop={HIT_SLOP.slop}
+              accessibilityRole="button"
+              accessibilityLabel="Fermer la notification"
+            >
               <Text className="ml-3 text-sm font-bold text-secondary">Fermer</Text>
             </Pressable>
           </View>

@@ -62,7 +62,12 @@ export function WilayaPicker({ value, onSelect, testID }: WilayaPickerProps): Re
             <Text className="py-6 text-center text-sm text-muted">Aucune wilaya trouvée.</Text>
           }
           renderItem={({ item }) => (
-            <Pressable onPress={() => choose(item.code)} className="border-b border-border py-3">
+            <Pressable
+              onPress={() => choose(item.code)}
+              accessibilityRole="button"
+              accessibilityLabel={`${item.code} — ${item.name}`}
+              className="border-b border-border py-3"
+            >
               <Text className="text-base text-text">
                 {item.code} — {item.name} · {item.nameAr}
               </Text>

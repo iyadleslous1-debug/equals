@@ -56,7 +56,11 @@ export default function ConfirmScreen(): React.JSX.Element {
           </Text>
         ) : null}
         {error ? (
-          <Text testID="confirm-error" className="mt-4 text-center text-sm text-destructive">
+          <Text
+            testID="confirm-error"
+            accessibilityRole="alert"
+            className="mt-4 text-center text-sm text-destructive"
+          >
             {error.message}
           </Text>
         ) : null}
@@ -70,7 +74,11 @@ export default function ConfirmScreen(): React.JSX.Element {
           />
         </View>
         {resendError ? (
-          <Text testID="confirm-resend-error" className="mt-2 text-center text-sm text-destructive">
+          <Text
+            testID="confirm-resend-error"
+            accessibilityRole="alert"
+            className="mt-2 text-center text-sm text-destructive"
+          >
             {resendError.message}
           </Text>
         ) : null}

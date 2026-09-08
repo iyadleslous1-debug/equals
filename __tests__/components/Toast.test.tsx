@@ -24,6 +24,7 @@ describe('Toast', () => {
 
     await fireEvent.press(screen.getByTestId('trigger'));
     expect(screen.getByText('Saved')).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Fermer la notification' })).toBeTruthy();
 
     await fireEvent.press(screen.getByTestId('toast-dismiss'));
     expect(() => screen.getByTestId('toast-message')).toThrow();

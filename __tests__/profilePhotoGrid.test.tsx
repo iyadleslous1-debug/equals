@@ -48,6 +48,7 @@ describe('PhotoGrid', () => {
       />,
     );
     expect(screen.getByTestId('grid-card-badge-p1')).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Choisir comme photo principale' })).toBeTruthy();
     await fireEvent.press(screen.getByTestId('grid-set-card-p2'));
     expect(onSetCard).toHaveBeenCalledWith('p2');
   });

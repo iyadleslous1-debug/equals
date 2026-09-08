@@ -72,6 +72,15 @@ describe('DiscoverScreen', () => {
     await fireEvent.press(screen.getByTestId('discover-request'));
     expect(mockRequest).toHaveBeenCalledWith('u-2');
     expect(screen.getByTestId('discover-action-error')).toBeTruthy();
+    expect(screen.getByTestId('discover-action-error').props.accessibilityRole).toBe('alert');
+  });
+
+  it('exposes the safety menu as labelled buttons', async () => {
+    mockDeckQuery = { isPending: false, data: { ok: true, data: [PROFILE] } };
+    await render(<DiscoverScreen />);
+    await fireEvent.press(screen.getByTestId('discover-more'));
+    expect(screen.getByRole('button', { name: 'Signaler Yasmine Haddad' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Bloquer Yasmine Haddad' })).toBeTruthy();
   });
 
   it('shows a real empty state with refresh when the deck runs out', async () => {

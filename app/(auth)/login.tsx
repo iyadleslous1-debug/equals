@@ -98,7 +98,7 @@ export default function LoginScreen(): React.JSX.Element {
               testID="login-password"
             />
             {next !== null && next.kind !== 'confirm' ? (
-              <Text testID="login-error" className="text-sm text-destructive">
+              <Text testID="login-error" accessibilityRole="alert" className="text-sm text-destructive">
                 {next.message}
               </Text>
             ) : null}
@@ -108,6 +108,8 @@ export default function LoginScreen(): React.JSX.Element {
                 <Pressable
                   testID="login-confirm-action"
                   onPress={() => router.replace({ pathname: '/confirm', params: { email: next.email } })}
+                  accessibilityRole="link"
+                  accessibilityLabel="Entrer le code"
                 >
                   <Text className="mt-2 text-sm font-bold text-secondary">Entrer le code</Text>
                 </Pressable>
@@ -119,7 +121,11 @@ export default function LoginScreen(): React.JSX.Element {
               loading={status === 'pending'}
               testID="login-submit"
             />
-            <Pressable onPress={() => router.replace('/signup')}>
+            <Pressable
+              onPress={() => router.replace('/signup')}
+              accessibilityRole="link"
+              accessibilityLabel="Créer un compte"
+            >
               <Text className="text-center text-sm text-muted">
                 Pas de compte ? <Text className="font-bold text-secondary">Créer un compte</Text>
               </Text>

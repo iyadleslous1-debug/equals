@@ -132,7 +132,7 @@ export function IdentityForm({ initial, serverError, pending, onSubmit, testID }
         testID={t('bio')}
       />
       {serverError ? (
-        <Text testID={t('server-error')} className="text-sm text-destructive">
+        <Text testID={t('server-error')} accessibilityRole="alert" className="text-sm text-destructive">
           {serverError}
         </Text>
       ) : null}

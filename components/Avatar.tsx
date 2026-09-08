@@ -26,7 +26,7 @@ export function Avatar({ name, uri, size = 48, testID }: AvatarProps): React.JSX
       testID={testID}
       accessible
       accessibilityRole="image"
-      accessibilityLabel={name === '' ? 'Profile photo' : name}
+      accessibilityLabel={name === '' ? 'Photo de profil' : name}
       className="items-center justify-center overflow-hidden rounded-full bg-elevated"
       style={{ width: size, height: size }}
     >

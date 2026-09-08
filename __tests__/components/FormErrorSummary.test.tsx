@@ -10,7 +10,7 @@ describe('FormErrorSummary', () => {
   it('lists every error and routes taps to the field', async () => {
     const onSelect = jest.fn();
     await render(<FormErrorSummary errors={errors} onSelect={onSelect} testID="form-errors" />);
-    expect(screen.getByRole('button', { name: 'Enter a valid email. Go to field.' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Enter a valid email. Aller au champ.' })).toBeTruthy();
     await fireEvent.press(screen.getByTestId('form-errors-email'));
     expect(onSelect).toHaveBeenCalledWith('email');
   });

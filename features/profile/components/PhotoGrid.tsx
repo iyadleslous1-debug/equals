@@ -65,6 +65,9 @@ export function PhotoGrid({
                   <Pressable
                     testID={testID ? `${testID}-retry-url-${photo.id}` : undefined}
                     onPress={() => onRetryUrl?.(photo.id)}
+                    hitSlop={8}
+                    accessibilityRole="button"
+                    accessibilityLabel="Réessayer le chargement de la photo"
                   >
                     <Text className="mt-1 text-xs font-bold text-secondary">Réessayer</Text>
                   </Pressable>
@@ -87,6 +90,9 @@ export function PhotoGrid({
                 <Pressable
                   testID={testID ? `${testID}-set-card-${photo.id}` : undefined}
                   onPress={() => onSetCard(photo.id)}
+                  hitSlop={8}
+                  accessibilityRole="button"
+                  accessibilityLabel="Choisir comme photo principale"
                   className="absolute bottom-1 left-1 rounded-full bg-void/70 px-2 py-1"
                 >
                   <Text className="text-xs font-bold text-text">Choisir</Text>
@@ -123,12 +129,18 @@ export function PhotoGrid({
               <Pressable
                 testID={testID ? `${testID}-retry-${index}` : undefined}
                 onPress={() => onRetry(index)}
+                hitSlop={8}
+                accessibilityRole="button"
+                accessibilityLabel="Réessayer l’envoi de la photo"
               >
                 <Text className="mt-1 text-xs font-bold text-secondary">Réessayer</Text>
               </Pressable>
               <Pressable
                 testID={testID ? `${testID}-remove-failed-${index}` : undefined}
                 onPress={() => onRemoveFailed(index)}
+                hitSlop={8}
+                accessibilityRole="button"
+                accessibilityLabel="Retirer cette photo"
               >
                 <Text className="mt-1 text-xs text-muted">Retirer</Text>
               </Pressable>

@@ -47,6 +47,7 @@ describe('MessageBubble', () => {
     const { unmount } = await render(
       <MessageBubble text="Salam" mine={false} failed onRetry={onRetry} testID="msg2" />,
     );
+    expect(screen.getByRole('button', { name: 'Échec — réessayer' })).toBeTruthy();
     await fireEvent.press(screen.getByTestId('msg2-retry'));
     expect(onRetry).toHaveBeenCalledTimes(1);
     await unmount();

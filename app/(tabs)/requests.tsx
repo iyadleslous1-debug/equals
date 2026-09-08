@@ -98,7 +98,11 @@ export default function RequestsScreen(): React.JSX.Element {
       <View className="grow px-4 py-6">
         <Text className="mb-2 text-2xl font-bold text-text">Demandes</Text>
         {error ? (
-          <Text testID="requests-action-error" className="mb-2 text-center text-sm text-destructive">
+          <Text
+            testID="requests-action-error"
+            accessibilityRole="alert"
+            className="mb-2 text-center text-sm text-destructive"
+          >
             {error}
           </Text>
         ) : null}

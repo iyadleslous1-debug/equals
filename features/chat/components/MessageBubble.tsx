@@ -22,7 +22,13 @@ export function MessageBubble({ text, mine, failed, sending = false, onRetry, te
       <View className={`mt-0.5 flex-row items-center ${mine ? 'justify-end' : 'justify-start'}`}>
         {sending && !failed ? <Text className="text-xs text-faint">Envoi…</Text> : null}
         {failed ? (
-          <Pressable testID={t('retry')} onPress={onRetry} hitSlop={10}>
+          <Pressable
+            testID={t('retry')}
+            onPress={onRetry}
+            hitSlop={10}
+            accessibilityRole="button"
+            accessibilityLabel="Échec — réessayer"
+          >
             <Text className="text-xs font-bold text-destructive">Échec — réessayer</Text>
           </Pressable>
         ) : null}
