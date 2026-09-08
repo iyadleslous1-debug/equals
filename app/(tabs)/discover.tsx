@@ -1,10 +1,18 @@
 import { useEffect, useState } from 'react';
-import { AppState, ScrollView, Text, View } from 'react-native';
+import { AppState, Pressable, ScrollView, Text, View } from 'react-native';
 import { EmptyState } from '@/components/EmptyState';
 import { ErrorState } from '@/components/ErrorState';
 import { LoadingState } from '@/components/LoadingState';
+import { Sheet } from '@/components/Sheet';
+import { useToast } from '@/components/Toast';
 import { UserCard } from '@/features/discover/components/UserCard';
 import { useCardPhotoUrls, useDeck, useDeckActions } from '@/features/discover/hooks';
+import type { DeckProfile } from '@/features/discover/api';
+import { BlockConfirm } from '@/features/safety/components/BlockConfirm';
+import { ReportSheet } from '@/features/safety/components/ReportSheet';
+import { useSafety } from '@/features/safety/hooks';
+
+type SafetyView = { mode: 'menu' } | { mode: 'report' } | { mode: 'block' } | null;
 
 export default function DiscoverScreen(): React.JSX.Element {
   const deckQuery = useDeck();
@@ -14,13 +22,18 @@ export default function DiscoverScreen(): React.JSX.Element {
   const deck = loaded?.ok ? loaded.data : [];
   const urls = useCardPhotoUrls(deck);
   const { refetch } = deckQuery;
+  const safety = useSafety();
+  const { show } = useToast();
+  const [target, setTarget] = useState<DeckProfile | null>(null);
+  const [view, setView] = useState<SafetyView>(null);
 
   useEffect(() => {
     const subscription = AppState.addEventListener('change', (state) => {
-      if (state === 'active') void refetch();
+      // Don't reorder the deck under an open safety sheet (target snapshot).
+      if (state === 'active' && target === null) void refetch();
     });
     return () => subscription.remove();
-  }, [refetch]);
+  }, [refetch, target]);
 
   if (deckQuery.isPending) return <LoadingState label="Chargement des profils…" />;
   if (loaded && !loaded.ok) {
@@ -39,6 +52,23 @@ export default function DiscoverScreen(): React.JSX.Element {
   const refresh = (): void => {
     setPosition(0);
     void deckQuery.refetch();
+  };
+  const closeSafety = (): void => {
+    setTarget(null);
+    setView(null);
+    safety.reset();
+  };
+  const submitReport = async (userId: string, reason: string, description: string): Promise<void> => {
+    if (await safety.report(userId, reason, description)) {
+      show('Signalement envoyé.');
+      closeSafety();
+    }
+  };
+  const confirmBlock = async (userId: string): Promise<void> => {
+    if (await safety.block(userId)) {
+      show('Utilisateur bloqué.');
+      closeSafety();
+    }
   };
 
   return (
@@ -61,6 +91,10 @@ export default function DiscoverScreen(): React.JSX.Element {
               acting={acting}
               onRequest={() => request(current.user_id)}
               onSkip={() => skip(current.user_id)}
+              onMore={() => {
+                setTarget(current);
+                setView({ mode: 'menu' });
+              }}
               testID="discover"
             />
             {error ? (
@@ -71,6 +105,63 @@ export default function DiscoverScreen(): React.JSX.Element {
           </>
         )}
       </View>
+      <Sheet
+        visible={target !== null}
+        onClose={closeSafety}
+        title={target ? target.display_name : 'Options'}
+        testID="discover-safety"
+      >
+        {target !== null && (view === null || view.mode === 'menu') ? (
+          <View className="gap-2">
+            <Pressable
+              testID="discover-safety-report"
+              onPress={() => setView({ mode: 'report' })}
+              className="rounded-xl border border-border bg-ink px-4 py-3"
+            >
+              <Text className="text-base font-semibold text-text">Signaler {target.display_name}</Text>
+            </Pressable>
+            <Pressable
+              testID="discover-safety-block"
+              onPress={() => setView({ mode: 'block' })}
+              className="rounded-xl border border-border bg-ink px-4 py-3"
+            >
+              <Text className="text-base font-semibold text-destructive">Bloquer {target.display_name}</Text>
+            </Pressable>
+          </View>
+        ) : null}
+        {target !== null && view?.mode === 'report' ? (
+          <>
+            <ReportSheet
+              userName={target.display_name}
+              onSubmit={(input) => void submitReport(target.user_id, input.reason, input.description)}
+              onClose={closeSafety}
+              pending={safety.status === 'pending'}
+              testID="discover-report"
+            />
+            {safety.error ? (
+              <Text testID="discover-safety-error" className="mt-2 text-center text-sm text-destructive">
+                {safety.error}
+              </Text>
+            ) : null}
+          </>
+        ) : null}
+        {target !== null && view?.mode === 'block' ? (
+          <>
+            <BlockConfirm
+              userName={target.display_name}
+              onConfirm={() => void confirmBlock(target.user_id)}
+              onCancel={closeSafety}
+              pending={safety.status === 'pending'}
+              testID="discover-block"
+            />
+            {safety.error ? (
+              <Text testID="discover-safety-error" className="mt-2 text-center text-sm text-destructive">
+                {safety.error}
+              </Text>
+            ) : null}
+          </>
+        ) : null}
+      </Sheet>
     </ScrollView>
   );
 }

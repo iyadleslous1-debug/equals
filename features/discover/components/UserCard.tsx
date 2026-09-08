@@ -1,6 +1,7 @@
 import { Image, Text, View } from 'react-native';
-import { WILAYAS } from '@/constants/wilayas';
+import { wilayaLabel } from '@/constants/wilayas';
 import { Button } from '@/components/Button';
+import { IconButton } from '@/components/IconButton';
 import type { DeckProfile } from '../api';
 
 export interface UserCardProps {
@@ -9,15 +10,11 @@ export interface UserCardProps {
   acting: boolean;
   onRequest: () => void;
   onSkip: () => void;
+  onMore?: () => void;
   testID?: string;
 }
 
-export function wilayaLabel(code: number): string {
-  const found = WILAYAS.find((w) => w.code === code);
-  return found ? `${found.code} — ${found.name}` : `Wilaya ${code}`;
-}
-
-export function UserCard({ profile, photoUrl, acting, onRequest, onSkip, testID }: UserCardProps) {
+export function UserCard({ profile, photoUrl, acting, onRequest, onSkip, onMore, testID }: UserCardProps) {
   const t = (id: string): string => (testID ? `${testID}-${id}` : '');
   return (
     <View testID={testID} className="overflow-hidden rounded-2xl border border-border bg-ink">
@@ -31,9 +28,19 @@ export function UserCard({ profile, photoUrl, acting, onRequest, onSkip, testID 
         </View>
       )}
       <View className="p-4">
-        <Text className="text-xl font-bold text-text">
-          {profile.display_name}, {profile.age}
-        </Text>
+        <View className="flex-row items-center justify-between">
+          <Text className="flex-1 text-xl font-bold text-text">
+            {profile.display_name}, {profile.age}
+          </Text>
+          {onMore ? (
+            <IconButton
+              name="ellipsis-horizontal"
+              label="Plus d’options"
+              onPress={onMore}
+              testID={t('more')}
+            />
+          ) : null}
+        </View>
         <Text className="mt-1 text-sm text-secondary">{wilayaLabel(profile.wilaya)}</Text>
         {profile.bio ? (
           <Text className="mt-2 text-sm text-muted" numberOfLines={4}>

@@ -408,6 +408,20 @@ export type Database = {
         };
         Returns: boolean;
       };
+      get_conversation_previews: {
+        Args: never;
+        Returns: {
+          conversation_id: string;
+          last_message: string;
+          last_message_at: string;
+          other_age: number;
+          other_card: string;
+          other_name: string;
+          other_user_id: string;
+          other_wilaya: number;
+          unread: number;
+        }[];
+      };
       get_discovery_candidates: {
         Args: { p_limit?: number };
         Returns: {
@@ -418,6 +432,22 @@ export type Database = {
           gender: string;
           user_id: string;
           wilaya: number;
+        }[];
+      };
+      get_request_inbox: {
+        Args: never;
+        Returns: {
+          counterpart_age: number;
+          counterpart_card: string;
+          counterpart_name: string;
+          counterpart_user_id: string;
+          counterpart_wilaya: number;
+          created_at: string;
+          direction: string;
+          id: string;
+          receiver_id: string;
+          sender_id: string;
+          status: string;
         }[];
       };
       is_active: { Args: never; Returns: boolean };

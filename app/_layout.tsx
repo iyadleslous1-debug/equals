@@ -11,6 +11,7 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import { ErrorBoundary } from '../components/ErrorBoundary';
+import { ToastProvider } from '../components/Toast';
 import { useSupabaseAuth } from '../hooks/useSupabaseAuth';
 import { config, reportOptionalEnv } from '../lib/config';
 import { setMinLevel } from '../lib/logger';
@@ -28,8 +29,10 @@ export default function RootLayout(): React.JSX.Element {
   return (
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
-        <StatusBar style="auto" />
-        <Stack screenOptions={{ headerShown: false }} />
+        <ToastProvider>
+          <StatusBar style="auto" />
+          <Stack screenOptions={{ headerShown: false }} />
+        </ToastProvider>
       </QueryClientProvider>
     </ErrorBoundary>
   );

@@ -4,6 +4,8 @@ import DiscoverScreen from '../app/(tabs)/discover';
 const mockRefetch = jest.fn();
 const mockRequest = jest.fn();
 const mockSkip = jest.fn();
+const mockSafetyReport = jest.fn();
+const mockSafetyBlock = jest.fn();
 let mockDeckQuery: { data?: unknown; isPending: boolean } = { data: undefined, isPending: true };
 let mockActions: { acting: boolean; error: string | null } = { acting: false, error: null };
 
@@ -24,6 +26,17 @@ jest.mock('@/features/discover/hooks', () => ({
   }),
   useCardPhotoUrls: () => ({ 'u-2': 'https://picsum.photos/300' }),
   useAct: () => ({}),
+}));
+
+jest.mock('@/features/safety/hooks', () => ({
+  useSafety: () => ({
+    report: mockSafetyReport,
+    block: mockSafetyBlock,
+    unblock: jest.fn(),
+    status: 'idle',
+    error: null,
+    reset: jest.fn(),
+  }),
 }));
 
 const PROFILE = {
@@ -75,5 +88,26 @@ describe('DiscoverScreen', () => {
     expect(screen.getByText('Découverte impossible.')).toBeTruthy();
     await fireEvent.press(screen.getByText('Réessayer'));
     expect(mockRefetch).toHaveBeenCalledTimes(1);
+  });
+
+  it('opens the safety menu and blocks the visible profile', async () => {
+    mockDeckQuery = { isPending: false, data: { ok: true, data: [PROFILE] } };
+    mockSafetyBlock.mockResolvedValue(true);
+    await render(<DiscoverScreen />);
+    await fireEvent.press(screen.getByTestId('discover-more'));
+    await fireEvent.press(screen.getByTestId('discover-safety-block'));
+    await fireEvent.press(screen.getByTestId('discover-block-confirm'));
+    expect(mockSafetyBlock).toHaveBeenCalledWith('u-2');
+  });
+
+  it('submits a report with reason from the safety menu', async () => {
+    mockDeckQuery = { isPending: false, data: { ok: true, data: [PROFILE] } };
+    mockSafetyReport.mockResolvedValue(true);
+    await render(<DiscoverScreen />);
+    await fireEvent.press(screen.getByTestId('discover-more'));
+    await fireEvent.press(screen.getByTestId('discover-safety-report'));
+    await fireEvent.press(screen.getByText('Spam'));
+    await fireEvent.press(screen.getByTestId('discover-report-confirm'));
+    expect(mockSafetyReport).toHaveBeenCalledWith('u-2', 'Spam', '');
   });
 });

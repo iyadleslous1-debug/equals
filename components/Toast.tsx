@@ -60,7 +60,7 @@ export function ToastProvider({ children }: { children: ReactNode }): React.JSX.
               {message}
             </Text>
             <Pressable testID="toast-dismiss" onPress={dismiss} hitSlop={HIT_SLOP.slop}>
-              <Text className="ml-3 text-sm font-bold text-secondary">Dismiss</Text>
+              <Text className="ml-3 text-sm font-bold text-secondary">Fermer</Text>
             </Pressable>
           </View>
         </View>

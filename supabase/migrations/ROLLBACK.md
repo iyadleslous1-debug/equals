@@ -6,6 +6,40 @@ section below is idempotent (`IF EXISTS`) and ordered so dependents drop before
 parents. Test every reversal on a scratch branch (`supabase db reset` on a
 copy), never on the shared staging project directly.
 
+## 0011 + 0012 chat guards & previews
+
+Reverses: block-lock + message rate triggers, conversation previews fn.
+
+```sql
+DROP TRIGGER IF EXISTS messages_rate_limit ON public.messages;
+DROP TRIGGER IF EXISTS messages_block_lock ON public.messages;
+DROP FUNCTION IF EXISTS public.enforce_message_rate_limit();
+DROP FUNCTION IF EXISTS public.enforce_block_lock();
+REVOKE ALL ON FUNCTION public.get_conversation_previews() FROM PUBLIC, anon, authenticated;
+DROP FUNCTION IF EXISTS public.get_conversation_previews();
+```
+
+Data impact: none. Without the triggers, blocked chats become writable and
+message sends unthrottled until re-applied — emergency-only.
+
+## 0013 `20260908172614_chat-ordering.sql`
+
+Reverses: deterministic ordering, single-source last message, P0002 lock
+code. Re-apply 0011/0012 bodies (kept in git history) to restore — there is
+no down-migration beyond re-running the prior file contents.
+
+## 0009 `20260908133538_requests-inbox.sql`
+
+Reverses: inbox definer function (read path only).
+
+```sql
+REVOKE ALL ON FUNCTION public.get_request_inbox() FROM PUBLIC, anon, authenticated;
+DROP FUNCTION IF EXISTS public.get_request_inbox();
+```
+
+Data impact: none. The Requests screens lose counterpart display data until
+re-applied (RLS owner-only profiles cannot substitute).
+
 ## 0007 `20260908063210_discovery.sql`
 
 Reverses: deck function + swipe/request rate triggers.
