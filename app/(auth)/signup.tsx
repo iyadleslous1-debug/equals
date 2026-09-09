@@ -12,6 +12,7 @@ import {
 import { Button } from '@/components/Button';
 import { FormErrorSummary, type FieldError } from '@/components/FormErrorSummary';
 import { Input } from '@/components/Input';
+import { Reveal } from '@/components/Reveal';
 import { isAlreadyRegistered } from '@/features/auth/authErrors';
 import { useSignUp } from '@/features/auth/hooks';
 import { normalizeEmail, validatePassword } from '@/lib/auth';
@@ -67,34 +68,38 @@ export default function SignupScreen(): React.JSX.Element {
             {summary.length > 0 ? (
               <FormErrorSummary errors={summary} onSelect={focusField} testID="signup-errors" />
             ) : null}
-            <Input
-              ref={emailRef}
-              label="Email"
-              value={email}
-              onChangeText={setEmail}
-              keyboardType="email-address"
-              autoCapitalize="none"
-              autoComplete="email"
-              textContentType="emailAddress"
-              error={fields.email}
-              returnKeyType="next"
-              onSubmitEditing={() => passwordRef.current?.focus()}
-              testID="signup-email"
-            />
-            <Input
-              ref={passwordRef}
-              label="Password"
-              hint="8 characters minimum"
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry
-              autoComplete="password"
-              textContentType="newPassword"
-              error={fields.password}
-              returnKeyType="done"
-              onSubmitEditing={submit}
-              testID="signup-password"
-            />
+            <Reveal index={0}>
+              <Input
+                ref={emailRef}
+                label="Email"
+                value={email}
+                onChangeText={setEmail}
+                keyboardType="email-address"
+                autoCapitalize="none"
+                autoComplete="email"
+                textContentType="emailAddress"
+                error={fields.email}
+                returnKeyType="next"
+                onSubmitEditing={() => passwordRef.current?.focus()}
+                testID="signup-email"
+              />
+            </Reveal>
+            <Reveal index={1}>
+              <Input
+                ref={passwordRef}
+                label="Password"
+                hint="8 characters minimum"
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry
+                autoComplete="password"
+                textContentType="newPassword"
+                error={fields.password}
+                returnKeyType="done"
+                onSubmitEditing={submit}
+                testID="signup-password"
+              />
+            </Reveal>
             {error && !registered ? (
               <Text
                 testID="signup-server-error"

@@ -29,7 +29,7 @@ export interface PhotoGridProps {
 
 function Tile({ children, testID }: { children: React.ReactNode; testID?: string }) {
   return (
-    <View testID={testID} className="h-36 w-[31%] overflow-hidden rounded-2xl bg-ink">
+    <View testID={testID} className="h-36 w-[31%] overflow-hidden rounded-xl bg-ink">
       {children}
     </View>
   );
@@ -154,7 +154,7 @@ export function PhotoGrid({
             onPress={onAdd}
             accessibilityRole="button"
             accessibilityLabel="Add a photo"
-            className="h-36 w-[31%] items-center justify-center rounded-2xl border border-dashed border-border"
+            className="h-36 w-[31%] items-center justify-center rounded-xl border-2 border-dashed border-border"
           >
             {uploading ? <ActivityIndicator /> : <Text className="text-3xl text-muted">+</Text>}
           </Pressable>

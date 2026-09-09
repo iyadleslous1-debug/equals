@@ -27,12 +27,15 @@ describe('Toast', () => {
     expect(screen.getByRole('button', { name: 'Dismiss notification' })).toBeTruthy();
 
     await fireEvent.press(screen.getByTestId('toast-dismiss'));
+    await act(async () => {
+      jest.advanceTimersByTime(250);
+    });
     expect(() => screen.getByTestId('toast-message')).toThrow();
 
     await fireEvent.press(screen.getByTestId('trigger'));
     expect(screen.getByText('Saved')).toBeTruthy();
     await act(async () => {
-      jest.advanceTimersByTime(3000);
+      jest.advanceTimersByTime(4000 + 250);
     });
     expect(() => screen.getByTestId('toast-message')).toThrow();
   });

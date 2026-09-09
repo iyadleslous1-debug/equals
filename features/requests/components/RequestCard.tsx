@@ -3,6 +3,7 @@ import { Text, View } from 'react-native';
 import { Avatar } from '@/components/Avatar';
 import { Badge } from '@/components/Badge';
 import { Button } from '@/components/Button';
+import { COLORS } from '@/constants/theme';
 import { wilayaLabel } from '@/constants/wilayas';
 
 export interface RequestCounterpart {
@@ -51,18 +52,30 @@ export const RequestCard = memo(function RequestCard({
       : (request.profile?.display_name ?? 'User unavailable');
   const chip = STATUS_CHIP[request.status as keyof typeof STATUS_CHIP] ?? STATUS_CHIP.pending;
   return (
-    <View testID={testID} className="flex-row items-center rounded-2xl border border-border bg-ink p-3">
+    <View
+      testID={testID}
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        borderRadius: 16,
+        backgroundColor: COLORS.ink,
+        padding: 16,
+        marginBottom: 12,
+      }}
+    >
       <Avatar
         name={request.profile?.display_name ?? '?'}
         uri={request.profile?.avatarUri ?? undefined}
-        size={48}
+        size={52}
       />
-      <View className="ml-3 flex-1">
-        <Text className="text-base font-bold text-text" numberOfLines={1}>
+      <View style={{ marginLeft: 16, flex: 1 }}>
+        <Text style={{ fontSize: 17, fontWeight: '600', color: COLORS.text }} numberOfLines={1}>
           {name}
         </Text>
         {request.profile?.wilaya !== null && request.profile?.wilaya !== undefined ? (
-          <Text className="text-xs text-muted">{wilayaLabel(request.profile.wilaya)}</Text>
+          <Text style={{ marginTop: 4, fontSize: 14, color: COLORS.muted }}>
+            {wilayaLabel(request.profile.wilaya)}
+          </Text>
         ) : null}
         {direction === 'sent' ? (
           <View className="mt-1 self-start">
@@ -72,12 +85,19 @@ export const RequestCard = memo(function RequestCard({
       </View>
       {direction === 'received' && request.status === 'pending' ? (
         <View className="gap-2">
-          <Button title="Accept" onPress={() => onAccept?.()} disabled={acting} testID={t('accept')} />
+          <Button
+            title="Accept"
+            onPress={() => onAccept?.()}
+            disabled={acting}
+            size="small"
+            testID={t('accept')}
+          />
           <Button
             title="Decline"
             onPress={() => onDecline?.()}
             disabled={acting}
             variant="ghost"
+            size="small"
             testID={t('decline')}
           />
         </View>

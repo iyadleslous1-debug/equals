@@ -15,7 +15,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#0f0b1e"
+        "backgroundColor": "#0f1419"
       },
       "package": "com.dzconnect.app"
     },
@@ -24,7 +24,14 @@
       "expo-secure-store",
       "expo-font",
       "expo-status-bar",
-      ["expo-splash-screen", { "backgroundColor": "#0f0b1e", "imageWidth": 200 }]
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#0f1419",
+          "imageWidth": 200
+        }
+      ],
+      "expo-image"
     ],
     "experiments": {
       "typedRoutes": true

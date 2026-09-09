@@ -8,6 +8,7 @@ import { LoadingState } from '@/components/LoadingState';
 import { Sheet } from '@/components/Sheet';
 import { useToast } from '@/components/Toast';
 import { UserCard } from '@/features/discover/components/UserCard';
+import { SwipeableCard } from '@/features/discover/components/SwipeableCard';
 import { FilterSheet } from '@/features/discover/components/FilterSheet';
 import {
   useCardPhotoUrls,
@@ -221,16 +222,24 @@ export default function DiscoverScreen(): React.JSX.Element {
           />
         ) : (
           <>
-            <UserCard
-              profile={current}
-              photoUrl={urls[current.user_id] ?? null}
-              acting={acting}
-              onRequest={requestCurrent}
-              onSkip={skipCurrent}
-              onMore={openSafety}
-              onOpenProfile={openProfile}
-              testID="discover"
-            />
+            <SwipeableCard
+              key={current.user_id}
+              onSwipeLeft={skipCurrent}
+              onSwipeRight={requestCurrent}
+              testID="discover-swipe"
+            >
+              <UserCard
+                profile={current}
+                photoUrl={urls[current.user_id] ?? null}
+                acting={acting}
+                compat={compatScores.get(current.user_id) ?? null}
+                onRequest={requestCurrent}
+                onSkip={skipCurrent}
+                onMore={openSafety}
+                onOpenProfile={openProfile}
+                testID="discover"
+              />
+            </SwipeableCard>
             {error ? (
               <Text
                 testID="discover-action-error"

@@ -136,6 +136,7 @@ export function SurveyForm({ initial, fieldErrors, pending, onSubmit, testID }: 
             label={label}
             selected={hobbies.includes(value)}
             onPress={() => toggleHobby(value)}
+            multiSelect
             testID={t(`hobby-${value}`)}
           />
         ))}

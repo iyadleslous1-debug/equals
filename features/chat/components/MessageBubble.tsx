@@ -1,5 +1,6 @@
 import { memo } from 'react';
 import { Pressable, Text, View } from 'react-native';
+import { COLORS, HIT_SLOP } from '@/constants/theme';
 
 export interface MessageBubbleProps {
   text: string;
@@ -21,20 +22,31 @@ export const MessageBubble = memo(function MessageBubble({
 }: MessageBubbleProps) {
   const t = (id: string): string => (testID ? `${testID}-${id}` : '');
   return (
-    <View testID={testID} className={`my-1 max-w-[80%] ${mine ? 'self-end' : 'self-start'}`}>
+    <View
+      testID={testID}
+      style={{ marginVertical: 4, maxWidth: '75%', alignSelf: mine ? 'flex-end' : 'flex-start' }}
+    >
       <View
         testID={t(mine ? 'mine' : 'theirs')}
-        className={`rounded-2xl px-3 py-2 ${mine ? 'bg-primary' : 'bg-elevated'}`}
+        style={{
+          paddingHorizontal: 16,
+          paddingVertical: 12,
+          backgroundColor: mine ? COLORS.primary : COLORS.elevated,
+          borderRadius: 18,
+          borderBottomRightRadius: mine ? 4 : 18,
+          borderBottomLeftRadius: mine ? 18 : 4,
+          opacity: sending && !failed ? 0.6 : 1,
+        }}
       >
-        <Text className={`text-base ${mine ? 'text-onPrimary' : 'text-text'}`}>{text}</Text>
+        <Text style={{ fontSize: 16, color: mine ? COLORS.onPrimary : COLORS.text }}>{text}</Text>
       </View>
-      <View className={`mt-0.5 flex-row items-center ${mine ? 'justify-end' : 'justify-start'}`}>
+      <View style={{ marginTop: 4, flexDirection: 'row', justifyContent: mine ? 'flex-end' : 'flex-start' }}>
         {sending && !failed ? <Text className="text-xs text-faint">Sending…</Text> : null}
         {failed ? (
           <Pressable
             testID={t('retry')}
             onPress={onRetry}
-            hitSlop={10}
+            hitSlop={HIT_SLOP.slop}
             accessibilityRole="button"
             accessibilityLabel="Failed — retry"
           >

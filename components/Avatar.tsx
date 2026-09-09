@@ -1,5 +1,8 @@
 import { useState } from 'react';
-import { Image, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { Image } from 'expo-image';
+import { COLORS } from '../constants/theme';
 
 export interface AvatarProps {
   name: string;
@@ -37,9 +40,20 @@ export function Avatar({ name, uri, size = 48, testID }: AvatarProps): React.JSX
           source={{ uri }}
           onError={() => setFailed(true)}
           style={{ width: size, height: size }}
+          contentFit="cover"
+          transition={200}
         />
       ) : (
-        <Text className="text-base font-bold text-muted">{initialsOf(name)}</Text>
+        <LinearGradient
+          colors={[COLORS.secondary, COLORS.primary]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={{ width: size, height: size, alignItems: 'center', justifyContent: 'center' }}
+        >
+          <Text style={{ fontSize: size * 0.4, fontWeight: '600', color: COLORS.onPrimary }}>
+            {initialsOf(name)}
+          </Text>
+        </LinearGradient>
       )}
     </View>
   );

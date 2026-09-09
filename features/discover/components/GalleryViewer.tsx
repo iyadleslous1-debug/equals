@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { FlatList, Image, Text, View, useWindowDimensions } from 'react-native';
+import { FlatList, Text, View, useWindowDimensions } from 'react-native';
+import { Image } from 'expo-image';
 
 export interface GalleryViewerProps {
   urls: string[];
@@ -30,9 +31,9 @@ export function GalleryViewer({ urls, name, testID }: GalleryViewerProps) {
             source={{ uri: item }}
             accessibilityRole="image"
             accessibilityLabel={`Photo of ${name}`}
-            className="h-96 w-full"
-            resizeMode="cover"
-            style={{ width }}
+            contentFit="cover"
+            transition={300}
+            style={{ width, height: 384 }}
           />
         )}
       />

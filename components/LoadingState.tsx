@@ -15,8 +15,12 @@ export function LoadingState({ label, testID }: LoadingStateProps): React.JSX.El
       accessibilityLiveRegion="polite"
       className="flex-1 items-center justify-center px-8"
     >
-      <ActivityIndicator size="large" color={COLORS.primary} />
-      <Text className="mt-4 text-center text-sm text-muted">{label}</Text>
+      <ActivityIndicator size="large" color={COLORS.secondary} />
+      <Text
+        style={{ marginTop: 16, textAlign: 'center', fontSize: 15, fontWeight: '500', color: COLORS.muted }}
+      >
+        {label}
+      </Text>
     </View>
   );
 }

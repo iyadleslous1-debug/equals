@@ -1,6 +1,6 @@
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { COLORS } from '@/constants/theme';
+import { TabBar } from '@/components/TabBar';
 
 /**
  * Bottom tabs — Discover, Requests, Chat. Never placeholder tabs: a screen
@@ -8,14 +8,7 @@ import { COLORS } from '@/constants/theme';
  */
 export default function TabsLayout(): React.JSX.Element {
   return (
-    <Tabs
-      screenOptions={{
-        headerShown: false,
-        tabBarStyle: { backgroundColor: COLORS.ink, borderTopColor: COLORS.border },
-        tabBarActiveTintColor: COLORS.primary,
-        tabBarInactiveTintColor: COLORS.muted,
-      }}
-    >
+    <Tabs tabBar={(props) => <TabBar {...props} />} screenOptions={{ headerShown: false }}>
       <Tabs.Screen
         name="discover"
         options={{

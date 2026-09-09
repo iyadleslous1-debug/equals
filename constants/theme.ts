@@ -9,21 +9,27 @@
  */
 
 export const COLORS = {
-  void: '#0f0b1e',
-  ink: '#17122b',
-  elevated: '#241b40',
-  primary: '#d9a441',
-  onPrimary: '#0f0b1e',
-  secondary: '#8b7bc7',
-  text: '#f4f1fa',
-  muted: '#b8b0d1',
-  faint: '#8a83a3',
-  border: '#2e2547',
-  destructive: '#dc2626',
+  void: '#0f1419',
+  ink: '#1a2028',
+  elevated: '#252d38',
+  primary: '#3368a0',
+  onPrimary: '#ffffff',
+  secondary: '#66a3bf',
+  tertiary: '#c8dfdb',
+  text: '#f2efe7',
+  muted: '#8a9ba8',
+  // Same value as muted by spec (placeholders use muted); separate token
+  // so faint usages can diverge later without a hunt.
+  faint: '#8a9ba8',
+  border: '#2a3441',
+  destructive: '#e5484d',
   onDestructive: '#ffffff',
-  success: '#34d399',
-  warning: '#f59e0b',
-  onWarning: '#0f0b1e',
+  success: '#30a46c',
+  warning: '#f5a524',
+  onWarning: '#0f1419',
+  /** Tinted surfaces that need alpha (chip select, scrims). */
+  primaryTint: 'rgba(51,104,160,0.15)',
+  scrim: 'rgba(15,20,25,0.7)',
 } as const;
 
 export const SPACING = {

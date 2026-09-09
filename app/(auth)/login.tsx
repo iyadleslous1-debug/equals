@@ -12,6 +12,7 @@ import {
 import { Button } from '@/components/Button';
 import { FormErrorSummary, type FieldError } from '@/components/FormErrorSummary';
 import { Input } from '@/components/Input';
+import { Reveal } from '@/components/Reveal';
 import { signInNextStep } from '@/features/auth/authErrors';
 import { useLogin } from '@/features/auth/hooks';
 import { normalizeEmail } from '@/lib/auth';
@@ -70,33 +71,37 @@ export default function LoginScreen(): React.JSX.Element {
             {summary.length > 0 ? (
               <FormErrorSummary errors={summary} onSelect={focusField} testID="login-errors" />
             ) : null}
-            <Input
-              ref={emailRef}
-              label="Email"
-              value={email}
-              onChangeText={onEmailChange}
-              keyboardType="email-address"
-              autoCapitalize="none"
-              autoComplete="email"
-              textContentType="emailAddress"
-              error={fields.email}
-              returnKeyType="next"
-              onSubmitEditing={() => passwordRef.current?.focus()}
-              testID="login-email"
-            />
-            <Input
-              ref={passwordRef}
-              label="Password"
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry
-              autoComplete="password"
-              textContentType="password"
-              error={fields.password}
-              returnKeyType="done"
-              onSubmitEditing={submit}
-              testID="login-password"
-            />
+            <Reveal index={0}>
+              <Input
+                ref={emailRef}
+                label="Email"
+                value={email}
+                onChangeText={onEmailChange}
+                keyboardType="email-address"
+                autoCapitalize="none"
+                autoComplete="email"
+                textContentType="emailAddress"
+                error={fields.email}
+                returnKeyType="next"
+                onSubmitEditing={() => passwordRef.current?.focus()}
+                testID="login-email"
+              />
+            </Reveal>
+            <Reveal index={1}>
+              <Input
+                ref={passwordRef}
+                label="Password"
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry
+                autoComplete="password"
+                textContentType="password"
+                error={fields.password}
+                returnKeyType="done"
+                onSubmitEditing={submit}
+                testID="login-password"
+              />
+            </Reveal>
             {next !== null && next.kind !== 'confirm' ? (
               <Text testID="login-error" accessibilityRole="alert" className="text-sm text-destructive">
                 {next.message}
