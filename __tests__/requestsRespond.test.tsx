@@ -47,5 +47,7 @@ describe('useRespond throw-path (audit S3)', () => {
       result.current.decline('r1');
     });
     expect(result.current.error).toBe('Action impossible. Réessayez.');
+    expect(result.current.acting).toBe(false);
+    expect(result.current.notice).toBeNull();
   });
 });

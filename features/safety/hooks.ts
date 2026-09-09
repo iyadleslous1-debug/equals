@@ -1,6 +1,7 @@
 import { useCallback, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAct } from '@/hooks/useAct';
+import { reportError } from '@/lib/reporting';
 import { blockUser, isBlocked, submitReport, unblockUser } from './api';
 import type { ApiResult } from '@/lib/result';
 
@@ -40,7 +41,8 @@ export function useSafety(): {
           setStatus('error');
           return false;
         }
-      } catch {
+      } catch (error) {
+        reportError(error, { where: 'safety/settle' });
         setError(fallback);
         setStatus('error');
         return false;

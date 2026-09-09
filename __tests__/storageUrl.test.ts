@@ -39,4 +39,18 @@ describe('resolveStorageUrl (audit S6)', () => {
     expect(result.ok).toBe(false);
     expect(mockCreateSignedUrl).toHaveBeenCalledWith('http://evil.test/pixel.gif', 3600);
   });
+
+  it('refuses off-allowlist https hosts instead of passing them through', async () => {
+    mockCreateSignedUrl.mockResolvedValue({ data: null, error: { message: 'denied' } });
+    const result = await resolveStorageUrl('profile-photos', 'https://evil.test/pixel.gif');
+    expect(result.ok).toBe(false);
+    expect(mockCreateSignedUrl).toHaveBeenCalledWith('https://evil.test/pixel.gif', 3600);
+  });
+
+  it('fails closed on bare non-URL strings', async () => {
+    mockCreateSignedUrl.mockResolvedValue({ data: null, error: { message: 'denied' } });
+    const result = await resolveStorageUrl('profile-photos', 'not-a-url');
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.error.code).toBe('storage/url-failed');
+  });
 });

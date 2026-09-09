@@ -3,6 +3,7 @@ import { OTP_COOLDOWN_SECONDS } from '@/constants/app';
 import { queryClient } from '@/lib/query-client';
 import { signOut as libSignOut } from '@/lib/auth';
 import { createLogger } from '@/lib/logger';
+import { reportError } from '@/lib/reporting';
 import type { AppError } from '@/lib/result';
 import { confirmCode, logIn, resendCode, signUp } from './api';
 import { clearPendingEmail, getPendingEmail } from './pendingEmail';
@@ -54,7 +55,8 @@ export function useSignUp(): {
       }
       setNeedsConfirmation(result.data.needsConfirmation);
       setStatus('success');
-    } catch {
+    } catch (error) {
+      reportError(error, { where: 'auth/signup' });
       setError({ code: 'auth/signup-failed', message: 'Création impossible. Réessayez.' });
       setStatus('error');
     }
@@ -88,7 +90,8 @@ export function useLogin(): {
         return;
       }
       setStatus('success');
-    } catch {
+    } catch (error) {
+      reportError(error, { where: 'auth/signin' });
       setError({ code: 'auth/signin-failed', message: 'Connexion impossible. Réessayez.' });
       setStatus('error');
     }
@@ -126,7 +129,8 @@ export function useConfirmCode(): {
         return;
       }
       setStatus('success');
-    } catch {
+    } catch (error) {
+      reportError(error, { where: 'auth/otp-verify' });
       setError({ code: 'auth/otp-verify-failed', message: 'Vérification impossible. Réessayez.' });
       setStatus('error');
     } finally {
@@ -176,7 +180,8 @@ export function useResendCode(): {
         }
         setStatus('success');
         start(OTP_COOLDOWN_SECONDS);
-      } catch {
+      } catch (error) {
+        reportError(error, { where: 'auth/resend' });
         setError({ code: 'auth/resend-failed', message: 'Envoi impossible. Réessayez.' });
         setStatus('error');
       }
@@ -205,13 +210,21 @@ export function useSignOut(): {
         setStatus('error');
         return;
       }
-      await clearPendingEmail();
-      queryClient.clear();
-      setStatus('idle');
-    } catch {
+    } catch (error) {
+      reportError(error, { where: 'auth/signout' });
       setError({ code: 'auth/signout-failed', message: 'Déconnexion impossible. Réessayez.' });
       setStatus('error');
+      return;
     }
+    // Server sign-out succeeded: local cleanup must not be skipped by a
+    // SecureStore failure — fall back to login on next launch instead.
+    try {
+      await clearPendingEmail();
+    } catch (error) {
+      reportError(error, { where: 'auth/signout-cleanup' });
+    }
+    queryClient.clear();
+    setStatus('idle');
   }, []);
 
   return { signOut: run, status, error };

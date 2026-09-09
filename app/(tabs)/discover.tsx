@@ -18,7 +18,8 @@ type SafetyView = { mode: 'menu' } | { mode: 'report' } | { mode: 'block' } | nu
 export default function DiscoverScreen(): React.JSX.Element {
   const deckQuery = useDeck();
   const [position, setPosition] = useState(0);
-  const { acting, request, skip, error } = useDeckActions(() => setPosition((p) => p + 1));
+  const advance = useCallback(() => setPosition((p) => p + 1), []);
+  const { acting, request, skip, error } = useDeckActions(advance);
   const loaded = deckQuery.data;
   const deck = loaded?.ok ? loaded.data : [];
   const urls = useCardPhotoUrls(deck);
@@ -35,6 +36,24 @@ export default function DiscoverScreen(): React.JSX.Element {
     }, [refetch, target]),
   );
 
+  const current = deck[position];
+  const currentId = current?.user_id;
+  // Stable callbacks so memoized UserCard skips re-renders on unrelated
+  // parent churn (toast notices, safety-sheet state). All hooks stay above
+  // the early returns (Rules of Hooks).
+  const requestCurrent = useCallback(() => {
+    if (currentId !== undefined) request(currentId);
+  }, [request, currentId]);
+  const skipCurrent = useCallback(() => {
+    if (currentId !== undefined) skip(currentId);
+  }, [skip, currentId]);
+  const openSafety = useCallback(() => {
+    if (current !== undefined) {
+      setTarget(current);
+      setView({ mode: 'menu' });
+    }
+  }, [current]);
+
   if (deckQuery.isPending) return <LoadingState label="Chargement des profils…" />;
   if (loaded && !loaded.ok) {
     return (
@@ -48,7 +67,6 @@ export default function DiscoverScreen(): React.JSX.Element {
     );
   }
 
-  const current = deck[position];
   const refresh = (): void => {
     setPosition(0);
     void deckQuery.refetch();
@@ -89,12 +107,9 @@ export default function DiscoverScreen(): React.JSX.Element {
               profile={current}
               photoUrl={urls[current.user_id] ?? null}
               acting={acting}
-              onRequest={() => request(current.user_id)}
-              onSkip={() => skip(current.user_id)}
-              onMore={() => {
-                setTarget(current);
-                setView({ mode: 'menu' });
-              }}
+              onRequest={requestCurrent}
+              onSkip={skipCurrent}
+              onMore={openSafety}
               testID="discover"
             />
             {error ? (

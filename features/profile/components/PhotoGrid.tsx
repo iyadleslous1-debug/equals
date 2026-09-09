@@ -1,5 +1,6 @@
 import { ActivityIndicator, Image, Pressable, Text, View } from 'react-native';
 import { MAX_PHOTOS } from '@/constants/app';
+import { HIT_SLOP } from '@/constants/theme';
 import { Badge } from '@/components/Badge';
 import { IconButton } from '@/components/IconButton';
 import type { PhotoRow } from '../api';
@@ -65,7 +66,7 @@ export function PhotoGrid({
                   <Pressable
                     testID={testID ? `${testID}-retry-url-${photo.id}` : undefined}
                     onPress={() => onRetryUrl?.(photo.id)}
-                    hitSlop={8}
+                    hitSlop={HIT_SLOP.slop}
                     accessibilityRole="button"
                     accessibilityLabel="Réessayer le chargement de la photo"
                   >
@@ -90,7 +91,7 @@ export function PhotoGrid({
                 <Pressable
                   testID={testID ? `${testID}-set-card-${photo.id}` : undefined}
                   onPress={() => onSetCard(photo.id)}
-                  hitSlop={8}
+                  hitSlop={HIT_SLOP.slop}
                   accessibilityRole="button"
                   accessibilityLabel="Choisir comme photo principale"
                   className="absolute bottom-1 left-1 rounded-full bg-void/70 px-2 py-1"
@@ -129,7 +130,7 @@ export function PhotoGrid({
               <Pressable
                 testID={testID ? `${testID}-retry-${index}` : undefined}
                 onPress={() => onRetry(index)}
-                hitSlop={8}
+                hitSlop={HIT_SLOP.slop}
                 accessibilityRole="button"
                 accessibilityLabel="Réessayer l’envoi de la photo"
               >
@@ -138,7 +139,7 @@ export function PhotoGrid({
               <Pressable
                 testID={testID ? `${testID}-remove-failed-${index}` : undefined}
                 onPress={() => onRemoveFailed(index)}
-                hitSlop={8}
+                hitSlop={HIT_SLOP.slop}
                 accessibilityRole="button"
                 accessibilityLabel="Retirer cette photo"
               >

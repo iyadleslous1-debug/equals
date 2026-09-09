@@ -29,6 +29,15 @@ describe('SMS providers (audit S6)', () => {
     if (!result.ok) expect(result.error.code).toBe('sms/not-configured');
   });
 
+  it('Algerian provider refuses plaintext aggregator URLs', async () => {
+    const result = await new AlgerianSmsProvider('http://sms.test', 'key-1').sendOtp({
+      toE164: '+213500000000',
+      code: '123456',
+    });
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.error.code).toBe('sms/insecure-url');
+  });
+
   it('Algerian provider posts the aggregator contract on success', async () => {
     const fetchMock = jest.fn().mockResolvedValue({ ok: true, status: 200 });
     const realFetch = global.fetch;

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { LIST_STALE_TIME_MS } from '@/constants/app';
+import { reportError } from '@/lib/reporting';
 import { supabase } from '@/lib/supabase';
 import { useSignedUrls } from '@/hooks/useSignedUrls';
 import { useForegroundRefetch } from '@/hooks/useForegroundRefetch';
@@ -176,8 +177,11 @@ export function useMessages(conversationId: string) {
         );
       })
       // Deliberate: silent page-load failure leaves existing messages in
-      // place; the user retries by scrolling. No error surface in the design.
-      .catch(() => undefined);
+      // place; the user retries by scrolling. Reported for diagnostics —
+      // no error surface in the design.
+      .catch((error: unknown) => {
+        reportError(error, { where: 'chat/load-more' });
+      });
   }, [client, conversationId, valid, messages]);
 
   return {
@@ -245,7 +249,10 @@ export function useMarkRead(conversationId: string, signature: string | null): v
       })
       // Deliberate: a failed read-receipt just means the badge refreshes on
       // the next foreground return; never blocks or errors the thread view.
-      .catch(() => undefined);
+      // Reported for diagnostics.
+      .catch((error: unknown) => {
+        reportError(error, { where: 'chat/mark-read' });
+      });
     return () => {
       cancelled = true;
     };

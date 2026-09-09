@@ -8,7 +8,7 @@
  * package installed; the dynamic import fails gracefully until then.
  */
 import { config } from './config';
-import { createLogger } from './logger';
+import { createLogger, redact } from './logger';
 
 const log = createLogger('reporting');
 
@@ -77,7 +77,10 @@ class SentryReporter implements ErrorReporter {
       return;
     }
     void loadSentry().then((sdk) => {
-      sdk?.captureException(error, { extra: { ...context, fatal: fatal === true } });
+      // Context extras are redacted: emails, phones and message text must
+      // never leave the device for a third party unmasked.
+      const extra = redact(context) as Record<string, unknown> | undefined;
+      sdk?.captureException(error, { extra: { ...extra, fatal: fatal === true } });
     });
   }
 

@@ -80,6 +80,12 @@ export class AlgerianSmsProvider implements SmsProvider {
         'Algerian SMS provider is selected but ALGERIAN_SMS_API_URL / ALGERIAN_SMS_API_KEY are missing.',
       );
     }
+    if (
+      !/^https:\/\/.+/.test(this.baseUrl) &&
+      !/^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?\//.test(this.baseUrl)
+    ) {
+      return err('sms/insecure-url', 'SMS provider URL must use HTTPS.');
+    }
     try {
       const response = await fetch(`${this.baseUrl}/send`, {
         method: 'POST',
@@ -96,7 +102,7 @@ export class AlgerianSmsProvider implements SmsProvider {
           status: response.status,
         });
       }
-      log.info('OTP handed to Algerian SMS provider.', { to: params.toE164 });
+      log.info('OTP handed to Algerian SMS provider.', { phone_number: params.toE164 });
       return ok(undefined);
     } catch (error) {
       return err('sms/network', 'Could not reach the SMS provider.', toAppError(error).details);
@@ -109,7 +115,7 @@ export class DisabledSmsProvider implements SmsProvider {
   readonly name = 'disabled';
 
   async sendOtp(params: SmsSendParams): Promise<ApiResult<void>> {
-    log.warn('SMS sending is DISABLED — code not delivered.', { to: params.toE164 });
+    log.warn('SMS sending is DISABLED — code not delivered.', { phone_number: params.toE164 });
     return ok(undefined);
   }
 }

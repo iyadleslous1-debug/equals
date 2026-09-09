@@ -11,7 +11,6 @@ const mockGetSession = jest.fn();
 jest.mock('@/lib/supabase', () => ({
   supabase: {
     auth: {
-      getSession: (...args: unknown[]) => mockGetSession(...args),
       onAuthStateChange: (cb: Listener) => {
         listener = cb;
         return { data: { subscription: { unsubscribe: mockUnsubscribe } } };
@@ -43,7 +42,9 @@ describe('useSupabaseAuth (audit S6)', () => {
     const { unmount } = await renderHook(() => useSupabaseAuth());
     await act(async () => {});
     expect(typeof listener).toBe('function');
-    listener?.('SIGNED_IN', { user: { id: 'u-2' } });
+    await act(async () => {
+      listener?.('SIGNED_IN', { user: { id: 'u-2' } });
+    });
     expect(useSessionStore.getState().session).toEqual({ user: { id: 'u-2' } });
     await unmount();
     expect(mockUnsubscribe).toHaveBeenCalledTimes(1);

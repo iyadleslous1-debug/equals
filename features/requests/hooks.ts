@@ -2,6 +2,8 @@ import { useCallback, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { LIST_STALE_TIME_MS } from '@/constants/app';
 import { useAct } from '@/hooks/useAct';
+import { reportError } from '@/lib/reporting';
+import type { ApiResult } from '@/lib/result';
 import { useSignedUrls } from '@/hooks/useSignedUrls';
 import { acceptRequest, declineRequest, fetchInbox, type InboxItem } from './api';
 
@@ -47,14 +49,15 @@ export function useRespond(): {
   const refresh = useCallback(() => void client.invalidateQueries({ queryKey: REQUESTS_KEY }), [client]);
 
   const settle = useCallback(
-    async (work: Promise<{ ok: boolean; error?: { message: string } }>, done: string) => {
+    async (work: Promise<ApiResult<unknown>>, done: string) => {
       try {
         const result = await work;
         if (!result.ok) {
-          setError(result.error?.message ?? 'Action impossible. Réessayez.');
+          setError(result.error.message);
           return;
         }
-      } catch {
+      } catch (error) {
+        reportError(error, { where: 'requests/settle' });
         setError('Action impossible. Réessayez.');
         return;
       }

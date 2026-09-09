@@ -141,7 +141,7 @@ export async function deleteMyPhoto(photoId: string): Promise<ApiResult<void>> {
   }
   if (!target.url.startsWith('http')) {
     const { error: removeError } = await supabase.storage.from(BUCKET).remove([target.url]);
-    if (removeError !== null) log.warn('Orphaned storage object after row delete.', { path: target.url });
+    if (removeError !== null) log.warn('Orphaned storage object after row delete.', { photoId });
   }
   // Deleting the card promotes the oldest remaining photo — a profile with
   // photos always has exactly one card.

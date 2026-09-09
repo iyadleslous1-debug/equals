@@ -53,6 +53,7 @@ export function ToastProvider({ children }: { children: ReactNode }): React.JSX.
         <View
           testID="toast-message"
           accessibilityRole="alert"
+          accessibilityLiveRegion="polite"
           className="absolute bottom-24 left-6 right-6 rounded-xl bg-elevated p-4"
         >
           <View className="flex-row items-center justify-between">

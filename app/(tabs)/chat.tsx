@@ -1,10 +1,11 @@
 import { useRouter } from 'expo-router';
-import { useCallback } from 'react';
+import { memo, useCallback } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import { EmptyState } from '@/components/EmptyState';
 import { ErrorState } from '@/components/ErrorState';
 import { LoadingState } from '@/components/LoadingState';
 import { ConversationRow } from '@/features/chat/components/ConversationRow';
+import type { ConversationPreview } from '@/features/chat/api';
 import { useConversations, usePreviewAvatars } from '@/features/chat/hooks';
 import { previewText } from '@/features/chat/api';
 import { useForegroundRefetch } from '@/hooks/useForegroundRefetch';
@@ -15,6 +16,30 @@ function timeLabel(iso: string | null): string | null {
   if (Number.isNaN(date.getTime())) return null;
   return date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
 }
+
+/** Memoized row: preview updates re-render the list; untouched rows skip. */
+const ConversationNavRow = memo(function ConversationNavRow({
+  convo,
+  avatarUri,
+  onOpen,
+}: {
+  convo: ConversationPreview;
+  avatarUri: string | null;
+  onOpen: (convo: ConversationPreview) => void;
+}) {
+  const open = useCallback(() => onOpen(convo), [onOpen, convo]);
+  return (
+    <ConversationRow
+      name={convo.otherName}
+      preview={convo.lastMessage ? previewText(convo.lastMessage) : null}
+      time={timeLabel(convo.lastMessageAt)}
+      unread={convo.unread}
+      avatarUri={avatarUri}
+      onPress={open}
+      testID={`chat-row-${convo.conversationId}`}
+    />
+  );
+});
 
 export default function ChatListScreen(): React.JSX.Element {
   const router = useRouter();
@@ -30,6 +55,20 @@ export default function ChatListScreen(): React.JSX.Element {
   const loaded = listQuery.data;
   const convos = loaded?.ok ? loaded.data : [];
   const avatars = usePreviewAvatars(convos);
+
+  const openConvo = useCallback(
+    (convo: ConversationPreview) => {
+      router.push({
+        pathname: '/chat/[id]',
+        params: {
+          id: convo.conversationId,
+          name: convo.otherName ?? '',
+          peer: convo.otherUserId,
+        },
+      });
+    },
+    [router],
+  );
 
   if (listQuery.isPending) return <LoadingState label="Chargement des conversations…" />;
   if (loaded && !loaded.ok) {
@@ -53,24 +92,11 @@ export default function ChatListScreen(): React.JSX.Element {
         ) : (
           <View className="gap-2">
             {convos.map((convo) => (
-              <ConversationRow
+              <ConversationNavRow
                 key={convo.conversationId}
-                name={convo.otherName}
-                preview={convo.lastMessage ? previewText(convo.lastMessage) : null}
-                time={timeLabel(convo.lastMessageAt)}
-                unread={convo.unread}
+                convo={convo}
                 avatarUri={avatars[convo.conversationId] ?? null}
-                onPress={() =>
-                  router.push({
-                    pathname: '/chat/[id]',
-                    params: {
-                      id: convo.conversationId,
-                      name: convo.otherName ?? '',
-                      peer: convo.otherUserId,
-                    },
-                  })
-                }
-                testID={`chat-row-${convo.conversationId}`}
+                onOpen={openConvo}
               />
             ))}
           </View>

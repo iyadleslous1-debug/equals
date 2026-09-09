@@ -1,7 +1,9 @@
 import { getReporter, reportError, resetReporter } from '../lib/reporting';
+import { resetLogSink, setLogSink } from '../lib/logger';
 
 afterEach(() => {
   resetReporter();
+  resetLogSink();
 });
 
 describe('reporting seam (audit S6)', () => {
@@ -10,6 +12,16 @@ describe('reporting seam (audit S6)', () => {
     expect(() => reportError(new Error('boom'), { where: 'test' })).not.toThrow();
     expect(() => reportError(new Error('fatal'), undefined, true)).not.toThrow();
     expect(() => getReporter().setUser('u-1')).not.toThrow();
+  });
+
+  it('delegates to the console reporter with fatal flag intact', () => {
+    const lines: string[] = [];
+    setLogSink((_level, line) => {
+      lines.push(line);
+    });
+    reportError(new Error('boom'), { where: 'test' }, true);
+    expect(lines).toHaveLength(1);
+    expect(lines[0]).toContain('Fatal error captured.');
   });
 
   it('degrades gracefully when sentry is selected but unavailable', () => {

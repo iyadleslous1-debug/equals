@@ -63,10 +63,11 @@ export function WilayaPicker({ value, onSelect, testID }: WilayaPickerProps): Re
           }
           renderItem={({ item }) => (
             <Pressable
+              testID={testID ? `${testID}-option-${item.code}` : undefined}
               onPress={() => choose(item.code)}
               accessibilityRole="button"
               accessibilityLabel={`${item.code} — ${item.name}`}
-              className="border-b border-border py-3"
+              className="min-h-[44px] justify-center border-b border-border py-3"
             >
               <Text className="text-base text-text">
                 {item.code} — {item.name} · {item.nameAr}

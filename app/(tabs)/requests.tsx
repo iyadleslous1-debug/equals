@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import { EmptyState } from '@/components/EmptyState';
 import { ErrorState } from '@/components/ErrorState';
@@ -44,6 +44,51 @@ function Section({
   );
 }
 
+function toCardProps(item: InboxItem, avatarUri: string | null) {
+  return {
+    id: item.id,
+    status: item.status,
+    created_at: item.created_at,
+    profile: item.counterpart
+      ? {
+          display_name: item.counterpart.display_name,
+          age: item.counterpart.age,
+          wilaya: item.counterpart.wilaya,
+          avatarUri,
+        }
+      : null,
+  };
+}
+
+/** Memoized row: inbox re-renders on toast/acting churn; idle rows skip. */
+const ReceivedRequestRow = memo(function ReceivedRequestRow({
+  item,
+  avatarUri,
+  acting,
+  onAccept,
+  onDecline,
+}: {
+  item: InboxItem;
+  avatarUri: string | null;
+  acting: boolean;
+  onAccept: (requestId: string) => void;
+  onDecline: (requestId: string) => void;
+}) {
+  const accept = useCallback(() => onAccept(item.id), [onAccept, item.id]);
+  const decline = useCallback(() => onDecline(item.id), [onDecline, item.id]);
+  const request = useMemo(() => toCardProps(item, avatarUri), [item, avatarUri]);
+  return (
+    <RequestCard
+      request={request}
+      direction="received"
+      acting={acting}
+      onAccept={accept}
+      onDecline={decline}
+      testID={`requests-${item.id}`}
+    />
+  );
+});
+
 export default function RequestsScreen(): React.JSX.Element {
   const inboxQuery = useRequests();
   const { acting, accept, decline, error, notice } = useRespond();
@@ -79,19 +124,6 @@ export default function RequestsScreen(): React.JSX.Element {
 
   const received = items.filter((item) => item.direction === 'received' && item.status === 'pending');
   const sent = items.filter((item) => item.direction === 'sent');
-  const toCardProps = (item: InboxItem) => ({
-    id: item.id,
-    status: item.status,
-    created_at: item.created_at,
-    profile: item.counterpart
-      ? {
-          display_name: item.counterpart.display_name,
-          age: item.counterpart.age,
-          wilaya: item.counterpart.wilaya,
-          avatarUri: urls[item.id] ?? null,
-        }
-      : null,
-  });
 
   return (
     <ScrollView className="bg-void">
@@ -114,14 +146,13 @@ export default function RequestsScreen(): React.JSX.Element {
           onRefresh={() => refetch()}
           testID="requests-received"
           renderItem={(item) => (
-            <RequestCard
+            <ReceivedRequestRow
               key={item.id}
-              request={toCardProps(item)}
-              direction="received"
+              item={item}
+              avatarUri={urls[item.id] ?? null}
               acting={acting}
-              onAccept={() => accept(item.id)}
-              onDecline={() => decline(item.id)}
-              testID={`requests-${item.id}`}
+              onAccept={accept}
+              onDecline={decline}
             />
           )}
         />
@@ -135,7 +166,7 @@ export default function RequestsScreen(): React.JSX.Element {
           renderItem={(item) => (
             <RequestCard
               key={item.id}
-              request={toCardProps(item)}
+              request={toCardProps(item, urls[item.id] ?? null)}
               direction="sent"
               acting={false}
               testID={`requests-${item.id}`}

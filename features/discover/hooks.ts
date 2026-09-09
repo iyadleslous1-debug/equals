@@ -2,6 +2,7 @@ import { useCallback, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { LIST_STALE_TIME_MS } from '@/constants/app';
 import { useAct } from '@/hooks/useAct';
+import { reportError } from '@/lib/reporting';
 import { useSignedUrls } from '@/hooks/useSignedUrls';
 import { fetchDeck, sendRequest, skipProfile, type DeckProfile } from './api';
 
@@ -55,7 +56,8 @@ export function useDeckActions(onDone: (targetUserId: string) => void): {
           setError(result.error?.message ?? 'Action impossible. Réessayez.');
           return;
         }
-      } catch {
+      } catch (error) {
+        reportError(error, { where: 'discover/settle' });
         setError('Action impossible. Réessayez.');
         return;
       }
