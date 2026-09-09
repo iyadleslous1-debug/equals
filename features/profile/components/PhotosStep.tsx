@@ -57,7 +57,7 @@ export function PhotosStep({
         failUpload(picked.data.uri, picked.data.mimeType ?? 'image/jpeg', result.error.message);
       }
     } catch {
-      failUpload(picked.data.uri, picked.data.mimeType ?? 'image/jpeg', 'Envoi impossible. Réessayez.');
+      failUpload(picked.data.uri, picked.data.mimeType ?? 'image/jpeg', "Couldn't upload. Try again.");
     }
   };
 
@@ -72,24 +72,22 @@ export function PhotosStep({
         failUpload(item.uri, item.mimeType, result.error.message);
       }
     } catch {
-      failUpload(item.uri, item.mimeType, 'Envoi impossible. Réessayez.');
+      failUpload(item.uri, item.mimeType, "Couldn't upload. Try again.");
     }
   };
 
   const guarded = async (work: Promise<{ ok: boolean; error?: { message: string } }>): Promise<void> => {
     try {
       const result = await work;
-      if (!result.ok) setActionError(result.error?.message ?? 'Action impossible. Réessayez.');
+      if (!result.ok) setActionError(result.error?.message ?? 'Something went wrong. Try again.');
     } catch {
-      setActionError('Action impossible. Réessayez.');
+      setActionError('Something went wrong. Try again.');
     }
   };
 
   return (
     <View testID={testID} className="gap-4">
-      <Text className="text-sm text-muted">
-        Ajoutez 1 à 6 photos. La première devient votre photo principale.
-      </Text>
+      <Text className="text-sm text-muted">Add 1 to 6 photos. The first becomes your main photo.</Text>
       <PhotoGrid
         photos={photos}
         urls={urls}
@@ -122,15 +120,10 @@ export function PhotosStep({
       ) : null}
       <View className="flex-row gap-2">
         <View className="flex-1">
-          <Button title="Retour" onPress={onBack} variant="secondary" testID={t('back')} />
+          <Button title="Back" onPress={onBack} variant="secondary" testID={t('back')} />
         </View>
         <View className="flex-1">
-          <Button
-            title="Continuer"
-            onPress={onContinue}
-            disabled={photos.length < 1}
-            testID={t('continue')}
-          />
+          <Button title="Continue" onPress={onContinue} disabled={photos.length < 1} testID={t('continue')} />
         </View>
       </View>
     </View>

@@ -53,12 +53,12 @@ export function useDeckActions(onDone: (targetUserId: string) => void): {
         const result = await work;
         const benign = result.ok || result.error?.code === 'discover/already-recorded';
         if (!benign) {
-          setError(result.error?.message ?? 'Action impossible. Réessayez.');
+          setError(result.error?.message ?? 'Something went wrong. Try again.');
           return;
         }
       } catch (error) {
         reportError(error, { where: 'discover/settle' });
-        setError('Action impossible. Réessayez.');
+        setError('Something went wrong. Try again.');
         return;
       }
       setError(null);

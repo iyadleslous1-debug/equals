@@ -24,9 +24,9 @@ function Fallback({ error, onRetry }: { error: Error; onRetry: () => void }): Re
   return (
     <View className="flex-1 items-center justify-center bg-void px-8">
       <Ionicons name="alert-circle" size={48} color={COLORS.muted} />
-      <Text className="mt-4 text-center text-xl font-bold text-text">Quelque chose a mal tourné.</Text>
+      <Text className="mt-4 text-center text-xl font-bold text-text">Something went wrong.</Text>
       <Text className="mt-2 text-center text-sm text-muted">
-        Vos données sont en sécurité. Réessayez — si le problème persiste, contactez le support.
+        Your data is safe. Try again — if this keeps happening, contact support.
       </Text>
       {__DEV__ ? (
         <Text className="mt-3 text-xs text-faint" numberOfLines={4}>
@@ -34,7 +34,7 @@ function Fallback({ error, onRetry }: { error: Error; onRetry: () => void }): Re
         </Text>
       ) : null}
       <View className="mt-6">
-        <Button title="Réessayer" onPress={onRetry} testID="error-boundary-retry" />
+        <Button title="Retry" onPress={onRetry} testID="error-boundary-retry" />
       </View>
     </View>
   );

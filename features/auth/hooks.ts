@@ -57,7 +57,7 @@ export function useSignUp(): {
       setStatus('success');
     } catch (error) {
       reportError(error, { where: 'auth/signup' });
-      setError({ code: 'auth/signup-failed', message: 'Création impossible. Réessayez.' });
+      setError({ code: 'auth/signup-failed', message: "Couldn't create your account. Try again." });
       setStatus('error');
     }
   }, []);
@@ -92,7 +92,7 @@ export function useLogin(): {
       setStatus('success');
     } catch (error) {
       reportError(error, { where: 'auth/signin' });
-      setError({ code: 'auth/signin-failed', message: 'Connexion impossible. Réessayez.' });
+      setError({ code: 'auth/signin-failed', message: "Couldn't log you in. Try again." });
       setStatus('error');
     }
   }, []);
@@ -131,7 +131,7 @@ export function useConfirmCode(): {
       setStatus('success');
     } catch (error) {
       reportError(error, { where: 'auth/otp-verify' });
-      setError({ code: 'auth/otp-verify-failed', message: 'Vérification impossible. Réessayez.' });
+      setError({ code: 'auth/otp-verify-failed', message: "Couldn't verify. Try again." });
       setStatus('error');
     } finally {
       busy.current = false;
@@ -182,7 +182,7 @@ export function useResendCode(): {
         start(OTP_COOLDOWN_SECONDS);
       } catch (error) {
         reportError(error, { where: 'auth/resend' });
-        setError({ code: 'auth/resend-failed', message: 'Envoi impossible. Réessayez.' });
+        setError({ code: 'auth/resend-failed', message: "Couldn't send. Try again." });
         setStatus('error');
       }
     },
@@ -212,7 +212,7 @@ export function useSignOut(): {
       }
     } catch (error) {
       reportError(error, { where: 'auth/signout' });
-      setError({ code: 'auth/signout-failed', message: 'Déconnexion impossible. Réessayez.' });
+      setError({ code: 'auth/signout-failed', message: "Couldn't log you out. Try again." });
       setStatus('error');
       return;
     }
@@ -257,7 +257,7 @@ export function usePendingEmail(enabled: boolean): {
         if (mounted) {
           setState({
             email: null,
-            error: { code: 'auth/pending-read-failed', message: 'Lecture impossible.' },
+            error: { code: 'auth/pending-read-failed', message: 'Unreadable.' },
           });
         }
       });

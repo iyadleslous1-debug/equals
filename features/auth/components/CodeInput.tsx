@@ -65,7 +65,7 @@ export function CodeInput({
         autoComplete="sms-otp"
         autoFocus={autoFocus}
         editable={editable}
-        accessibilityLabel="Code de confirmation à 6 chiffres"
+        accessibilityLabel="6-digit confirmation code"
         className="h-px w-px opacity-0"
       />
     </Pressable>

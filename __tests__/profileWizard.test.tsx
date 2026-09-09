@@ -87,7 +87,7 @@ describe('OnboardingScreen', () => {
     mockDraft = { step: 1, fields: { display_name: 'Amine' } };
     await render(<OnboardingScreen />);
     await screen.findByTestId('onboarding-photos-grid-add');
-    expect(screen.getByText('Étape 2/3')).toBeTruthy();
+    expect(screen.getByText('Step 2/3')).toBeTruthy();
   });
 
   it('finishes review by clearing the draft and leaving onboarding', async () => {
@@ -114,7 +114,7 @@ describe('OnboardingScreen', () => {
     await render(<OnboardingScreen />);
     await screen.findByTestId('onboarding-review-done');
     await fireEvent.press(screen.getByTestId('onboarding-review-done'));
-    await screen.findByText('Profil incomplet. Vérifiez vos infos et votre photo.');
+    await screen.findByText('Profile incomplete. Check your info and photo.');
     expect(mockReplace).not.toHaveBeenCalled();
   });
 });

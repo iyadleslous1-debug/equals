@@ -57,19 +57,19 @@ beforeEach(() => {
 describe('RequestsScreen', () => {
   it('shows loading, then both sections', async () => {
     const { rerender } = await render(<RequestsScreen />);
-    expect(screen.getByText('Chargement des demandes…')).toBeTruthy();
+    expect(screen.getByText('Loading requests…')).toBeTruthy();
 
     mockInbox = { isPending: false, data: { ok: true, data: [RECEIVED, SENT] } };
     await rerender(<RequestsScreen />);
-    expect(screen.getByText('Reçues')).toBeTruthy();
-    expect(screen.getByText('Envoyées')).toBeTruthy();
+    expect(screen.getByText('Received')).toBeTruthy();
+    expect(screen.getByText('Sent')).toBeTruthy();
     expect(screen.getByText('Mehdi Kaci, 27')).toBeTruthy();
-    expect(screen.getByText('Acceptée')).toBeTruthy();
+    expect(screen.getByText('Accepted')).toBeTruthy();
   });
 
   it('routes accept with the request id and surfaces errors', async () => {
     mockInbox = { isPending: false, data: { ok: true, data: [RECEIVED] } };
-    mockRespond = { acting: false, error: 'Acceptation impossible. Réessayez.' };
+    mockRespond = { acting: false, error: "Couldn't accept. Try again." };
     await render(<RequestsScreen />);
     await fireEvent.press(screen.getByTestId('requests-r1-accept'));
     expect(mockAccept).toHaveBeenCalledWith('r1');
@@ -86,8 +86,8 @@ describe('RequestsScreen', () => {
   it('shows empty states per section with refresh', async () => {
     mockInbox = { isPending: false, data: { ok: true, data: [] } };
     await render(<RequestsScreen />);
-    expect(screen.getByText('Aucune demande reçue')).toBeTruthy();
-    expect(screen.getByText('Aucune demande envoyée')).toBeTruthy();
+    expect(screen.getByText('No received requests')).toBeTruthy();
+    expect(screen.getByText('No sent requests')).toBeTruthy();
     await fireEvent.press(screen.getByTestId('requests-received-empty-action'));
     await fireEvent.press(screen.getByTestId('requests-sent-empty-action'));
     expect(mockRefetch).toHaveBeenCalledTimes(2);
@@ -97,7 +97,7 @@ describe('RequestsScreen', () => {
     mockInbox = { isPending: false, data: { ok: false, error: { message: 'Demandes illisibles.' } } };
     await render(<RequestsScreen />);
     expect(screen.getByText('Demandes illisibles.')).toBeTruthy();
-    await fireEvent.press(screen.getByText('Réessayer'));
+    await fireEvent.press(screen.getByText('Retry'));
     expect(mockRefetch).toHaveBeenCalledTimes(1);
   });
 });

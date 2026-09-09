@@ -13,4 +13,4 @@ Owns: conversation list, message threads, outbox, read receipts.
   a lock notice, send disabled with reason.
 - Query keys: `['chat', 'list']`, `['chat', 'thread', id]`. Sends invalidate
   both (list order/preview + thread).
-- Copy: French-simple (D1).
+- Copy: English, plain and direct.

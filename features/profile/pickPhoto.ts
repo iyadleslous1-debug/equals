@@ -6,7 +6,7 @@ import type { PickedPhoto } from './api';
 export async function pickSinglePhoto(): Promise<ApiResult<PickedPhoto | null>> {
   const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
   if (!permission.granted) {
-    return err('profile/photo-permission', 'Autorisez l’accès aux photos pour continuer.');
+    return err('profile/photo-permission', 'Allow photo access to continue.');
   }
   const result = await ImagePicker.launchImageLibraryAsync({
     mediaTypes: ['images'],
@@ -16,6 +16,6 @@ export async function pickSinglePhoto(): Promise<ApiResult<PickedPhoto | null>> 
   });
   if (result.canceled || result.assets.length === 0) return ok(null);
   const asset = result.assets[0];
-  if (!asset?.uri) return err('profile/photo-pick-failed', 'Lecture impossible. Réessayez.');
+  if (!asset?.uri) return err('profile/photo-pick-failed', "Couldn't read that photo. Try again.");
   return ok({ uri: asset.uri, mimeType: asset.mimeType, fileSize: asset.fileSize ?? undefined });
 }

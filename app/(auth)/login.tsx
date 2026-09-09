@@ -36,7 +36,7 @@ export default function LoginScreen(): React.JSX.Element {
 
   const submit = (): void => {
     const cleanEmail = normalizeEmail(email);
-    const passwordError = password === '' ? 'Entrez votre mot de passe.' : undefined;
+    const passwordError = password === '' ? 'Enter your password.' : undefined;
     setFields({
       email: cleanEmail.ok ? undefined : cleanEmail.error.message,
       password: passwordError,
@@ -64,8 +64,8 @@ export default function LoginScreen(): React.JSX.Element {
     <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} className="flex-1 bg-void">
       <ScrollView>
         <View className="grow justify-center px-4 py-8">
-          <Text className="text-2xl font-bold text-text">Se connecter</Text>
-          <Text className="mt-2 text-sm text-muted">Bon retour parmi nous.</Text>
+          <Text className="text-2xl font-bold text-text">Log in</Text>
+          <Text className="mt-2 text-sm text-muted">Welcome back.</Text>
           <View className="mt-6 gap-4">
             {summary.length > 0 ? (
               <FormErrorSummary errors={summary} onSelect={focusField} testID="login-errors" />
@@ -86,7 +86,7 @@ export default function LoginScreen(): React.JSX.Element {
             />
             <Input
               ref={passwordRef}
-              label="Mot de passe"
+              label="Password"
               value={password}
               onChangeText={setPassword}
               secureTextEntry
@@ -104,30 +104,25 @@ export default function LoginScreen(): React.JSX.Element {
             ) : null}
             {next !== null && next.kind === 'confirm' ? (
               <View className="rounded-xl border border-border bg-ink p-4">
-                <Text className="text-sm text-text">Confirmez votre email pour continuer.</Text>
+                <Text className="text-sm text-text">Confirm your email to continue.</Text>
                 <Pressable
                   testID="login-confirm-action"
                   onPress={() => router.replace({ pathname: '/confirm', params: { email: next.email } })}
                   accessibilityRole="link"
-                  accessibilityLabel="Entrer le code"
+                  accessibilityLabel="Enter the code"
                 >
-                  <Text className="mt-2 text-sm font-bold text-secondary">Entrer le code</Text>
+                  <Text className="mt-2 text-sm font-bold text-secondary">Enter the code</Text>
                 </Pressable>
               </View>
             ) : null}
-            <Button
-              title="Se connecter"
-              onPress={submit}
-              loading={status === 'pending'}
-              testID="login-submit"
-            />
+            <Button title="Log in" onPress={submit} loading={status === 'pending'} testID="login-submit" />
             <Pressable
               onPress={() => router.replace('/signup')}
               accessibilityRole="link"
-              accessibilityLabel="Créer un compte"
+              accessibilityLabel="Create an account"
             >
               <Text className="text-center text-sm text-muted">
-                Pas de compte ? <Text className="font-bold text-secondary">Créer un compte</Text>
+                No account yet? <Text className="font-bold text-secondary">Create one</Text>
               </Text>
             </Pressable>
           </View>

@@ -6,25 +6,25 @@ describe('mapDbError', () => {
   it('maps unique violations to a benign already-recorded state', () => {
     expect(mapDbError({ code: '23505', message: 'duplicate key' })).toEqual({
       code: 'discover/already-recorded',
-      message: 'Déjà enregistré.',
+      message: 'Already recorded.',
     });
   });
 
   it('maps trigger denials to a visible throttle state', () => {
     expect(mapDbError({ code: 'P0001', message: 'rate_limited: too many swipes' })).toEqual({
       code: 'discover/rate-limited',
-      message: 'Ralentissez un peu, puis réessayez.',
+      message: 'Slow down a bit, then try again.',
     });
   });
 
   it('falls back to a generic actionable message', () => {
     expect(mapDbError({ code: 'XX000', message: 'boom' })).toEqual({
       code: 'discover/action-failed',
-      message: 'Action impossible. Réessayez.',
+      message: 'Something went wrong. Try again.',
     });
     expect(mapDbError(null)).toEqual({
       code: 'discover/action-failed',
-      message: 'Action impossible. Réessayez.',
+      message: 'Something went wrong. Try again.',
     });
   });
 });

@@ -58,7 +58,7 @@ describe('SignupScreen', () => {
   it('offers sign-in instead when the email is registered', async () => {
     mockHookState = {
       status: 'error',
-      error: { code: 'auth/email-registered', message: 'Un compte existe déjà.' },
+      error: { code: 'auth/email-registered', message: 'Account already exists.' },
       needsConfirmation: false,
     };
     await render(<SignupScreen />);

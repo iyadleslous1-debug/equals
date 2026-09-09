@@ -11,4 +11,4 @@ Owns: received/sent lists, accept/decline actions, `RequestCard`.
 - Mirrored pendings are distinct rows by design (`friend_requests_pending_idx`
   covers same-direction only) — reconciled here, never in the deck.
 - Query keys: `['requests']`. Mutations invalidate it.
-- Copy: French-simple (D1).
+- Copy: English, plain and direct.

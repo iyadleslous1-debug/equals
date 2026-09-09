@@ -13,7 +13,7 @@ import { createLogger } from '@/lib/logger';
 import type { ProfileInput } from '@/lib/validation/schemas';
 
 const log = createLogger('onboarding');
-const TITLES = ['Votre profil', 'Vos photos', 'Vérification'];
+const TITLES = ['Your profile', 'Your photos', 'Review'];
 
 /** Server rows carry extra keys — pick only the wizard fields, never spread. */
 function toFields(profile: {
@@ -63,7 +63,7 @@ export default function OnboardingScreen(): React.JSX.Element {
     }
   }, [returningComplete, step, fields, router]);
 
-  if (step === null || profileQuery.isPending) return <LoadingState label="Chargement…" />;
+  if (step === null || profileQuery.isPending) return <LoadingState label="Loading…" />;
   if (loaded && !loaded.ok) {
     return (
       <View className="flex-1 bg-void">
@@ -94,7 +94,7 @@ export default function OnboardingScreen(): React.JSX.Element {
         persistDraft({ step: 1, fields: values });
         setStep(1);
       },
-      onError: () => setServerError('Sauvegarde impossible. Réessayez.'),
+      onError: () => setServerError("Couldn't save. Try again."),
     });
   };
 
@@ -113,7 +113,7 @@ export default function OnboardingScreen(): React.JSX.Element {
       const profile = data?.ok ? data.data.profile : null;
       const photos = data?.ok ? data.data.photos : [];
       if (profile === null || !isProfileComplete(profile, countVisiblePhotos(photos))) {
-        setServerError('Profil incomplet. Vérifiez vos infos et votre photo.');
+        setServerError('Profile incomplete. Check your info and photo.');
         return;
       }
       try {
@@ -131,7 +131,7 @@ export default function OnboardingScreen(): React.JSX.Element {
     <ScrollView className="bg-void">
       <View className="grow px-4 py-8">
         <Text testID="onboarding-step" className="text-xs font-bold text-muted">
-          Étape {step + 1}/3
+          Step {step + 1}/3
         </Text>
         <Text className="mt-1 text-2xl font-bold text-text">{TITLES[step] ?? ''}</Text>
         <View className="mt-6">

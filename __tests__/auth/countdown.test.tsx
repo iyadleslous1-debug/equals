@@ -5,8 +5,8 @@ jest.useFakeTimers();
 
 describe('resendLabel', () => {
   it('shows the countdown while waiting and the action when ready', async () => {
-    expect(resendLabel(47)).toBe('Renvoyer dans 47 s');
-    expect(resendLabel(0)).toBe('Renvoyer le code');
+    expect(resendLabel(47)).toBe('Resend in 47s');
+    expect(resendLabel(0)).toBe('Resend code');
   });
 });
 
@@ -14,7 +14,7 @@ describe('useResendCountdown', () => {
   it('starts cooling down immediately (no first-frame resend flash)', async () => {
     const { result } = await renderHook(() => useResendCountdown(60));
     expect(result.current.secondsLeft).toBe(60);
-    expect(result.current.label).toBe('Renvoyer dans 60 s');
+    expect(result.current.label).toBe('Resend in 60s');
   });
 
   it('ticks down each second and stops at zero', async () => {
@@ -39,6 +39,6 @@ describe('useResendCountdown', () => {
       result.current.start(42);
     });
     expect(result.current.secondsLeft).toBe(42);
-    expect(result.current.label).toBe('Renvoyer dans 42 s');
+    expect(result.current.label).toBe('Resend in 42s');
   });
 });

@@ -33,7 +33,7 @@ function Section({
         <EmptyState
           title={emptyTitle}
           message={emptyMessage}
-          actionTitle="Rafraîchir"
+          actionTitle="Refresh"
           onAction={onRefresh}
           testID={`${testID}-empty`}
         />
@@ -113,7 +113,7 @@ export default function RequestsScreen(): React.JSX.Element {
   const items = loaded?.ok ? loaded.data : [];
   const urls = useInboxPhotoUrls(items);
 
-  if (inboxQuery.isPending) return <LoadingState label="Chargement des demandes…" />;
+  if (inboxQuery.isPending) return <LoadingState label="Loading requests…" />;
   if (loaded && !loaded.ok) {
     return (
       <View className="flex-1 bg-void">
@@ -128,7 +128,7 @@ export default function RequestsScreen(): React.JSX.Element {
   return (
     <ScrollView className="bg-void">
       <View className="grow px-4 py-6">
-        <Text className="mb-2 text-2xl font-bold text-text">Demandes</Text>
+        <Text className="mb-2 text-2xl font-bold text-text">Requests</Text>
         {error ? (
           <Text
             testID="requests-action-error"
@@ -139,10 +139,10 @@ export default function RequestsScreen(): React.JSX.Element {
           </Text>
         ) : null}
         <Section
-          title="Reçues"
+          title="Received"
           items={received}
-          emptyTitle="Aucune demande reçue"
-          emptyMessage="Quand quelqu’un vous remarque, ce sera ici."
+          emptyTitle="No received requests"
+          emptyMessage="When someone notices you, they'll show up here."
           onRefresh={() => refetch()}
           testID="requests-received"
           renderItem={(item) => (
@@ -157,10 +157,10 @@ export default function RequestsScreen(): React.JSX.Element {
           )}
         />
         <Section
-          title="Envoyées"
+          title="Sent"
           items={sent}
-          emptyTitle="Aucune demande envoyée"
-          emptyMessage="Les profils que vous remarquez apparaissent ici."
+          emptyTitle="No sent requests"
+          emptyMessage="People you reach out to will appear here."
           onRefresh={() => refetch()}
           testID="requests-sent"
           renderItem={(item) => (

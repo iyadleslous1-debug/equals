@@ -72,7 +72,7 @@ describe('useSafety', () => {
       await result.current.report('u-9', 'Spam', '');
     });
     expect(result.current.status).toBe('error');
-    expect(result.current.error).toBe('Signalement impossible. Réessayez.');
+    expect(result.current.error).toBe("Couldn't send report. Try again.");
   });
 });
 

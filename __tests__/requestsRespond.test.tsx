@@ -36,7 +36,7 @@ describe('useRespond throw-path (audit S3)', () => {
     await act(async () => {
       result.current.accept('r1');
     });
-    expect(result.current.error).toBe('Action impossible. Réessayez.');
+    expect(result.current.error).toBe('Something went wrong. Try again.');
     expect(result.current.acting).toBe(false);
   });
 
@@ -46,7 +46,7 @@ describe('useRespond throw-path (audit S3)', () => {
     await act(async () => {
       result.current.decline('r1');
     });
-    expect(result.current.error).toBe('Action impossible. Réessayez.');
+    expect(result.current.error).toBe('Something went wrong. Try again.');
     expect(result.current.acting).toBe(false);
     expect(result.current.notice).toBeNull();
   });

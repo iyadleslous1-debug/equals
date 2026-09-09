@@ -48,7 +48,7 @@ export function isConversationId(value: string): boolean {
 
 function assertConversationId(conversationId: string): ApiResult<void> {
   if (!isConversationId(conversationId)) {
-    return err('chat/not-found', 'Conversation introuvable.');
+    return err('chat/not-found', 'Conversation not found.');
   }
   return ok(undefined);
 }
@@ -60,7 +60,7 @@ function assertConversationId(conversationId: string): ApiResult<void> {
 export async function listConversations(): Promise<ApiResult<ConversationPreview[]>> {
   const { data, error } = await supabase.rpc('get_conversation_previews');
   if (error !== null || data === null) {
-    return err('chat/list-failed', 'Conversations illisibles. Réessayez.', toAppError(error));
+    return err('chat/list-failed', "Couldn't load conversations. Try again.", toAppError(error));
   }
   return ok(
     (data as PreviewRow[]).map((row) => ({
@@ -103,7 +103,7 @@ export async function fetchMessages(
   }
   const { data, error } = await query;
   if (error !== null || data === null) {
-    return err('chat/messages-failed', 'Messages illisibles. Réessayez.', toAppError(error));
+    return err('chat/messages-failed', "Couldn't load messages. Try again.", toAppError(error));
   }
   return ok(data);
 }
@@ -125,12 +125,12 @@ export async function sendMessage(conversationId: string, rawText: string): Prom
     // Machine-map on code first (P0002 lock vs P0001 rate); message prefix is
     // the fallback, never a bare substring.
     if (error?.code === 'P0002' || /^locked:/i.test(error?.message ?? '')) {
-      return err('chat/locked', 'Conversation verrouillée.', toAppError(error));
+      return err('chat/locked', 'Conversation locked.', toAppError(error));
     }
     if (error?.code === 'P0001' || /^rate_limited:/i.test(error?.message ?? '')) {
-      return err('chat/rate-limited', 'Ralentissez un peu, puis réessayez.', toAppError(error));
+      return err('chat/rate-limited', 'Slow down a bit, then try again.', toAppError(error));
     }
-    return err('chat/send-failed', 'Envoi impossible. Réessayez.', toAppError(error));
+    return err('chat/send-failed', "Couldn't send. Try again.", toAppError(error));
   }
   return ok(data);
 }
@@ -148,7 +148,7 @@ export async function markRead(conversationId: string): Promise<ApiResult<void>>
     .neq('sender_id', user.data)
     .is('read_at', null);
   if (error !== null) {
-    return err('chat/read-failed', 'Lecture non enregistrée.', toAppError(error));
+    return err('chat/read-failed', 'Read receipt not saved.', toAppError(error));
   }
   return ok(undefined);
 }

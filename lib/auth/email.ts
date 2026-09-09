@@ -45,7 +45,11 @@ export async function signUpWithEmail(
     log.info('Signup requested.', { needsConfirmation });
     return ok({ needsConfirmation });
   } catch (error) {
-    return err('auth/signup-failed', 'Création impossible. Vérifiez votre connexion.', toAppError(error));
+    return err(
+      'auth/signup-failed',
+      "Couldn't create your account. Check your connection.",
+      toAppError(error),
+    );
   }
 }
 
@@ -53,7 +57,7 @@ export async function signUpWithEmail(
 export async function signInWithEmail(rawEmail: string, password: string): Promise<ApiResult<Session>> {
   const email = normalizeEmail(rawEmail);
   if (!email.ok) return email;
-  if (password === '') return err('auth/password-empty', 'Entrez votre mot de passe.');
+  if (password === '') return err('auth/password-empty', 'Enter your password.');
 
   try {
     const { data, error } = await timed('auth.signin', () =>
@@ -66,7 +70,7 @@ export async function signInWithEmail(rawEmail: string, password: string): Promi
     log.info('Signed in with email.');
     return ok(data.session);
   } catch (error) {
-    return err('auth/signin-failed', 'Connexion impossible. Vérifiez votre connexion.', toAppError(error));
+    return err('auth/signin-failed', "Couldn't log you in. Check your connection.", toAppError(error));
   }
 }
 
@@ -75,7 +79,7 @@ export async function verifyEmailOtp(rawEmail: string, token: string): Promise<A
   const email = normalizeEmail(rawEmail);
   if (!email.ok) return email;
   const code = token.trim();
-  if (!/^\d{6}$/.test(code)) return err('auth/otp-invalid', 'Entrez le code à 6 chiffres reçu par email.');
+  if (!/^\d{6}$/.test(code)) return err('auth/otp-invalid', 'Enter the 6-digit code from your email.');
 
   try {
     const { data, error } = await supabase.auth.verifyOtp({
@@ -90,11 +94,7 @@ export async function verifyEmailOtp(rawEmail: string, token: string): Promise<A
     log.info('Email confirmed — session established.');
     return ok(data.session);
   } catch (error) {
-    return err(
-      'auth/otp-verify-failed',
-      'Vérification impossible. Vérifiez votre connexion.',
-      toAppError(error),
-    );
+    return err('auth/otp-verify-failed', "Couldn't verify. Check your connection.", toAppError(error));
   }
 }
 
@@ -105,7 +105,7 @@ export async function resendSignupConfirmation(rawEmail: string): Promise<ApiRes
 
   const allowance = consumeOtpAllowance(`email:${email.data}`);
   if (!allowance.allowed) {
-    return err('auth/resend-throttled', `Trop d'emails. Réessayez dans ${allowance.retryAfterSec} s.`, {
+    return err('auth/resend-throttled', `Too many emails. Try again in ${allowance.retryAfterSec}s.`, {
       retryAfterSec: allowance.retryAfterSec,
     });
   }
@@ -128,7 +128,7 @@ function friendly(raw: string, fallbackCode: string): { code: string; message: s
   if (/already registered|already exists|duplicate/i.test(raw)) {
     return {
       code: 'auth/email-registered',
-      message: 'Un compte existe déjà avec cet email. Connectez-vous.',
+      message: 'An account already exists with this email. Log in.',
     };
   }
   if (/invalid login|invalid credentials/i.test(raw)) {
@@ -137,17 +137,17 @@ function friendly(raw: string, fallbackCode: string): { code: string; message: s
   if (/email not confirmed|not confirmed/i.test(raw)) {
     return {
       code: 'auth/email-not-confirmed',
-      message: 'Confirmez votre email pour continuer. Le code est dans votre boîte mail.',
+      message: 'Confirm your email to continue. The code is in your inbox.',
     };
   }
   if (/rate limit/i.test(raw)) {
     return { code: 'auth/rate-limited', message: 'Trop de tentatives. Attendez quelques minutes.' };
   }
   if (/expired|invalid.*token|invalid.*code/i.test(raw)) {
-    return { code: 'auth/otp-invalid', message: 'Code incorrect ou expiré. Demandez-en un nouveau.' };
+    return { code: 'auth/otp-invalid', message: 'Incorrect or expired code. Request a new one.' };
   }
   if (/password/i.test(raw) && /weak|short|length/i.test(raw)) {
-    return { code: fallbackCode, message: 'Mot de passe trop faible. Utilisez au moins 8 caractères.' };
+    return { code: fallbackCode, message: 'Password too weak. Use at least 8 characters.' };
   }
-  return { code: fallbackCode, message: 'Une erreur est survenue. Réessayez.' };
+  return { code: fallbackCode, message: 'Something went wrong. Try again.' };
 }

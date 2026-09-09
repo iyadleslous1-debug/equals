@@ -13,18 +13,18 @@ export function BlockConfirm({ userName, onConfirm, onCancel, pending = false, t
   const t = (id: string): string => (testID ? `${testID}-${id}` : '');
   return (
     <View testID={testID} className="gap-3">
-      <Text className="text-lg font-bold text-text">Bloquer {userName} ?</Text>
+      <Text className="text-lg font-bold text-text">Block {userName}?</Text>
       <Text className="text-sm text-muted">
-        {userName} ne pourra plus vous voir ni vous écrire, et vos conversations seront verrouillées. Vous
-        pourrez lever le blocage plus tard.
+        {userName} won’t be able to see you or message you anymore, and your conversations will be locked. You
+        can unblock them later.
       </Text>
       <View className="flex-row gap-2">
         <View className="flex-1">
-          <Button title="Annuler" onPress={onCancel} variant="secondary" testID={t('cancel')} />
+          <Button title="Cancel" onPress={onCancel} variant="secondary" testID={t('cancel')} />
         </View>
         <View className="flex-1">
           <Button
-            title="Bloquer"
+            title="Block"
             onPress={onConfirm}
             loading={pending}
             variant="destructive"

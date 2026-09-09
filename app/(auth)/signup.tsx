@@ -61,8 +61,8 @@ export default function SignupScreen(): React.JSX.Element {
     <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} className="flex-1 bg-void">
       <ScrollView>
         <View className="grow justify-center px-4 py-8">
-          <Text className="text-2xl font-bold text-text">Créer un compte</Text>
-          <Text className="mt-2 text-sm text-muted">Rejoignez DZ Connect en une minute.</Text>
+          <Text className="text-2xl font-bold text-text">Create an account</Text>
+          <Text className="mt-2 text-sm text-muted">Meet people for friendship or romance in a minute.</Text>
           <View className="mt-6 gap-4">
             {summary.length > 0 ? (
               <FormErrorSummary errors={summary} onSelect={focusField} testID="signup-errors" />
@@ -83,8 +83,8 @@ export default function SignupScreen(): React.JSX.Element {
             />
             <Input
               ref={passwordRef}
-              label="Mot de passe"
-              hint="8 caractères minimum"
+              label="Password"
+              hint="8 characters minimum"
               value={password}
               onChangeText={setPassword}
               secureTextEntry
@@ -111,14 +111,14 @@ export default function SignupScreen(): React.JSX.Element {
                   testID="signup-signin-link"
                   onPress={() => router.replace('/login')}
                   accessibilityRole="link"
-                  accessibilityLabel="Se connecter"
+                  accessibilityLabel="Log in"
                 >
-                  <Text className="mt-2 text-sm font-bold text-secondary">Se connecter</Text>
+                  <Text className="mt-2 text-sm font-bold text-secondary">Log in</Text>
                 </Pressable>
               </View>
             ) : null}
             <Button
-              title="Créer mon compte"
+              title="Create my account"
               onPress={submit}
               loading={status === 'pending'}
               testID="signup-submit"
@@ -126,10 +126,10 @@ export default function SignupScreen(): React.JSX.Element {
             <Pressable
               onPress={() => router.replace('/login')}
               accessibilityRole="link"
-              accessibilityLabel="Se connecter"
+              accessibilityLabel="Log in"
             >
               <Text className="text-center text-sm text-muted">
-                Déjà un compte ? <Text className="font-bold text-secondary">Se connecter</Text>
+                Already have an account? <Text className="font-bold text-secondary">Log in</Text>
               </Text>
             </Pressable>
           </View>

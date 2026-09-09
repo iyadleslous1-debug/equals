@@ -28,7 +28,7 @@ describe('signInNextStep', () => {
 
 describe('isAlreadyRegistered', () => {
   it('detects the already-registered signup error only', () => {
-    expect(isAlreadyRegistered(err('auth/email-registered', 'Un compte existe déjà.'))).toBe(true);
+    expect(isAlreadyRegistered(err('auth/email-registered', 'Account already exists.'))).toBe(true);
     expect(isAlreadyRegistered(err('auth/signup-failed', 'Trop de tentatives.'))).toBe(false);
   });
 });

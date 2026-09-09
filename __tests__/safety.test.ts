@@ -13,18 +13,18 @@ describe('mapSafetyError', () => {
   it('treats double-block as idempotent success', () => {
     expect(mapSafetyError({ code: '23505', message: 'duplicate' })).toEqual({
       code: 'safety/already-blocked',
-      message: 'Déjà bloqué.',
+      message: 'Already blocked.',
     });
   });
 
   it('falls back to an actionable message', () => {
     expect(mapSafetyError({ code: 'XX000', message: 'boom' })).toEqual({
       code: 'safety/action-failed',
-      message: 'Action impossible. Réessayez.',
+      message: 'Something went wrong. Try again.',
     });
     expect(mapSafetyError(null)).toEqual({
       code: 'safety/action-failed',
-      message: 'Action impossible. Réessayez.',
+      message: 'Something went wrong. Try again.',
     });
   });
 });

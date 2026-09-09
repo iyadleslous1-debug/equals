@@ -65,7 +65,7 @@ export function useSafety(): {
     (reportedId: string, reason: string, description?: string): Promise<boolean> => {
       reset();
       return run(() =>
-        settle(submitReport(reportedId, reason, description), false, 'Signalement impossible. Réessayez.'),
+        settle(submitReport(reportedId, reason, description), false, "Couldn't send report. Try again."),
       ).then((done) => done ?? false);
     },
     [run, settle, reset],
@@ -74,7 +74,7 @@ export function useSafety(): {
   const block = useCallback(
     (targetUserId: string): Promise<boolean> => {
       reset();
-      return run(() => settle(blockUser(targetUserId), true, 'Blocage impossible. Réessayez.')).then(
+      return run(() => settle(blockUser(targetUserId), true, "Couldn't block. Try again.")).then(
         (done) => done ?? false,
       );
     },
@@ -84,7 +84,7 @@ export function useSafety(): {
   const unblock = useCallback(
     (targetUserId: string): Promise<boolean> => {
       reset();
-      return run(() => settle(unblockUser(targetUserId), true, 'Déblocage impossible. Réessayez.')).then(
+      return run(() => settle(unblockUser(targetUserId), true, "Couldn't unblock. Try again.")).then(
         (done) => done ?? false,
       );
     },

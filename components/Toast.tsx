@@ -65,9 +65,9 @@ export function ToastProvider({ children }: { children: ReactNode }): React.JSX.
               onPress={dismiss}
               hitSlop={HIT_SLOP.slop}
               accessibilityRole="button"
-              accessibilityLabel="Fermer la notification"
+              accessibilityLabel="Dismiss notification"
             >
-              <Text className="ml-3 text-sm font-bold text-secondary">Fermer</Text>
+              <Text className="ml-3 text-sm font-bold text-secondary">Close</Text>
             </Pressable>
           </View>
         </View>

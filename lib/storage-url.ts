@@ -31,7 +31,7 @@ export async function resolveStorageUrl(
   if (isSafeExternalUrl(pathOrUrl, trustedPhotoHosts())) return ok(pathOrUrl);
   const { data, error } = await supabase.storage.from(bucket).createSignedUrl(pathOrUrl, ttlSec);
   if (error !== null || data === null) {
-    return err('storage/url-failed', 'Photo illisible. Réessayez.', toAppError(error));
+    return err('storage/url-failed', "Couldn't load photo. Try again.", toAppError(error));
   }
   return ok(data.signedUrl);
 }

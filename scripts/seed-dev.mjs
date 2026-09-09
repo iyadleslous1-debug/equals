@@ -41,14 +41,14 @@ const FIRST = ['Amine', 'Yasmine', 'Riyad', 'Nourhane', 'Mehdi', 'Sara', 'Walid'
 const LAST = ['Benali', 'Haddad', 'Boumediene', 'Ziani', 'Kaci', 'Mansouri', 'Belkacem', 'Cherif'];
 const WILAYAS = [16, 16, 31, 25, 19, 23, 9, 6];
 const BIOS = [
-  'Algerois, café crème enthusiast. Weekends are for Sablettes walks.',
-  'Oranaise 🌊 — foot, raï old-school et les couchers de soleil de Santa Cruz.',
-  'Constantinois, ponts suspendus enjoyer. Je cuisine un bon chakhchoukha.',
-  'Sétifienne, entrepreneuse le jour, cinéphile la nuit.',
-  'Blidéen, amateur de randos à Chréa. Atlas Mitidjien every Friday.',
-  'Annabie, mer, théatre et bons plans bouffe.',
-  'Kabyle de Tizi, guitare et montagne. Asaru ⵣ',
-  'DZ returnee — rediscovering home one wilaya at a time.',
+  'Coffee first, always. Weekend hiker and amateur photographer.',
+  'Ocean person 🌊 — football, old-school playlists and golden-hour walks.',
+  'Bridge views and home cooking. I make a great stew.',
+  'Entrepreneur by day, film buff by night.',
+  'Trail runner. Mountains every Friday, no excuses.',
+  'Sea, theatre and hunting down the best food spots.',
+  'Guitar and highlands. Here for good conversation.',
+  'New in town — rediscovering the city one neighborhood at a time.',
 ];
 
 const fail = (where, error) => {
@@ -154,9 +154,9 @@ const say = async (convoId, from, text) => {
   if (error) fail('message', error);
 };
 const c1 = await convo(0, 1);
-await say(c1, 0, 'Salam Yasmine ! On dirait qu’on traîne aux mêmes cafés à Alger 👀');
-await say(c1, 1, 'Haha possible ! Tu connais celui près de la Grande Poste ?');
-await say(c1, 0, 'Oui — meilleur café crème du centre, sans débat.');
+  await say(c1, 0, 'Hey Yasmine! Looks like we hang out at the same cafes 👀');
+  await say(c1, 1, 'Haha maybe! Do you know the one near the central post office?');
+  await say(c1, 0, 'Yes — best flat white downtown, no contest.');
 const c2 = await convo(2, 3);
 await say(c2, 2, 'Azul ! Tu randonnes souvent vers Yakouren ?');
 await say(c2, 3, 'Azul Riyad ! Oui, presque chaque mois. On s’organise une sortie ?');

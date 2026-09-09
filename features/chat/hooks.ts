@@ -204,7 +204,7 @@ export function useSendMessage(conversationId: string): {
   const send = useCallback(
     async (text: string) => {
       if (busy.current) {
-        return { ok: false as const, error: { code: 'chat/busy', message: 'Envoi en cours.' } };
+        return { ok: false as const, error: { code: 'chat/busy', message: 'Sending…' } };
       }
       busy.current = true;
       setSending(true);
@@ -221,7 +221,7 @@ export function useSendMessage(conversationId: string): {
       } catch {
         const fallback = {
           ok: false as const,
-          error: { code: 'chat/send-failed', message: 'Envoi impossible. Réessayez.' },
+          error: { code: 'chat/send-failed', message: "Couldn't send. Try again." },
         };
         setError(fallback.error.message);
         return fallback;

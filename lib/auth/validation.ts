@@ -9,10 +9,10 @@ export const MIN_PASSWORD_LENGTH = 8;
 /** Trim + lowercase + sanity-check an email address. */
 export function normalizeEmail(input: string): ApiResult<string> {
   const email = input.trim().toLowerCase();
-  if (email === '') return err('auth/email-empty', 'Entrez votre adresse email.');
+  if (email === '') return err('auth/email-empty', 'Enter your email address.');
   // Pragmatic RFC-lite check: local@domain.tld, no spaces. Supabase re-validates server-side.
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) {
-    return err('auth/email-invalid', 'Cet email semble invalide. Vérifiez-le.');
+    return err('auth/email-invalid', 'That email looks invalid. Check it.');
   }
   if (email.length > 254) return err('auth/email-invalid', 'Cet email est trop long.');
   return ok(email);
@@ -21,10 +21,7 @@ export function normalizeEmail(input: string): ApiResult<string> {
 /** Enforce the client-side password floor (Supabase enforces its own too). */
 export function validatePassword(password: string): ApiResult<string> {
   if (password.length < MIN_PASSWORD_LENGTH) {
-    return err(
-      'auth/password-weak',
-      `Utilisez au moins ${MIN_PASSWORD_LENGTH} caractères pour votre mot de passe.`,
-    );
+    return err('auth/password-weak', `Use at least ${MIN_PASSWORD_LENGTH} characters for your password.`);
   }
   return ok(password);
 }

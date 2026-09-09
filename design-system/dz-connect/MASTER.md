@@ -54,12 +54,12 @@ Rules: semantic tokens only — never hardcode hex in screens. Disabled = `faint
 
 ---
 
-## 2. Conservative-market & trust rules (product-specific, non-optional)
+## 2. Trust rules (product-specific, non-optional)
 
-1. **Respectful copy only** — no suggestive language, no innuendo in empty-states, errors, or prompts. French-simple default (decision D1, confirmable), short sentences, no idioms that break translation.
+1. **Direct, honest copy** — the app is openly for friendship or romance and may say so. English default, short sentences, no idioms that break translation.
 2. **User controls exposure** — card shows only what the user put on their profile; `is_card_photo` is their explicit choice. Never auto-promote a photo.
 3. **No gendered assumptions** in copy or flows (matching is user-driven; UI never presumes who sees whom).
-4. **Safety is first-class UI** — report/block entry points reachable from every profile/card/conversation; confirmations use plain language ("Bloquer Amine ? Il ne pourra plus vous voir ni vous écrire.").
+4. **Safety is first-class UI** — report/block entry points reachable from every profile/card/conversation; confirmations use plain language ("Block Amine? They won't be able to see you or message you.").
 5. **"Under review" transparency** — pending-moderation photos show their state to the owner; nothing safety-relevant is hidden silently.
 6. **Wilaya, not location** — never render maps, distances, or anything implying precise location.
 
@@ -72,10 +72,10 @@ Rules: semantic tokens only — never hardcode hex in screens. Disabled = `faint
 - **Realtime-sensitive screens** (requests/chat) refetch on foreground (`AppState`) at minimum; full Realtime decision lands in Piece 5 plan.
 - **Breakpoints:** 375 (small phone, primary target) · 768 (tablet portrait: gutters 24, cap content 640 centered) · 1024/1440 (landscape/tablet: two-pane where it aids chat/requests, never stretched edge-to-edge text).
 
-## 4. Copy & i18n posture (MVP1)
+## 4. Copy & i18n posture
 
-- UI strings live next to features (no scattered literals); French-simple default pending D1 confirmation.
-- Bios/user content render verbatim (Arabic/French/Darja) with system fonts; `numberOfLines` guards everywhere.
+- UI strings live next to features (no scattered literals); English default.
+- Bios/user content render verbatim in any language with system fonts; `numberOfLines` guards everywhere.
 - Numbers/dates: wilaya shown as `Wilaya 16 — Alger` via `constants/wilayas.ts` (never bare codes in UI).
 
 ---
@@ -87,7 +87,7 @@ Rules: semantic tokens only — never hardcode hex in screens. Disabled = `faint
 **Contrast (dark):** body ≥4.5:1 · dividers/borders visible · scrim measured on real background.
 **Layout:** safe areas (notch/gesture bar) · content not hidden behind fixed bars · 375 + landscape checked · gutters adapt ≥768 · 8dp rhythm.
 **Accessibility:** decorative icons hidden from screen reader · icon buttons named with state · fields labeled with inline errors + submit summary focus · color never the sole signal · reduced-motion + largest Dynamic Type checked · auth allows paste + password managers.
-**Product:** loading/empty/error states real · RLS-safe queries only · conservative-market copy · report/block reachable where a stranger is shown.
+**Product:** loading/empty/error states real · RLS-safe queries only · direct English copy · report/block reachable where a stranger is shown.
 
 ## Component-states matrix (every component × applicable states)
 

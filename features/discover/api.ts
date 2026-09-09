@@ -24,19 +24,19 @@ export interface DbError {
  */
 export function mapDbError(error: DbError | null): { code: string; message: string } {
   if (error?.code === '23505') {
-    return { code: 'discover/already-recorded', message: 'Déjà enregistré.' };
+    return { code: 'discover/already-recorded', message: 'Already recorded.' };
   }
   if (typeof error?.message === 'string' && /rate_limited/i.test(error.message)) {
-    return { code: 'discover/rate-limited', message: 'Ralentissez un peu, puis réessayez.' };
+    return { code: 'discover/rate-limited', message: 'Slow down a bit, then try again.' };
   }
-  return { code: 'discover/action-failed', message: 'Action impossible. Réessayez.' };
+  return { code: 'discover/action-failed', message: 'Something went wrong. Try again.' };
 }
 
 /** Deck for the signed-in viewer — exclusions enforced in SQL, not in app code. */
 export async function fetchDeck(limit = 20): Promise<ApiResult<DeckProfile[]>> {
   const { data, error } = await supabase.rpc('get_discovery_candidates', { p_limit: limit });
   if (error !== null || data === null) {
-    return err('discover/deck-failed', 'Découverte impossible. Réessayez.', toAppError(error));
+    return err('discover/deck-failed', "Couldn't load discovery. Try again.", toAppError(error));
   }
   return ok(data as DeckProfile[]);
 }

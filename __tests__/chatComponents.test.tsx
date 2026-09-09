@@ -9,7 +9,7 @@ describe('ConversationRow', () => {
     await render(
       <ConversationRow
         name="Yasmine Haddad"
-        preview="Tu connais celui près de la Grande Poste ?"
+        preview="Do you know the one near the central post office?"
         time="12:04"
         unread={3}
         onPress={onPress}
@@ -17,7 +17,7 @@ describe('ConversationRow', () => {
       />,
     );
     expect(screen.getByText('Yasmine Haddad')).toBeTruthy();
-    expect(screen.getByText('Tu connais celui près de la Grande Poste ?')).toBeTruthy();
+    expect(screen.getByText('Do you know the one near the central post office?')).toBeTruthy();
     expect(screen.getByTestId('convo-unread')).toBeTruthy();
     await fireEvent.press(screen.getByTestId('convo'));
     expect(onPress).toHaveBeenCalledTimes(1);
@@ -34,7 +34,7 @@ describe('ConversationRow', () => {
         testID="convo"
       />,
     );
-    expect(screen.getByText('Utilisateur indisponible')).toBeTruthy();
+    expect(screen.getByText('User unavailable')).toBeTruthy();
     expect(() => screen.getByTestId('convo-unread')).toThrow();
   });
 });
@@ -47,7 +47,7 @@ describe('MessageBubble', () => {
     const { unmount } = await render(
       <MessageBubble text="Salam" mine={false} failed onRetry={onRetry} testID="msg2" />,
     );
-    expect(screen.getByRole('button', { name: 'Échec — réessayer' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Failed — retry' })).toBeTruthy();
     await fireEvent.press(screen.getByTestId('msg2-retry'));
     expect(onRetry).toHaveBeenCalledTimes(1);
     await unmount();
@@ -69,7 +69,7 @@ describe('ChatInput', () => {
     await unmount();
 
     await render(<ChatInput onSend={() => undefined} disabled={false} locked testID="chat-input" />);
-    expect(screen.getByText('Conversation verrouillée.')).toBeTruthy();
+    expect(screen.getByText('Conversation locked.')).toBeTruthy();
     expect(() => screen.getByTestId('chat-input-send')).toThrow();
   });
 });

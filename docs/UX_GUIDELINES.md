@@ -37,8 +37,8 @@ mystery-disabled button. Auth allows paste + password managers.
 - First-time vs returning: onboarding resumes mid-wizard; authed users land
   on Discover, never on auth.
 
-## Conservative-market copy
+## Open, direct copy
 
-French-simple default (D1). Short sentences, no idioms, no suggestive copy,
-no gendered assumptions, wilaya as "Wilaya 16 — Alger" (never bare codes,
-never maps/distances).
+English default. Short sentences, no idioms, no gendered assumptions. The app
+is openly for friendship or romance — copy may say so directly. Location
+renders as "Wilaya 16 · Alger" (never bare codes, never maps/distances).

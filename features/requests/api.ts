@@ -43,7 +43,7 @@ interface InboxRow {
 export async function fetchInbox(): Promise<ApiResult<InboxItem[]>> {
   const { data, error } = await supabase.rpc('get_request_inbox');
   if (error !== null || data === null) {
-    return err('requests/inbox-failed', 'Demandes illisibles. Réessayez.', toAppError(error));
+    return err('requests/inbox-failed', "Couldn't load requests. Try again.", toAppError(error));
   }
   const items: InboxItem[] = [];
   for (const row of data as InboxRow[]) {
@@ -86,7 +86,7 @@ export async function acceptRequest(requestId: string): Promise<ApiResult<{ conv
     .eq('id', requestId)
     .single();
   if (readError !== null || row === null) {
-    return err('requests/not-found', 'Demande introuvable.', toAppError(readError));
+    return err('requests/not-found', 'Request not found.', toAppError(readError));
   }
   const user = await getCurrentUserId();
   if (!user.ok) return user;
@@ -100,7 +100,7 @@ export async function acceptRequest(requestId: string): Promise<ApiResult<{ conv
 
   const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
   if (!UUID_RE.test(row.sender_id) || !UUID_RE.test(row.receiver_id)) {
-    return err('requests/not-found', 'Demande introuvable.');
+    return err('requests/not-found', 'Request not found.');
   }
   const { data: flipped, error: acceptError } = await supabase
     .from('friend_requests')
@@ -116,7 +116,7 @@ export async function acceptRequest(requestId: string): Promise<ApiResult<{ conv
     if (acceptError.code === '25001') {
       return err('requests/not-pending', 'Cette demande n’est plus en attente.');
     }
-    return err('requests/accept-failed', 'Acceptation impossible. Réessayez.', toAppError(acceptError));
+    return err('requests/accept-failed', "Couldn't accept. Try again.", toAppError(acceptError));
   }
   if ((flipped ?? []).length === 0) {
     // Nothing was pending anymore (declined/canceled between read and write —
@@ -163,7 +163,7 @@ async function findConversation(a: string, b: string): Promise<ApiResult<string>
         .single();
       if (retry.data) return ok(retry.data.id);
     }
-    return err('requests/convo-failed', 'Conversation impossible. Réessayez.', toAppError(error));
+    return err('requests/convo-failed', "Couldn't open conversation. Try again.", toAppError(error));
   }
   return ok(created.id);
 }
@@ -179,7 +179,7 @@ export async function declineRequest(requestId: string): Promise<ApiResult<void>
     .eq('receiver_id', user.data)
     .eq('status', 'pending');
   if (error !== null) {
-    return err('requests/decline-failed', 'Refus impossible. Réessayez.', toAppError(error));
+    return err('requests/decline-failed', "Couldn't decline. Try again.", toAppError(error));
   }
   return ok(undefined);
 }

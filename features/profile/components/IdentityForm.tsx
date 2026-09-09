@@ -71,7 +71,7 @@ export function IdentityForm({ initial, serverError, pending, onSubmit, testID }
       ) : null}
       <Input
         ref={nameRef}
-        label="Nom d’affichage"
+        label="Display name"
         value={name}
         onChangeText={setName}
         autoComplete="name"
@@ -82,7 +82,7 @@ export function IdentityForm({ initial, serverError, pending, onSubmit, testID }
       />
       <Input
         ref={ageRef}
-        label="Âge"
+        label="Age"
         value={age}
         onChangeText={setAge}
         keyboardType="number-pad"
@@ -91,16 +91,16 @@ export function IdentityForm({ initial, serverError, pending, onSubmit, testID }
         testID={t('age')}
       />
       <View>
-        <Text className="mb-2 text-sm font-semibold text-text">Genre</Text>
+        <Text className="mb-2 text-sm font-semibold text-text">Gender</Text>
         <View className="flex-row gap-2">
           <Chip
-            label="Homme"
+            label="Man"
             selected={gender === 'male'}
             onPress={() => setGender('male')}
             testID={t('gender-male')}
           />
           <Chip
-            label="Femme"
+            label="Woman"
             selected={gender === 'female'}
             onPress={() => setGender('female')}
             testID={t('gender-female')}
@@ -123,7 +123,7 @@ export function IdentityForm({ initial, serverError, pending, onSubmit, testID }
       </View>
       <Input
         ref={bioRef}
-        label="Bio (optionnel)"
+        label="Bio (optional)"
         value={bio}
         onChangeText={setBio}
         multiline
@@ -136,7 +136,7 @@ export function IdentityForm({ initial, serverError, pending, onSubmit, testID }
           {serverError}
         </Text>
       ) : null}
-      <Button title="Continuer" onPress={submit} loading={pending} testID={t('submit')} />
+      <Button title="Continue" onPress={submit} loading={pending} testID={t('submit')} />
     </View>
   );
 }

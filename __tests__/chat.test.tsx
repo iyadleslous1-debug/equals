@@ -16,7 +16,7 @@ describe('isConversationId', () => {
 
 describe('previewText', () => {
   it('truncates long previews with an ellipsis', () => {
-    expect(previewText('Salam, ça va ?', 10)).toBe('Salam, ça…');
+    expect(previewText('Hello, how are you?', 10)).toBe('Hello, ho…');
     expect(previewText('Court', 10)).toBe('Court');
   });
 });
@@ -35,12 +35,12 @@ describe('useOutbox', () => {
     expect(result.current.pending(first)).toBe(false);
     let failedId = '';
     await act(async () => {
-      failedId = result.current.queue('Deuxième');
+      failedId = result.current.queue('Second');
     });
     await act(async () => {
       result.current.markFailed(failedId);
     });
-    expect(result.current.failed().map((m) => m.text)).toEqual(['Deuxième']);
+    expect(result.current.failed().map((m) => m.text)).toEqual(['Second']);
     await act(async () => {
       result.current.retry(failedId);
     });

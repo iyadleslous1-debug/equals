@@ -58,7 +58,7 @@ beforeEach(() => {
 describe('DiscoverScreen', () => {
   it('shows loading, then the top card', async () => {
     const { rerender } = await render(<DiscoverScreen />);
-    expect(screen.getByText('Chargement des profils…')).toBeTruthy();
+    expect(screen.getByText('Loading profiles…')).toBeTruthy();
 
     mockDeckQuery = { isPending: false, data: { ok: true, data: [PROFILE] } };
     await rerender(<DiscoverScreen />);
@@ -67,7 +67,7 @@ describe('DiscoverScreen', () => {
 
   it('routes actions with the visible profile id and surfaces action errors', async () => {
     mockDeckQuery = { isPending: false, data: { ok: true, data: [PROFILE] } };
-    mockActions = { acting: false, error: 'Ralentissez un peu, puis réessayez.' };
+    mockActions = { acting: false, error: 'Slow down a bit, then try again.' };
     await render(<DiscoverScreen />);
     await fireEvent.press(screen.getByTestId('discover-request'));
     expect(mockRequest).toHaveBeenCalledWith('u-2');
@@ -79,23 +79,23 @@ describe('DiscoverScreen', () => {
     mockDeckQuery = { isPending: false, data: { ok: true, data: [PROFILE] } };
     await render(<DiscoverScreen />);
     await fireEvent.press(screen.getByTestId('discover-more'));
-    expect(screen.getByRole('button', { name: 'Signaler Yasmine Haddad' })).toBeTruthy();
-    expect(screen.getByRole('button', { name: 'Bloquer Yasmine Haddad' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Report Yasmine Haddad' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Block Yasmine Haddad' })).toBeTruthy();
   });
 
   it('shows a real empty state with refresh when the deck runs out', async () => {
     mockDeckQuery = { isPending: false, data: { ok: true, data: [] } };
     await render(<DiscoverScreen />);
-    expect(screen.getByText('Plus de profils pour le moment')).toBeTruthy();
-    await fireEvent.press(screen.getByText('Rafraîchir'));
+    expect(screen.getByText('No more profiles for now')).toBeTruthy();
+    await fireEvent.press(screen.getByText('Refresh'));
     expect(mockRefetch).toHaveBeenCalledTimes(1);
   });
 
   it('shows a retryable error when the deck fails', async () => {
-    mockDeckQuery = { isPending: false, data: { ok: false, error: { message: 'Découverte impossible.' } } };
+    mockDeckQuery = { isPending: false, data: { ok: false, error: { message: "Couldn't load discovery." } } };
     await render(<DiscoverScreen />);
-    expect(screen.getByText('Découverte impossible.')).toBeTruthy();
-    await fireEvent.press(screen.getByText('Réessayer'));
+    expect(screen.getByText("Couldn't load discovery.")).toBeTruthy();
+    await fireEvent.press(screen.getByText('Retry'));
     expect(mockRefetch).toHaveBeenCalledTimes(1);
   });
 

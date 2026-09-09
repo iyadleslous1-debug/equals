@@ -30,7 +30,8 @@ export async function getMyProfile(): Promise<ApiResult<{ profile: ProfileRow | 
     .select('*')
     .eq('user_id', user.data)
     .maybeSingle();
-  if (error !== null) return err('profile/load-failed', 'Profil introuvable. Réessayez.', toAppError(error));
+  if (error !== null)
+    return err('profile/load-failed', "Couldn't load profile. Try again.", toAppError(error));
   if (profile === null) return ok({ profile: null, photos: [] });
   const { data: photos, error: photosError } = await supabase
     .from('profile_photos')
@@ -38,7 +39,7 @@ export async function getMyProfile(): Promise<ApiResult<{ profile: ProfileRow | 
     .eq('profile_id', profile.id)
     .order('order_index');
   if (photosError !== null) {
-    return err('profile/photos-failed', 'Photos introuvables. Réessayez.', toAppError(photosError));
+    return err('profile/photos-failed', "Couldn't load photos. Try again.", toAppError(photosError));
   }
   return ok({ profile, photos });
 }
@@ -54,7 +55,7 @@ export async function upsertMyProfile(input: ProfileInput): Promise<ApiResult<Pr
     .select()
     .single();
   if (error !== null || data === null) {
-    return err('profile/save-failed', 'Sauvegarde impossible. Réessayez.', toAppError(error));
+    return err('profile/save-failed', "Couldn't save. Try again.", toAppError(error));
   }
   return ok(data);
 }
@@ -76,7 +77,7 @@ export async function uploadMyPhoto(photo: PickedPhoto): Promise<ApiResult<Photo
   const mine = await getMyProfile();
   if (!mine.ok) return mine;
   if (mine.data.profile === null) {
-    return err('profile/missing', 'Créez votre profil avant d’ajouter des photos.');
+    return err('profile/missing', 'Create your profile before adding photos.');
   }
   if (mine.data.photos.length >= MAX_PHOTOS) {
     return err('profile/too-many-photos', `${MAX_PHOTOS} photos maximum.`);
@@ -94,7 +95,7 @@ export async function uploadMyPhoto(photo: PickedPhoto): Promise<ApiResult<Photo
     .from(BUCKET)
     .upload(path, body, { contentType: photo.mimeType, upsert: false });
   if (uploadError !== null) {
-    return err('profile/upload-failed', 'Envoi impossible. Réessayez.', toAppError(uploadError));
+    return err('profile/upload-failed', "Couldn't upload. Try again.", toAppError(uploadError));
   }
   const { data, error } = await supabase
     .from('profile_photos')
@@ -109,9 +110,9 @@ export async function uploadMyPhoto(photo: PickedPhoto): Promise<ApiResult<Photo
   if (error !== null || data === null) {
     await supabase.storage.from(BUCKET).remove([path]);
     if ((error as { code?: string } | null)?.code === '23505') {
-      return err('profile/photo-conflict', 'Photo presque prête. Touchez Réessayer.');
+      return err('profile/photo-conflict', 'Photo almost ready. Tap Retry.');
     }
-    return err('profile/photo-save-failed', 'Enregistrement impossible. Réessayez.', toAppError(error));
+    return err('profile/photo-save-failed', "Couldn't save. Try again.", toAppError(error));
   }
   return ok(data);
 }
@@ -123,7 +124,7 @@ export async function uploadMyPhoto(photo: PickedPhoto): Promise<ApiResult<Photo
 export async function setCardPhoto(photoId: string): Promise<ApiResult<void>> {
   const { data, error } = await supabase.rpc('set_card_photo', { p_photo_id: photoId });
   if (error !== null || data !== true) {
-    return err('profile/card-failed', 'Sélection impossible. Réessayez.', toAppError(error));
+    return err('profile/card-failed', "Couldn't select. Try again.", toAppError(error));
   }
   return ok(undefined);
 }
@@ -132,12 +133,12 @@ export async function deleteMyPhoto(photoId: string): Promise<ApiResult<void>> {
   const mine = await getMyProfile();
   if (!mine.ok) return mine;
   const target = mine.data.photos.find((p) => p.id === photoId);
-  if (!target) return err('profile/photo-not-found', 'Photo introuvable.');
+  if (!target) return err('profile/photo-not-found', 'Photo not found.');
   // Row first (RLS-guarded): a storage failure must not strand the row, and
   // orphan files in a private bucket are bloat, never a leak.
   const { error } = await supabase.from('profile_photos').delete().eq('id', photoId);
   if (error !== null) {
-    return err('profile/photo-delete-failed', 'Suppression impossible. Réessayez.', toAppError(error));
+    return err('profile/photo-delete-failed', "Couldn't delete. Try again.", toAppError(error));
   }
   if (!target.url.startsWith('http')) {
     const { error: removeError } = await supabase.storage.from(BUCKET).remove([target.url]);

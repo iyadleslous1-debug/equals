@@ -13,6 +13,6 @@ resume, completeness gate.
 - Gate: `isProfileComplete` (`validation.ts`) — discovery stays locked until
   every required field validates AND ≥1 photo exists.
 - Query keys: `['profile', 'me']`. Mutations invalidate it.
-- Copy: French-simple (D1). No profanity blocklist by decision: client lists
-  are bypassable theater across Arabic/French/Darja — the real guards are
+- Copy: English, plain and direct. No profanity blocklist by decision: client lists
+  are bypassable theater in any language — the real guards are
   `moderation_status=pending` + reports + server CHECKs.

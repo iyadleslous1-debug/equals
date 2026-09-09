@@ -42,12 +42,7 @@ export const UserCard = memo(function UserCard({
             {profile.display_name}, {profile.age}
           </Text>
           {onMore ? (
-            <IconButton
-              name="ellipsis-horizontal"
-              label="Plus d’options"
-              onPress={onMore}
-              testID={t('more')}
-            />
+            <IconButton name="ellipsis-horizontal" label="More options" onPress={onMore} testID={t('more')} />
           ) : null}
         </View>
         <Text className="mt-1 text-sm text-secondary">{wilayaLabel(profile.wilaya)}</Text>
@@ -58,16 +53,10 @@ export const UserCard = memo(function UserCard({
         ) : null}
         <View className="mt-4 flex-row gap-2">
           <View className="flex-1">
-            <Button
-              title="Passer"
-              onPress={onSkip}
-              disabled={acting}
-              variant="secondary"
-              testID={t('skip')}
-            />
+            <Button title="Pass" onPress={onSkip} disabled={acting} variant="secondary" testID={t('skip')} />
           </View>
           <View className="flex-1">
-            <Button title="Demander" onPress={onRequest} loading={acting} testID={t('request')} />
+            <Button title="Request" onPress={onRequest} loading={acting} testID={t('request')} />
           </View>
         </View>
       </View>

@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 /** Button copy for the resend-code control. */
 export function resendLabel(secondsLeft: number): string {
-  return secondsLeft <= 0 ? 'Renvoyer le code' : `Renvoyer dans ${secondsLeft} s`;
+  return secondsLeft <= 0 ? 'Resend code' : `Resend in ${secondsLeft}s`;
 }
 
 /**

@@ -54,7 +54,7 @@ beforeEach(() => {
 describe('AuthGate', () => {
   it('shows loading while the session resolves', async () => {
     await render(<AuthGate />);
-    expect(screen.getByText('Chargement…')).toBeTruthy();
+    expect(screen.getByText('Loading…')).toBeTruthy();
   });
 
   it('resumes an unconfirmed signup at the code screen', async () => {
@@ -105,7 +105,7 @@ describe('AuthGate', () => {
     mockProfileQuery = { data: undefined, isPending: true };
     useSessionStore.setState({ session: { user: {} } as never, status: 'authed' });
     await render(<AuthGate />);
-    expect(screen.getByText('Chargement…')).toBeTruthy();
+    expect(screen.getByText('Loading…')).toBeTruthy();
   });
 
   it('holds a skeleton on stale data mid-refetch instead of misrouting', async () => {
@@ -117,7 +117,7 @@ describe('AuthGate', () => {
     };
     useSessionStore.setState({ session: { user: {} } as never, status: 'authed' });
     await render(<AuthGate />);
-    expect(screen.getByText('Chargement…')).toBeTruthy();
+    expect(screen.getByText('Loading…')).toBeTruthy();
     expect(mockRedirect).not.toHaveBeenCalled();
   });
 

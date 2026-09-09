@@ -22,15 +22,15 @@ export default function ConfirmScreen(): React.JSX.Element {
     if (status === 'success') router.replace('/');
   }, [status, router]);
 
-  if (!hasParam && stored === undefined) return <LoadingState label="Chargement…" />;
+  if (!hasParam && stored === undefined) return <LoadingState label="Loading…" />;
   const email = hasParam ? normalizedParam : stored;
   if (email === null || email === undefined || email === '') {
     return (
       <View className="flex-1 bg-void">
         <ErrorState
-          message="Aucun email en attente de confirmation."
+          message="No email awaiting confirmation."
           onRetry={() => router.replace('/signup')}
-          retryTitle="Créer un compte"
+          retryTitle="Create an account"
           testID="confirm-missing"
         />
       </View>
@@ -41,8 +41,8 @@ export default function ConfirmScreen(): React.JSX.Element {
   return (
     <ScrollView className="bg-void">
       <View className="grow justify-center px-4 py-8">
-        <Text className="text-2xl font-bold text-text">Vérifiez votre email</Text>
-        <Text className="mt-2 text-sm text-muted">Entrez le code à 6 chiffres envoyé à {email}.</Text>
+        <Text className="text-2xl font-bold text-text">Check your email</Text>
+        <Text className="mt-2 text-sm text-muted">Enter the 6-digit code sent to {email}.</Text>
         <View className="mt-6">
           <CodeInput
             onComplete={(code) => confirm(email, code)}
@@ -52,7 +52,7 @@ export default function ConfirmScreen(): React.JSX.Element {
         </View>
         {verifying ? (
           <Text testID="confirm-verifying" className="mt-4 text-center text-sm text-muted">
-            Vérification…
+            Verifying…
           </Text>
         ) : null}
         {error ? (

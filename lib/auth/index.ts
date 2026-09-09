@@ -1,5 +1,5 @@
 /**
- * Auth façade — method-agnostic surface for the rest of the app.
+ * Auth facade — method-agnostic surface for the rest of the app.
  *
  * Feature code imports from `@/lib/auth` (this file) and never from
  * `./email` / `./phone` directly, so adding phone/OTP later means filling in
@@ -18,7 +18,7 @@ export { MIN_PASSWORD_LENGTH, normalizeEmail, validatePassword } from './validat
 
 export async function signOut(): Promise<ApiResult<void>> {
   const { error } = await supabase.auth.signOut();
-  if (error !== null) return err('auth/signout-failed', 'Déconnexion impossible.', toAppError(error));
+  if (error !== null) return err('auth/signout-failed', "Couldn't log you out.", toAppError(error));
   return ok(undefined);
 }
 
@@ -32,7 +32,7 @@ export async function getSession(): Promise<import('@supabase/supabase-js').Sess
 export async function getCurrentUserId(): Promise<ApiResult<string>> {
   const { data, error } = await supabase.auth.getUser();
   if (error !== null || data.user === null) {
-    return err('auth/not-signed-in', 'Connectez-vous pour continuer.');
+    return err('auth/not-signed-in', 'Log in to continue.');
   }
   return ok(data.user.id);
 }

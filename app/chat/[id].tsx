@@ -50,21 +50,21 @@ export default function ThreadScreen(): React.JSX.Element {
   const submitReport = async (reason: string, description: string): Promise<void> => {
     if (peerId === '') return;
     if (await safety.report(peerId, reason, description)) {
-      show('Signalement envoyé.');
+      show('Report sent.');
       closeSafety();
     }
   };
   const confirmBlock = async (): Promise<void> => {
     if (peerId === '') return;
     if (await safety.block(peerId)) {
-      show('Utilisateur bloqué.');
+      show('User blocked.');
       closeSafety();
     }
   };
   const confirmUnblock = async (): Promise<void> => {
     if (peerId === '') return;
     if (await safety.unblock(peerId)) {
-      show('Blocage levé.');
+      show('Block removed.');
       closeSafety();
     }
   };
@@ -102,9 +102,9 @@ export default function ThreadScreen(): React.JSX.Element {
     return (
       <View className="flex-1 bg-void">
         <ErrorState
-          message="Conversation introuvable."
+          message="Conversation not found."
           onRetry={() => router.back()}
-          retryTitle="Retour"
+          retryTitle="Back"
           testID="thread-missing"
         />
       </View>
@@ -129,14 +129,14 @@ export default function ThreadScreen(): React.JSX.Element {
   return (
     <View className="flex-1 bg-void">
       <View className="flex-row items-center border-b border-border px-2 py-3">
-        <IconButton name="arrow-back" label="Retour" onPress={() => router.back()} testID="thread-back" />
+        <IconButton name="arrow-back" label="Back" onPress={() => router.back()} testID="thread-back" />
         <Text className="ml-2 flex-1 text-lg font-bold text-text" numberOfLines={1}>
           {peerName}
         </Text>
         {peerId !== '' ? (
           <IconButton
             name="ellipsis-horizontal"
-            label="Options de sécurité"
+            label="Safety options"
             onPress={() => {
               setSafetyView('menu');
               setSafetyOpen(true);
@@ -146,7 +146,7 @@ export default function ThreadScreen(): React.JSX.Element {
         ) : null}
       </View>
       {threadQuery.isPending ? (
-        <LoadingState label="Chargement des messages…" />
+        <LoadingState label="Loading messages…" />
       ) : loaded && !loaded.ok ? (
         <ErrorState
           message={loaded.error.message}
@@ -155,7 +155,7 @@ export default function ThreadScreen(): React.JSX.Element {
         />
       ) : serverNewestFirst.length === 0 && failed.length === 0 ? (
         <View className="flex-1">
-          <EmptyState title="Aucun message" message="Dites salam !" testID="thread-empty" />
+          <EmptyState title="No messages yet" message="Say hi!" testID="thread-empty" />
         </View>
       ) : (
         <FlatList
@@ -169,7 +169,7 @@ export default function ThreadScreen(): React.JSX.Element {
           ListFooterComponent={
             threadQuery.hasMore ? (
               <Button
-                title="Charger plus anciens"
+                title="Load older messages"
                 onPress={() => threadQuery.loadMore()}
                 variant="ghost"
                 testID="thread-load-more"
@@ -235,30 +235,30 @@ export default function ThreadScreen(): React.JSX.Element {
               testID="thread-safety-report"
               onPress={() => setSafetyView('report')}
               accessibilityRole="button"
-              accessibilityLabel={`Signaler ${peerName}`}
+              accessibilityLabel={`Report ${peerName}`}
               className="rounded-xl border border-border bg-ink px-4 py-3"
             >
-              <Text className="text-base font-semibold text-text">Signaler {peerName}</Text>
+              <Text className="text-base font-semibold text-text">Report {peerName}</Text>
             </Pressable>
             {blockedByMe ? (
               <Pressable
                 testID="thread-safety-unblock"
                 onPress={() => void confirmUnblock()}
                 accessibilityRole="button"
-                accessibilityLabel={`Débloquer ${peerName}`}
+                accessibilityLabel={`Unblock ${peerName}`}
                 className="rounded-xl border border-border bg-ink px-4 py-3"
               >
-                <Text className="text-base font-semibold text-secondary">Débloquer {peerName}</Text>
+                <Text className="text-base font-semibold text-secondary">Unblock {peerName}</Text>
               </Pressable>
             ) : (
               <Pressable
                 testID="thread-safety-block"
                 onPress={() => setSafetyView('block')}
                 accessibilityRole="button"
-                accessibilityLabel={`Bloquer ${peerName}`}
+                accessibilityLabel={`Block ${peerName}`}
                 className="rounded-xl border border-border bg-ink px-4 py-3"
               >
-                <Text className="text-base font-semibold text-destructive">Bloquer {peerName}</Text>
+                <Text className="text-base font-semibold text-destructive">Block {peerName}</Text>
               </Pressable>
             )}
           </View>

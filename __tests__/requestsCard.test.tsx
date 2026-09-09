@@ -41,7 +41,7 @@ describe('RequestCard', () => {
         testID="req"
       />,
     );
-    expect(screen.getByText('Utilisateur indisponible')).toBeTruthy();
+    expect(screen.getByText('User unavailable')).toBeTruthy();
     await fireEvent.press(screen.getByTestId('req-accept'));
     expect(onAccept).not.toHaveBeenCalled();
   });
@@ -50,13 +50,13 @@ describe('RequestCard', () => {
     const { unmount } = await render(
       <RequestCard request={{ ...base, status: 'pending' }} direction="sent" acting={false} testID="req" />,
     );
-    expect(screen.getByText('En attente')).toBeTruthy();
+    expect(screen.getByText('Pending')).toBeTruthy();
     expect(() => screen.getByTestId('req-accept')).toThrow();
     await unmount();
 
     await render(
       <RequestCard request={{ ...base, status: 'accepted' }} direction="sent" acting={false} testID="req" />,
     );
-    expect(screen.getByText('Acceptée')).toBeTruthy();
+    expect(screen.getByText('Accepted')).toBeTruthy();
   });
 });

@@ -74,7 +74,7 @@ const CONVOS = [
     otherAge: 24,
     otherWilaya: 31,
     otherCard: null,
-    lastMessage: 'Tu connais celui près de la Grande Poste ?',
+    lastMessage: 'Do you know the one near the central post office?',
     lastMessageAt: '2026-09-08T12:04:00Z',
     unread: 2,
   },
@@ -92,7 +92,7 @@ beforeEach(() => {
 describe('ChatListScreen', () => {
   it('shows loading, then rows that navigate to the thread', async () => {
     const { rerender } = await render(<ChatListScreen />);
-    expect(screen.getByText('Chargement des conversations…')).toBeTruthy();
+    expect(screen.getByText('Loading conversations…')).toBeTruthy();
 
     mockList = { isPending: false, data: { ok: true, data: CONVOS } };
     await rerender(<ChatListScreen />);
@@ -107,7 +107,7 @@ describe('ChatListScreen', () => {
   it('shows an empty state when there are no conversations', async () => {
     mockList = { isPending: false, data: { ok: true, data: [] } };
     await render(<ChatListScreen />);
-    expect(screen.getByText('Aucune conversation')).toBeTruthy();
+    expect(screen.getByText('No conversations')).toBeTruthy();
   });
 });
 
@@ -132,7 +132,7 @@ describe('ThreadScreen', () => {
     mockThread = { isPending: false, data: { ok: true, data: [] } };
     mockSend.mockResolvedValue({ ok: true, data: MSGS[0] });
     await render(<ThreadScreen />);
-    expect(screen.getByText('Aucun message')).toBeTruthy();
+    expect(screen.getByText('No messages yet')).toBeTruthy();
     await fireEvent.changeText(screen.getByTestId('thread-input-field'), 'Azul  ');
     await fireEvent.press(screen.getByTestId('thread-input-send'));
     expect(mockSend).toHaveBeenCalledWith('Azul');
@@ -143,12 +143,12 @@ describe('ThreadScreen', () => {
     mockThread = { isPending: false, data: { ok: true, data: MSGS } };
     mockSend.mockResolvedValue({
       ok: false,
-      error: { code: 'chat/locked', message: 'Conversation verrouillée.' },
+      error: { code: 'chat/locked', message: 'Conversation locked.' },
     });
     await render(<ThreadScreen />);
     await fireEvent.changeText(screen.getByTestId('thread-input-field'), 'Hello');
     await fireEvent.press(screen.getByTestId('thread-input-send'));
-    expect(screen.getByText('Conversation verrouillée.')).toBeTruthy();
+    expect(screen.getByText('Conversation locked.')).toBeTruthy();
   });
 
   it('reports and blocks the peer from the thread menu', async () => {

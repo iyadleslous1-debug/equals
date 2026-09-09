@@ -30,7 +30,7 @@ describe('useDeckActions settle', () => {
   it('advances on idempotent already-recorded without an error', async () => {
     mockSend.mockResolvedValue({
       ok: false,
-      error: { code: 'discover/already-recorded', message: 'Déjà enregistré.' },
+      error: { code: 'discover/already-recorded', message: 'Already recorded.' },
     });
     const onDone = jest.fn();
     const { result } = await renderHook(() => useDeckActions(onDone));
@@ -63,7 +63,7 @@ describe('useDeckActions settle', () => {
       result.current.request('u-2');
     });
     expect(onDone).not.toHaveBeenCalled();
-    expect(result.current.error).toBe('Action impossible. Réessayez.');
+    expect(result.current.error).toBe('Something went wrong. Try again.');
     // Regression guard only — useAct's finally resets `acting` even on the
     // broken code; the error/onDone assertions above are the true fix guards.
     expect(result.current.acting).toBe(false);

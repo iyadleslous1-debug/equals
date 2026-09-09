@@ -10,5 +10,5 @@ Owns: report/block/unblock actions, `ReportSheet`, `BlockConfirm`.
   requests and chat must drop the party at once; importing other features'
   query keys would break the no-cross-import rule).
 - Moderation queue (reviewing/actioned) is service_role tooling, not app UI.
-- Copy: French-simple (D1). Safety copy is explicit about consequences and
+- Copy: English, plain and direct. Safety copy is explicit about consequences and
   irreversibility — never a bare icon tap.

@@ -13,7 +13,7 @@ let mockResendState: {
   canResend: boolean;
   error: { code: string; message: string } | null;
 } = {
-  label: 'Renvoyer le code',
+  label: 'Resend code',
   canResend: true,
   error: null,
 };
@@ -54,7 +54,7 @@ describe('ConfirmScreen', () => {
   it('shows verifying state and server errors with a resend path', async () => {
     mockConfirmState = {
       status: 'error',
-      error: { code: 'auth/otp-invalid', message: 'Code incorrect ou expiré.' },
+      error: { code: 'auth/otp-invalid', message: 'Incorrect or expired code.' },
     };
     await render(<ConfirmScreen />);
     expect(screen.getByTestId('confirm-error')).toBeTruthy();
@@ -63,15 +63,15 @@ describe('ConfirmScreen', () => {
   });
 
   it('disables resend with a countdown reason', async () => {
-    mockResendState = { label: 'Renvoyer dans 47 s', canResend: false, error: null };
+    mockResendState = { label: 'Resend in 47s', canResend: false, error: null };
     await render(<ConfirmScreen />);
-    expect(screen.getByText('Renvoyer dans 47 s')).toBeTruthy();
+    expect(screen.getByText('Resend in 47s')).toBeTruthy();
   });
 
   it('locks input and resend while verifying, and shows resend errors', async () => {
     mockConfirmState = { status: 'pending', error: null };
     mockResendState = {
-      label: 'Renvoyer le code',
+      label: 'Resend code',
       canResend: true,
       error: { code: 'auth/resend-throttled', message: 'Trop de tentatives.' },
     };

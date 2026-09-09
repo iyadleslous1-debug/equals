@@ -34,11 +34,11 @@ export function WilayaPicker({ value, onSelect, testID }: WilayaPickerProps): Re
         testID={testID ? `${testID}-open` : undefined}
         onPress={() => setOpen(true)}
         accessibilityRole="button"
-        accessibilityLabel="Choisir la wilaya"
+        accessibilityLabel="Choose wilaya"
         className="rounded-xl border border-border bg-ink px-4 py-3"
       >
         <Text className={`text-base ${value === null ? 'text-faint' : 'text-text'}`}>
-          {value === null ? 'Choisir la wilaya' : wilayaLabel(value)}
+          {value === null ? 'Choose wilaya' : wilayaLabel(value)}
         </Text>
       </Pressable>
       <Sheet
@@ -48,7 +48,7 @@ export function WilayaPicker({ value, onSelect, testID }: WilayaPickerProps): Re
         testID={testID ? `${testID}-sheet` : undefined}
       >
         <Input
-          label="Rechercher"
+          label="Search"
           value={query}
           onChangeText={setQuery}
           placeholder="Alger, وهران, 31…"
@@ -58,9 +58,7 @@ export function WilayaPicker({ value, onSelect, testID }: WilayaPickerProps): Re
           data={matches}
           keyExtractor={(item) => String(item.code)}
           className="mt-2 max-h-80"
-          ListEmptyComponent={
-            <Text className="py-6 text-center text-sm text-muted">Aucune wilaya trouvée.</Text>
-          }
+          ListEmptyComponent={<Text className="py-6 text-center text-sm text-muted">No wilayas found.</Text>}
           renderItem={({ item }) => (
             <Pressable
               testID={testID ? `${testID}-option-${item.code}` : undefined}

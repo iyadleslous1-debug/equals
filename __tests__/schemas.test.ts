@@ -8,7 +8,7 @@ import {
 
 describe('sanitizeText', () => {
   it('strips control characters but keeps newlines, tabs, Arabic and emoji', () => {
-    expect(sanitizeText('Salam -benzema- emmène-moi 1')).toBe('Salam -benzema- emmène-moi 1');
+    expect(sanitizeText('Hey -benzema- take-me 1')).toBe('Hey -benzema- take-me 1');
     expect(sanitizeText('  hello\t\nworld  ')).toBe('hello\t\nworld');
     expect(sanitizeText('a\n\n\n\nb')).toBe('a\n\nb');
   });
@@ -31,13 +31,13 @@ describe('profileSchema', () => {
     if (!wilaya.ok) expect(wilaya.error.code).toBe('validation/failed');
     const name = parseWith(profileSchema, { ...valid, display_name: 'A' });
     expect(name.ok).toBe(false);
-    if (!name.ok) expect(name.error.message).toMatch(/2 caractères/);
+    if (!name.ok) expect(name.error.message).toMatch(/2 characters/);
   });
 });
 
 describe('messageSchema', () => {
   it('accepts normal text and rejects empty/oversized input', () => {
-    expect(parseWith(messageSchema, { content: 'Salam, ça va ?' }).ok).toBe(true);
+    expect(parseWith(messageSchema, { content: 'Hello, how are you?' }).ok).toBe(true);
     expect(parseWith(messageSchema, { content: '   ' }).ok).toBe(false);
     expect(parseWith(messageSchema, { content: 'x'.repeat(1001) }).ok).toBe(false);
   });

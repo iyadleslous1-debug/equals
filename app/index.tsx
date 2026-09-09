@@ -20,12 +20,12 @@ export default function AuthGate(): React.JSX.Element {
   const { email: pending } = usePendingEmail(status === 'guest');
   const profileQuery = useMyProfile(status === 'authed');
 
-  if (status === 'loading') return <LoadingState label="Chargement…" />;
+  if (status === 'loading') return <LoadingState label="Loading…" />;
   if (status === 'authed') {
     // Never decide on a stale snapshot mid-refetch (e.g. right after the
     // wizard saved): a stale "incomplete" would bounce back to onboarding.
     if (profileQuery.isPending || (profileQuery.isFetching && profileQuery.isStale)) {
-      return <LoadingState label="Chargement…" />;
+      return <LoadingState label="Loading…" />;
     }
     if (profileQuery.isError || (profileQuery.data !== undefined && !profileQuery.data.ok)) {
       return (
@@ -34,7 +34,7 @@ export default function AuthGate(): React.JSX.Element {
             message={
               profileQuery.data !== undefined && !profileQuery.data.ok
                 ? profileQuery.data.error.message
-                : 'Profil illisible. Réessayez.'
+                : "Couldn't load profile. Try again."
             }
             onRetry={() => profileQuery.refetch()}
             testID="gate-profile-error"
@@ -50,7 +50,7 @@ export default function AuthGate(): React.JSX.Element {
     }
     return <Redirect href="/discover" />;
   }
-  if (pending === undefined) return <LoadingState label="Chargement…" />;
+  if (pending === undefined) return <LoadingState label="Loading…" />;
   if (pending !== null) {
     return <Redirect href={{ pathname: '/confirm', params: { email: pending } }} />;
   }

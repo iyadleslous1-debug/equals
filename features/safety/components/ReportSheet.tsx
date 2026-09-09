@@ -19,9 +19,9 @@ export function ReportSheet({ userName, onSubmit, onClose, pending = false, test
 
   return (
     <View testID={testID} className="gap-3">
-      <Text className="text-lg font-bold text-text">Signaler {userName}</Text>
+      <Text className="text-lg font-bold text-text">Report {userName}</Text>
       <Text className="text-sm text-muted">
-        Un signalement ne peut pas être annulé ni modifié après envoi. Notre équipe le relira.
+        A report can’t be undone or edited after sending. Our team will review it.
       </Text>
       <View className="flex-row flex-wrap gap-2">
         {REPORT_REASONS.map((option) => (
@@ -29,7 +29,7 @@ export function ReportSheet({ userName, onSubmit, onClose, pending = false, test
             key={option}
             onPress={() => setReason(option)}
             accessibilityRole="button"
-            accessibilityLabel={`${option}${reason === option ? ', sélectionné' : ''}`}
+            accessibilityLabel={`${option}${reason === option ? ', selected' : ''}`}
             accessibilityState={{ selected: reason === option }}
             className={`rounded-full border px-4 py-2 ${
               reason === option ? 'border-primary bg-primary' : 'border-border bg-ink'
@@ -42,8 +42,8 @@ export function ReportSheet({ userName, onSubmit, onClose, pending = false, test
         ))}
       </View>
       <Input
-        label="Détails (optionnel)"
-        hint="1000 caractères maximum"
+        label="Details (optional)"
+        hint="1000 characters max"
         value={description}
         onChangeText={setDescription}
         multiline
@@ -53,11 +53,11 @@ export function ReportSheet({ userName, onSubmit, onClose, pending = false, test
       />
       <View className="flex-row gap-2">
         <View className="flex-1">
-          <Button title="Annuler" onPress={onClose} variant="secondary" testID={t('cancel')} />
+          <Button title="Cancel" onPress={onClose} variant="secondary" testID={t('cancel')} />
         </View>
         <View className="flex-1">
           <Button
-            title="Envoyer"
+            title="Send"
             onPress={() => {
               if (reason) onSubmit({ reason, description });
             }}

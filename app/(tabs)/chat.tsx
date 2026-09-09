@@ -70,7 +70,7 @@ export default function ChatListScreen(): React.JSX.Element {
     [router],
   );
 
-  if (listQuery.isPending) return <LoadingState label="Chargement des conversations…" />;
+  if (listQuery.isPending) return <LoadingState label="Loading conversations…" />;
   if (loaded && !loaded.ok) {
     return (
       <View className="flex-1 bg-void">
@@ -85,8 +85,8 @@ export default function ChatListScreen(): React.JSX.Element {
         <Text className="mb-4 text-2xl font-bold text-text">Messages</Text>
         {convos.length === 0 ? (
           <EmptyState
-            title="Aucune conversation"
-            message="Acceptez une demande pour commencer à discuter."
+            title="No conversations"
+            message="Accept a request to start chatting."
             testID="chat-empty"
           />
         ) : (

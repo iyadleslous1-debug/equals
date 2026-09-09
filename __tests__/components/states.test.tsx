@@ -43,7 +43,7 @@ describe('state components', () => {
     const onRetry = jest.fn();
     await render(<ErrorState message="No connection" onRetry={onRetry} testID="err" />);
     expect(screen.getByText('No connection')).toBeTruthy();
-    await fireEvent.press(screen.getByText('Réessayer'));
+    await fireEvent.press(screen.getByText('Retry'));
     expect(onRetry).toHaveBeenCalledTimes(1);
   });
 });

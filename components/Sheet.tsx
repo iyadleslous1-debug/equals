@@ -19,7 +19,7 @@ export function Sheet({ visible, onClose, title, children, testID }: SheetProps)
           testID={testID ? `${testID}-scrim` : undefined}
           onPress={onClose}
           accessibilityRole="button"
-          accessibilityLabel="Fermer"
+          accessibilityLabel="Close"
           className="absolute inset-0 bg-black/60"
         />
         <View
@@ -32,7 +32,7 @@ export function Sheet({ visible, onClose, title, children, testID }: SheetProps)
             <Text className="text-lg font-bold text-text">{title}</Text>
             <IconButton
               name="close"
-              label={`Fermer ${title}`}
+              label={`Close ${title}`}
               onPress={onClose}
               testID={testID ? `${testID}-close` : undefined}
             />

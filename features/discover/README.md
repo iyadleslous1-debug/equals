@@ -17,4 +17,4 @@ Owns: deck fetching, request/skip actions, `UserCard`.
 - `useAct` serializes button taps (frontstop); the UNIQUE constraint is the
   backstop. Buttons-first, no pan gestures in MVP (a11y rule).
 - Query keys: `['deck']`. Every action invalidates it.
-- Copy: French-simple (D1).
+- Copy: English, plain and direct.

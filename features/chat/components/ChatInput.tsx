@@ -17,7 +17,7 @@ export function ChatInput({ onSend, disabled, locked, testID }: ChatInputProps) 
   if (locked) {
     return (
       <View className="border-t border-border bg-ink px-4 py-3">
-        <Text className="text-center text-sm text-muted">Conversation verrouillée.</Text>
+        <Text className="text-center text-sm text-muted">Conversation locked.</Text>
       </View>
     );
   }
@@ -35,7 +35,7 @@ export function ChatInput({ onSend, disabled, locked, testID }: ChatInputProps) 
         testID={t('field')}
         value={text}
         onChangeText={setText}
-        placeholder="Écrivez un message…"
+        placeholder="Write a message…"
         multiline
         numberOfLines={4}
         maxLength={1000}
@@ -48,7 +48,7 @@ export function ChatInput({ onSend, disabled, locked, testID }: ChatInputProps) 
       <View className="ml-2 pb-1">
         <IconButton
           name="send"
-          label="Envoyer"
+          label="Send"
           onPress={send}
           disabled={disabled || text.trim() === ''}
           testID={t('send')}

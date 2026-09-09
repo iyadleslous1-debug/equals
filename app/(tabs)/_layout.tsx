@@ -19,14 +19,14 @@ export default function TabsLayout(): React.JSX.Element {
       <Tabs.Screen
         name="discover"
         options={{
-          title: 'Découverte',
+          title: 'Discover',
           tabBarIcon: ({ color, size }) => <Ionicons name="compass" size={size} color={color} />,
         }}
       />
       <Tabs.Screen
         name="requests"
         options={{
-          title: 'Demandes',
+          title: 'Requests',
           tabBarIcon: ({ color, size }) => <Ionicons name="people" size={size} color={color} />,
         }}
       />

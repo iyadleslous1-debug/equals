@@ -58,7 +58,7 @@ export function useRespond(): {
         }
       } catch (error) {
         reportError(error, { where: 'requests/settle' });
-        setError('Action impossible. Réessayez.');
+        setError('Something went wrong. Try again.');
         return;
       }
       setError(null);
@@ -72,7 +72,7 @@ export function useRespond(): {
   const accept = useCallback(
     (requestId: string) => {
       setError(null);
-      void run(() => settle(acceptRequest(requestId), 'Demande acceptée.'));
+      void run(() => settle(acceptRequest(requestId), 'Request accepted.'));
     },
     [run, settle],
   );
@@ -80,7 +80,7 @@ export function useRespond(): {
   const decline = useCallback(
     (requestId: string) => {
       setError(null);
-      void run(() => settle(declineRequest(requestId), 'Demande refusée.'));
+      void run(() => settle(declineRequest(requestId), 'Request declined.'));
     },
     [run, settle],
   );

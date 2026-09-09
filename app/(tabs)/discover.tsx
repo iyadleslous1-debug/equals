@@ -54,7 +54,7 @@ export default function DiscoverScreen(): React.JSX.Element {
     }
   }, [current]);
 
-  if (deckQuery.isPending) return <LoadingState label="Chargement des profils…" />;
+  if (deckQuery.isPending) return <LoadingState label="Loading profiles…" />;
   if (loaded && !loaded.ok) {
     return (
       <View className="flex-1 bg-void">
@@ -78,13 +78,13 @@ export default function DiscoverScreen(): React.JSX.Element {
   };
   const submitReport = async (userId: string, reason: string, description: string): Promise<void> => {
     if (await safety.report(userId, reason, description)) {
-      show('Signalement envoyé.');
+      show('Report sent.');
       closeSafety();
     }
   };
   const confirmBlock = async (userId: string): Promise<void> => {
     if (await safety.block(userId)) {
-      show('Utilisateur bloqué.');
+      show('User blocked.');
       closeSafety();
     }
   };
@@ -92,12 +92,12 @@ export default function DiscoverScreen(): React.JSX.Element {
   return (
     <ScrollView className="bg-void">
       <View className="grow px-4 py-6">
-        <Text className="mb-4 text-2xl font-bold text-text">Découverte</Text>
+        <Text className="mb-4 text-2xl font-bold text-text">Discover</Text>
         {current === undefined ? (
           <EmptyState
-            title="Plus de profils pour le moment"
-            message="Revenez un peu plus tard — de nouveaux profils arrivent."
-            actionTitle="Rafraîchir"
+            title="No more profiles for now"
+            message="Check back later — new people are joining."
+            actionTitle="Refresh"
             onAction={refresh}
             testID="discover-empty"
           />
@@ -136,19 +136,19 @@ export default function DiscoverScreen(): React.JSX.Element {
               testID="discover-safety-report"
               onPress={() => setView({ mode: 'report' })}
               accessibilityRole="button"
-              accessibilityLabel={`Signaler ${target.display_name}`}
+              accessibilityLabel={`Report ${target.display_name}`}
               className="rounded-xl border border-border bg-ink px-4 py-3"
             >
-              <Text className="text-base font-semibold text-text">Signaler {target.display_name}</Text>
+              <Text className="text-base font-semibold text-text">Report {target.display_name}</Text>
             </Pressable>
             <Pressable
               testID="discover-safety-block"
               onPress={() => setView({ mode: 'block' })}
               accessibilityRole="button"
-              accessibilityLabel={`Bloquer ${target.display_name}`}
+              accessibilityLabel={`Block ${target.display_name}`}
               className="rounded-xl border border-border bg-ink px-4 py-3"
             >
-              <Text className="text-base font-semibold text-destructive">Bloquer {target.display_name}</Text>
+              <Text className="text-base font-semibold text-destructive">Block {target.display_name}</Text>
             </Pressable>
           </View>
         ) : null}

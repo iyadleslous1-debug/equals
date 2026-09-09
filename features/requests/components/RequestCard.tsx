@@ -29,10 +29,10 @@ export interface RequestCardProps {
 }
 
 const STATUS_CHIP = {
-  pending: { label: 'En attente', variant: 'warning' },
-  accepted: { label: 'Acceptée', variant: 'success' },
-  declined: { label: 'Refusée', variant: 'destructive' },
-  canceled: { label: 'Annulée', variant: 'destructive' },
+  pending: { label: 'Pending', variant: 'warning' },
+  accepted: { label: 'Accepted', variant: 'success' },
+  declined: { label: 'Declined', variant: 'destructive' },
+  canceled: { label: 'Canceled', variant: 'destructive' },
 } as const;
 
 /** Memoized: inbox re-renders on acting/notice churn; idle rows skip. */
@@ -48,7 +48,7 @@ export const RequestCard = memo(function RequestCard({
   const name =
     request.profile && request.profile.age !== null
       ? `${request.profile.display_name}, ${request.profile.age}`
-      : (request.profile?.display_name ?? 'Utilisateur indisponible');
+      : (request.profile?.display_name ?? 'User unavailable');
   const chip = STATUS_CHIP[request.status as keyof typeof STATUS_CHIP] ?? STATUS_CHIP.pending;
   return (
     <View testID={testID} className="flex-row items-center rounded-2xl border border-border bg-ink p-3">
@@ -72,9 +72,9 @@ export const RequestCard = memo(function RequestCard({
       </View>
       {direction === 'received' && request.status === 'pending' ? (
         <View className="gap-2">
-          <Button title="Accepter" onPress={() => onAccept?.()} disabled={acting} testID={t('accept')} />
+          <Button title="Accept" onPress={() => onAccept?.()} disabled={acting} testID={t('accept')} />
           <Button
-            title="Refuser"
+            title="Decline"
             onPress={() => onDecline?.()}
             disabled={acting}
             variant="ghost"

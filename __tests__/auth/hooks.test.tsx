@@ -43,7 +43,7 @@ describe('useLogin throw-path (audit S3)', () => {
       result.current.logIn('a@b.co', 'Seedpass123!');
     });
     expect(result.current.status).toBe('error');
-    expect(result.current.error?.message).toBe('Connexion impossible. Réessayez.');
+    expect(result.current.error?.message).toBe("Couldn't log you in. Try again.");
   });
 });
 

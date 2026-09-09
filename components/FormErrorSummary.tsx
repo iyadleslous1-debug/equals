@@ -35,7 +35,7 @@ export const FormErrorSummary = forwardRef<View, FormErrorSummaryProps>(function
           onPress={() => onSelect(item.field)}
           hitSlop={HIT_SLOP.slop}
           accessibilityRole="button"
-          accessibilityLabel={`${item.message}. Aller au champ.`}
+          accessibilityLabel={`${item.message}. Go to field.`}
           className="min-h-[44px] justify-center"
         >
           <Text className="text-sm text-destructive underline">{item.message}</Text>

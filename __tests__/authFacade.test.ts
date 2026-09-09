@@ -18,7 +18,7 @@ beforeEach(() => {
   jest.clearAllMocks();
 });
 
-describe('auth façade (audit S6)', () => {
+describe('auth facade (audit S6)', () => {
   it('signOut maps success and failure', async () => {
     mockSignOut.mockResolvedValue({ error: null });
     await expect(signOut()).resolves.toEqual({ ok: true, data: undefined });

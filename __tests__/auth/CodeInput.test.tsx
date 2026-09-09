@@ -36,6 +36,6 @@ describe('CodeInput', () => {
 
   it('announces itself as a six-digit code field', async () => {
     await render(<CodeInput onComplete={() => undefined} testID="otp" />);
-    expect(screen.getByLabelText('Code de confirmation à 6 chiffres')).toBeTruthy();
+    expect(screen.getByLabelText('6-digit confirmation code')).toBeTruthy();
   });
 });

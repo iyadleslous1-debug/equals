@@ -7,7 +7,7 @@ describe('ReportSheet', () => {
     const onSubmit = jest.fn();
     const onClose = jest.fn();
     await render(<ReportSheet userName="Yasmine" onSubmit={onSubmit} onClose={onClose} testID="report" />);
-    expect(screen.getByText(/ne peut pas être annulé/)).toBeTruthy();
+    expect(screen.getByText(/can’t be undone/)).toBeTruthy();
     const confirm = screen.getByTestId('report-confirm');
     await fireEvent.press(confirm);
     expect(onSubmit).not.toHaveBeenCalled();
@@ -26,7 +26,7 @@ describe('BlockConfirm', () => {
     await render(
       <BlockConfirm userName="Yasmine" onConfirm={onConfirm} onCancel={onCancel} testID="block" />,
     );
-    expect(screen.getByText(/ne pourra plus vous voir ni vous écrire/)).toBeTruthy();
+    expect(screen.getByText(/won’t be able to see you/)).toBeTruthy();
     await fireEvent.press(screen.getByTestId('block-confirm'));
     expect(onConfirm).toHaveBeenCalledTimes(1);
     await fireEvent.press(screen.getByTestId('block-cancel'));

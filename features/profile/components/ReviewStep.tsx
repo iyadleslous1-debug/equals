@@ -24,9 +24,9 @@ export function ReviewStep({
 }: ReviewStepProps) {
   const t = (id: string): string => (testID ? `${testID}-${id}` : '');
   const rows: [string, string][] = [
-    ['Nom', fields.display_name ?? '—'],
-    ['Âge', fields.age !== undefined ? String(fields.age) : '—'],
-    ['Genre', fields.gender === 'male' ? 'Homme' : fields.gender === 'female' ? 'Femme' : '—'],
+    ['Name', fields.display_name ?? '—'],
+    ['Age', fields.age !== undefined ? String(fields.age) : '—'],
+    ['Gender', fields.gender === 'male' ? 'Man' : fields.gender === 'female' ? 'Woman' : '—'],
     [
       'Wilaya',
       fields.wilaya !== undefined && isValidWilaya(fields.wilaya) ? wilayaLabel(fields.wilaya) : '—',
@@ -36,7 +36,7 @@ export function ReviewStep({
   ];
   return (
     <View testID={testID} className="gap-4">
-      <Text className="text-sm text-muted">Vérifiez votre profil avant de découvrir.</Text>
+      <Text className="text-sm text-muted">Review your profile before you start discovering.</Text>
       <View className="rounded-2xl border border-border bg-ink p-4">
         {rows.map(([label, value]) => (
           <View key={label} className="flex-row justify-between py-2">
@@ -54,10 +54,10 @@ export function ReviewStep({
       ) : null}
       <View className="flex-row gap-2">
         <View className="flex-1">
-          <Button title="Retour" onPress={onBack} variant="secondary" testID={t('back')} />
+          <Button title="Back" onPress={onBack} variant="secondary" testID={t('back')} />
         </View>
         <View className="flex-1">
-          <Button title="Terminer" onPress={onDone} loading={pending} testID={t('done')} />
+          <Button title="Finish" onPress={onDone} loading={pending} testID={t('done')} />
         </View>
       </View>
     </View>

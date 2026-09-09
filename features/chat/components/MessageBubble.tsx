@@ -29,16 +29,16 @@ export const MessageBubble = memo(function MessageBubble({
         <Text className={`text-base ${mine ? 'text-onPrimary' : 'text-text'}`}>{text}</Text>
       </View>
       <View className={`mt-0.5 flex-row items-center ${mine ? 'justify-end' : 'justify-start'}`}>
-        {sending && !failed ? <Text className="text-xs text-faint">Envoi…</Text> : null}
+        {sending && !failed ? <Text className="text-xs text-faint">Sending…</Text> : null}
         {failed ? (
           <Pressable
             testID={t('retry')}
             onPress={onRetry}
             hitSlop={10}
             accessibilityRole="button"
-            accessibilityLabel="Échec — réessayer"
+            accessibilityLabel="Failed — retry"
           >
-            <Text className="text-xs font-bold text-destructive">Échec — réessayer</Text>
+            <Text className="text-xs font-bold text-destructive">Failed — retry</Text>
           </Pressable>
         ) : null}
       </View>

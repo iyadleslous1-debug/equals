@@ -28,7 +28,7 @@ describe('PhotoGrid', () => {
         testID="grid"
       />,
     );
-    expect(screen.getByText('En révision')).toBeTruthy();
+    expect(screen.getByText('Under review')).toBeTruthy();
   });
 
   it('marks the card photo and wires set-card on the others', async () => {
@@ -48,7 +48,7 @@ describe('PhotoGrid', () => {
       />,
     );
     expect(screen.getByTestId('grid-card-badge-p1')).toBeTruthy();
-    expect(screen.getByRole('button', { name: 'Choisir comme photo principale' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Set as main photo' })).toBeTruthy();
     await fireEvent.press(screen.getByTestId('grid-set-card-p2'));
     expect(onSetCard).toHaveBeenCalledWith('p2');
   });
@@ -119,7 +119,7 @@ describe('PhotoGrid', () => {
         testID="grid"
       />,
     );
-    expect(screen.getByText('Refusée — remplacez-la')).toBeTruthy();
+    expect(screen.getByText('Rejected — replace it')).toBeTruthy();
     await fireEvent.press(screen.getByTestId('grid-retry-url-p8'));
     expect(onRetryUrl).toHaveBeenCalledWith('p8');
   });
