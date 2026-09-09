@@ -59,6 +59,14 @@ export default function DiscoverScreen(): React.JSX.Element {
     [compatQuery.data],
   );
   const orderedDeck = useMemo(() => orderByScore(deck, (d) => d.user_id, compatScores), [deck, compatScores]);
+  // Deck identity changed (refetch/invalidate after an action): restart at
+  // the top so position never strands past the end of a reshuffled deck.
+  const deckKey = useMemo(() => orderedDeck.map((d) => d.user_id).join(','), [orderedDeck]);
+  const [seenDeckKey, setSeenDeckKey] = useState(deckKey);
+  if (seenDeckKey !== deckKey) {
+    setSeenDeckKey(deckKey);
+    setPosition(0);
+  }
   const current = orderedDeck[position];
   const currentId = current?.user_id;
   // Stable callbacks so memoized UserCard skips re-renders on unrelated
@@ -76,6 +84,21 @@ export default function DiscoverScreen(): React.JSX.Element {
       setView({ mode: 'menu' });
     }
   }, [current]);
+  const openProfile = useCallback(() => {
+    if (current !== undefined) {
+      router.push({
+        pathname: '/profile/[id]',
+        params: {
+          id: current.user_id,
+          user_id: current.user_id,
+          name: current.display_name,
+          age: String(current.age),
+          wilaya: String(current.wilaya),
+          bio: current.bio ?? '',
+        },
+      });
+    }
+  }, [current, router]);
 
   // One paint, already ordered: when my survey is done we also wait for
   // scores, so the first card never swaps under the user mid-read.
@@ -145,6 +168,7 @@ export default function DiscoverScreen(): React.JSX.Element {
               onRequest={requestCurrent}
               onSkip={skipCurrent}
               onMore={openSafety}
+              onOpenProfile={openProfile}
               testID="discover"
             />
             {error ? (

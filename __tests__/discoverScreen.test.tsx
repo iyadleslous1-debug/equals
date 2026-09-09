@@ -4,6 +4,7 @@ import DiscoverScreen from '../app/(tabs)/discover';
 const mockRefetch = jest.fn();
 const mockRequest = jest.fn();
 const mockSkip = jest.fn();
+const mockPush = jest.fn();
 const mockSafetyReport = jest.fn();
 const mockSafetyBlock = jest.fn();
 let mockDeckQuery: { data?: unknown; isPending: boolean } = { data: undefined, isPending: true };
@@ -16,7 +17,7 @@ let mockCompatImpl: (ids: string[]) => { data?: unknown; isPending: boolean } = 
 });
 
 jest.mock('expo-router', () => ({
-  useRouter: () => ({ replace: jest.fn(), push: jest.fn(), back: jest.fn() }),
+  useRouter: () => ({ replace: jest.fn(), push: (...args: unknown[]) => mockPush(...args), back: jest.fn() }),
   useLocalSearchParams: () => ({}),
   Redirect: () => null,
   Tabs: { Screen: () => null },
@@ -236,5 +237,17 @@ describe('DiscoverScreen', () => {
     mockCompatImpl = () => ({ data: { ok: false, error: { message: 'Down.' } }, isPending: false });
     await render(<DiscoverScreen />);
     expect(screen.getByText('Low Match, 24')).toBeTruthy();
+  });
+
+  it('opens the full profile with deck params on photo tap', async () => {
+    mockDeckQuery = { isPending: false, data: { ok: true, data: [PROFILE] } };
+    await render(<DiscoverScreen />);
+    await fireEvent.press(screen.getByTestId('discover-open'));
+    expect(mockPush).toHaveBeenCalledWith(
+      expect.objectContaining({
+        pathname: '/profile/[id]',
+        params: expect.objectContaining({ user_id: 'u-2', name: 'Yasmine Haddad' }),
+      }),
+    );
   });
 });

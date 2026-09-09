@@ -14,9 +14,10 @@ import { writeFileSync } from 'node:fs';
 const out = spawnSync('npx', ['supabase', 'gen', 'types', 'typescript', '--local'], {
   encoding: 'buffer',
   maxBuffer: 16 * 1024 * 1024,
+  shell: true,
 });
-if (out.status !== 0) {
-  console.error(out.stderr.toString('utf8'));
+if (out.status !== 0 || !out.stdout || out.stdout.length === 0) {
+  console.error(out.stderr?.toString('utf8') ?? 'typegen produced no output');
   process.exit(out.status ?? 1);
 }
 writeFileSync('types/database.ts', out.stdout);

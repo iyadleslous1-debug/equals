@@ -12,6 +12,12 @@ export interface DeckProfile {
   card_photo_url: string | null;
 }
 
+export interface GalleryPhoto {
+  url: string;
+  is_card_photo: boolean;
+  order_index: number;
+}
+
 export interface DbError {
   code?: string | null;
   message?: string | null;
@@ -60,6 +66,30 @@ export async function fetchCompatibility(userIds: string[]): Promise<ApiResult<M
     }
   }
   return ok(scores);
+}
+
+/**
+ * Full photo list for a stranger's profile (gallery RPC mirrors the deck
+ * exclusions; empty when blocked/inactive/unavailable). Storage paths —
+ * the caller signs URLs, buckets stay private.
+ */
+export async function fetchGallery(userId: string): Promise<ApiResult<GalleryPhoto[]>> {
+  if (userId === '') return ok([]);
+  const { data, error } = await supabase.rpc('get_profile_gallery', { p_user_id: userId });
+  if (error !== null || data === null || !Array.isArray(data)) {
+    return err('discover/gallery-failed', "Couldn't load photos. Try again.", toAppError(error));
+  }
+  const photos: GalleryPhoto[] = [];
+  for (const row of data as { url?: unknown; is_card_photo?: unknown; order_index?: unknown }[]) {
+    if (
+      typeof row.url === 'string' &&
+      typeof row.is_card_photo === 'boolean' &&
+      typeof row.order_index === 'number'
+    ) {
+      photos.push({ url: row.url, is_card_photo: row.is_card_photo, order_index: row.order_index });
+    }
+  }
+  return ok(photos);
 }
 
 async function recordSwipe(

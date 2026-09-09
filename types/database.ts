@@ -480,6 +480,14 @@ export type Database = {
           wilaya: number;
         }[];
       };
+      get_profile_gallery: {
+        Args: { p_user_id: string };
+        Returns: {
+          is_card_photo: boolean;
+          order_index: number;
+          url: string;
+        }[];
+      };
       get_request_inbox: {
         Args: never;
         Returns: {

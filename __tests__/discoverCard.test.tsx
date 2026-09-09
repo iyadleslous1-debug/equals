@@ -52,4 +52,37 @@ describe('UserCard', () => {
     expect(onRequest).not.toHaveBeenCalled();
     expect(onSkip).not.toHaveBeenCalled();
   });
+
+  it('opens the full profile from the photo, with or without one', async () => {
+    const onOpenProfile = jest.fn();
+    const { unmount } = await render(
+      <UserCard
+        profile={profile}
+        photoUrl={profile.card_photo_url}
+        acting={false}
+        onRequest={() => undefined}
+        onSkip={() => undefined}
+        onOpenProfile={onOpenProfile}
+        testID="card"
+      />,
+    );
+    await fireEvent.press(screen.getByTestId('card-open'));
+    expect(onOpenProfile).toHaveBeenCalledTimes(1);
+    await unmount();
+
+    const reopen = jest.fn();
+    await render(
+      <UserCard
+        profile={profile}
+        photoUrl={null}
+        acting={false}
+        onRequest={() => undefined}
+        onSkip={() => undefined}
+        onOpenProfile={reopen}
+        testID="card2"
+      />,
+    );
+    await fireEvent.press(screen.getByTestId('card2-open'));
+    expect(reopen).toHaveBeenCalledTimes(1);
+  });
 });

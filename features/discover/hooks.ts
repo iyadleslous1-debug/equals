@@ -4,7 +4,14 @@ import { LIST_STALE_TIME_MS } from '@/constants/app';
 import { useAct } from '@/hooks/useAct';
 import { reportError } from '@/lib/reporting';
 import { useSignedUrls } from '@/hooks/useSignedUrls';
-import { fetchDeck, fetchCompatibility, sendRequest, skipProfile, type DeckProfile } from './api';
+import {
+  fetchDeck,
+  fetchCompatibility,
+  fetchGallery,
+  sendRequest,
+  skipProfile,
+  type DeckProfile,
+} from './api';
 
 export const DECK_KEY = ['deck'] as const;
 export const COMPAT_KEY = ['compat'] as const;
@@ -26,6 +33,18 @@ export function useCompatibility(userIds: string[]) {
     queryFn: () => fetchCompatibility(userIds),
     staleTime: LIST_STALE_TIME_MS,
     enabled: userIds.length > 0,
+  });
+}
+
+export const GALLERY_KEY = ['gallery'] as const;
+
+/** Stranger gallery for one profile (empty = blocked/inactive/unavailable). */
+export function useGallery(userId: string) {
+  return useQuery({
+    queryKey: [...GALLERY_KEY, userId],
+    queryFn: () => fetchGallery(userId),
+    staleTime: LIST_STALE_TIME_MS,
+    enabled: userId !== '',
   });
 }
 

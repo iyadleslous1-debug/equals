@@ -1,5 +1,5 @@
 import { memo } from 'react';
-import { Image, Text, View } from 'react-native';
+import { Image, Pressable, Text, View } from 'react-native';
 import { wilayaLabel } from '@/constants/wilayas';
 import { Button } from '@/components/Button';
 import { IconButton } from '@/components/IconButton';
@@ -12,6 +12,7 @@ export interface UserCardProps {
   onRequest: () => void;
   onSkip: () => void;
   onMore?: () => void;
+  onOpenProfile?: () => void;
   testID?: string;
 }
 
@@ -22,13 +23,36 @@ export const UserCard = memo(function UserCard({
   onRequest,
   onSkip,
   onMore,
+  onOpenProfile,
   testID,
 }: UserCardProps) {
   const t = (id: string): string => (testID ? `${testID}-${id}` : '');
   return (
     <View testID={testID} className="overflow-hidden rounded-2xl border border-border bg-ink">
-      {photoUrl ? (
+      {photoUrl && onOpenProfile ? (
+        <Pressable
+          testID={t('open')}
+          onPress={onOpenProfile}
+          accessibilityRole="button"
+          accessibilityLabel={`View ${profile.display_name}'s full profile`}
+        >
+          <Image testID={t('photo')} source={{ uri: photoUrl }} className="h-96 w-full" resizeMode="cover" />
+        </Pressable>
+      ) : photoUrl ? (
         <Image testID={t('photo')} source={{ uri: photoUrl }} className="h-96 w-full" resizeMode="cover" />
+      ) : onOpenProfile ? (
+        <Pressable
+          testID={t('open')}
+          onPress={onOpenProfile}
+          accessibilityRole="button"
+          accessibilityLabel={`View ${profile.display_name}'s full profile`}
+        >
+          <View testID={t('photo-missing')} className="h-96 w-full items-center justify-center bg-elevated">
+            <Text className="text-5xl font-bold text-faint">
+              {(profile.display_name[0] ?? '?').toUpperCase()}
+            </Text>
+          </View>
+        </Pressable>
       ) : (
         <View testID={t('photo-missing')} className="h-96 w-full items-center justify-center bg-elevated">
           <Text className="text-5xl font-bold text-faint">
