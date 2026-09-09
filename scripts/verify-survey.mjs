@@ -54,7 +54,6 @@ const profileIdOf = async (userId) => {
   return data.id;
 };
 const p1 = await profileIdOf(byEmail['dev-01@seed.local']);
-const p2 = await profileIdOf(byEmail['dev-02@seed.local']);
 
 const login = async (email) => {
   const tmp = createClient(URL, ANON_KEY, { auth: { persistSession: false } });
@@ -63,12 +62,19 @@ const login = async (email) => {
   return data.session.access_token;
 };
 
-// Victim row, created by the owner (proves own-insert works — probe 5a).
+// Victim row, created by the owner (proves own-write works — probe 5a).
+// Upsert: the seed already carries surveys, so this overwrites and the
+// original is restored at the end.
+const { data: seedRow } = await admin
+  .from('personality_surveys')
+  .select('profile_id, answers, completed_at')
+  .eq('profile_id', p1)
+  .maybeSingle();
 const owner = asUser(await login('dev-01@seed.local'));
 const created = await owner
   .from('personality_surveys')
-  .insert({ profile_id: p1, answers: { vibe: 'cafes' } });
-verdict('probe 5a: own insert succeeds', !created.error, created.error?.message);
+  .upsert({ profile_id: p1, answers: { vibe: 'cafes' } }, { onConflict: 'profile_id' });
+verdict('probe 5a: own write succeeds', !created.error, created.error?.message);
 
 // PROBE 1: cross-user select → nothing visible.
 {
@@ -107,14 +113,22 @@ verdict('probe 5a: own insert succeeds', !created.error, created.error?.message)
 }
 
 // PROBE 5b/5c: owner round-trip (select sees it, delete removes it).
+// dev-04 has no seed survey, so the insert/delete cycle leaves no residue.
 {
   const seen = await owner.from('personality_surveys').select('profile_id').eq('profile_id', p1).single();
   verdict('probe 5b: own select succeeds', seen.data?.profile_id === p1, seen.error?.message);
-  // dev-02 has no row of their own; create one to prove a second owner works.
-  const other = asUser(await login('dev-02@seed.local'));
-  const own = await other.from('personality_surveys').insert({ profile_id: p2, answers: {} });
+  const p4 = await profileIdOf(byEmail['dev-04@seed.local']);
+  const other = asUser(await login('dev-04@seed.local'));
+  const own = await other.from('personality_surveys').insert({ profile_id: p4, answers: {} });
   verdict('probe 5c: second owner insert succeeds', !own.error, own.error?.message);
-  await admin.from('personality_surveys').delete().in('profile_id', [p1, p2]);
+  const gone = await other.from('personality_surveys').delete().eq('profile_id', p4);
+  const check = await admin.from('personality_surveys').select('profile_id').eq('profile_id', p4);
+  verdict('probe 5d: own delete succeeds', !gone.error && check.data.length === 0, gone.error?.message);
+}
+
+// Restore dev-01's seed row (probe 5a overwrote it).
+if (seedRow) {
+  await admin.from('personality_surveys').upsert(seedRow, { onConflict: 'profile_id' });
 }
 
 if (failures > 0) {

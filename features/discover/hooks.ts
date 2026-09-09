@@ -1,13 +1,16 @@
 import { useCallback, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { LIST_STALE_TIME_MS } from '@/constants/app';
 import { useAct } from '@/hooks/useAct';
 import { reportError } from '@/lib/reporting';
 import { useSignedUrls } from '@/hooks/useSignedUrls';
+import { deckFiltersSchema, parseWith, type DeckFilters } from '@/lib/validation/schemas';
 import {
   fetchDeck,
   fetchCompatibility,
   fetchGallery,
+  getMyFilters,
+  saveFilters,
   sendRequest,
   skipProfile,
   type DeckProfile,
@@ -15,9 +18,80 @@ import {
 
 export const DECK_KEY = ['deck'] as const;
 export const COMPAT_KEY = ['compat'] as const;
+export const FILTERS_KEY = ['filters', 'mine'] as const;
 
-export function useDeck() {
-  return useQuery({ queryKey: DECK_KEY, queryFn: () => fetchDeck(), staleTime: LIST_STALE_TIME_MS });
+export function useDeck(filters?: DeckFilters) {
+  return useQuery({
+    queryKey: [...DECK_KEY, JSON.stringify(filters ?? null)],
+    queryFn: () => fetchDeck(20, filters),
+    staleTime: LIST_STALE_TIME_MS,
+    enabled: filters !== undefined,
+  });
+}
+
+/** My persisted filter preferences (undefined until loaded). */
+export function useFilters() {
+  return useQuery({ queryKey: FILTERS_KEY, queryFn: () => getMyFilters(), staleTime: LIST_STALE_TIME_MS });
+}
+
+/** Validate → save → refresh deck. Invalid shapes never reach the API. */
+export function useSaveFilters(): {
+  save: (input: unknown) => void;
+  reset: () => void;
+  status: 'idle' | 'pending' | 'success' | 'error';
+  error: string | null;
+  fieldErrors: Record<string, string>;
+} {
+  const [status, setStatus] = useState<'idle' | 'pending' | 'success' | 'error'>('idle');
+  const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const client = useQueryClient();
+
+  const reset = useCallback(() => {
+    setStatus('idle');
+    setError(null);
+    setFieldErrors({});
+  }, []);
+
+  const save = useCallback(
+    (input: unknown) => {
+      setStatus('pending');
+      setError(null);
+      setFieldErrors({});
+      const parsed = parseWith(deckFiltersSchema, input);
+      if (!parsed.ok) {
+        const next: Record<string, string> = {};
+        for (const issue of (parsed.error.details as { path: (string | number)[]; message: string }[]) ??
+          []) {
+          const key = String(issue.path[0] ?? 'form');
+          if (next[key] === undefined) next[key] = issue.message;
+        }
+        setFieldErrors(next);
+        setStatus('error');
+        return;
+      }
+      void (async () => {
+        try {
+          const result = await saveFilters(parsed.data);
+          if (!result.ok) {
+            setError(result.error.message);
+            setStatus('error');
+            return;
+          }
+          setStatus('success');
+          void client.invalidateQueries({ queryKey: FILTERS_KEY });
+          void client.invalidateQueries({ queryKey: DECK_KEY });
+        } catch (thrown) {
+          reportError(thrown, { where: 'discover/filters-save' });
+          setError('Something went wrong. Try again.');
+          setStatus('error');
+        }
+      })();
+    },
+    [client],
+  );
+
+  return { save, reset, status, error, fieldErrors };
 }
 
 /**

@@ -1,14 +1,24 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { EmptyState } from '@/components/EmptyState';
 import { ErrorState } from '@/components/ErrorState';
+import { IconButton } from '@/components/IconButton';
 import { LoadingState } from '@/components/LoadingState';
 import { Sheet } from '@/components/Sheet';
 import { useToast } from '@/components/Toast';
 import { UserCard } from '@/features/discover/components/UserCard';
-import { useCardPhotoUrls, useCompatibility, useDeck, useDeckActions } from '@/features/discover/hooks';
+import { FilterSheet } from '@/features/discover/components/FilterSheet';
+import {
+  useCardPhotoUrls,
+  useCompatibility,
+  useDeck,
+  useDeckActions,
+  useFilters,
+  useSaveFilters,
+} from '@/features/discover/hooks';
 import type { DeckProfile } from '@/features/discover/api';
+import { EMPTY_FILTERS } from '@/features/discover/api';
 import { BlockConfirm } from '@/features/safety/components/BlockConfirm';
 import { ReportSheet } from '@/features/safety/components/ReportSheet';
 import { useSafety } from '@/features/safety/hooks';
@@ -21,7 +31,15 @@ type SafetyView = { mode: 'menu' } | { mode: 'report' } | { mode: 'block' } | nu
 
 export default function DiscoverScreen(): React.JSX.Element {
   const router = useRouter();
-  const deckQuery = useDeck();
+  const filtersQuery = useFilters();
+  const saver = useSaveFilters();
+  const [filterOpen, setFilterOpen] = useState(false);
+  const filters = filtersQuery.data?.ok === true ? filtersQuery.data.data : undefined;
+  const filtersFailed = filtersQuery.isError || (filtersQuery.data !== undefined && !filtersQuery.data.ok);
+  // Filters failed: fall back to defaults rather than deadlocking the deck
+  // (the deck query stays disabled on undefined forever).
+  const effectiveFilters = filters ?? (filtersFailed ? EMPTY_FILTERS : undefined);
+  const deckQuery = useDeck(effectiveFilters);
   const [position, setPosition] = useState(0);
   const advance = useCallback(() => setPosition((p) => p + 1), []);
   const { acting, request, skip, error } = useDeckActions(advance);
@@ -49,24 +67,30 @@ export default function DiscoverScreen(): React.JSX.Element {
     }, [refetch, target]),
   );
 
+  // One-shot close on save success (guarded: fires only on the transition,
+  // not every render — no cascade).
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (saver.status === 'success') setFilterOpen(false);
+  }, [saver.status]);
+
   // Compatibility ordering (MVP2 piece 2): active ONLY when my own survey
-  // is completed. Survey-less viewers keep the default deck — no penalty,
-  // no different treatment. Unscored profiles keep server order.
+  // is completed AND the server isn't already recency-ordering (sort=newest
+  // would be destroyed by client reordering). Otherwise the server order
+  // stands — no penalty, no different treatment.
+  const applyCompat = completed && filters?.sort !== 'newest';
   const compatIds = useMemo(() => deck.map((d) => d.user_id), [deck]);
-  const compatQuery = useCompatibility(completed ? compatIds : []);
+  const compatQuery = useCompatibility(applyCompat ? compatIds : []);
   const compatScores = useMemo(
     () => (compatQuery.data?.ok === true ? compatQuery.data.data : new Map<string, number>()),
     [compatQuery.data],
   );
-  const orderedDeck = useMemo(() => orderByScore(deck, (d) => d.user_id, compatScores), [deck, compatScores]);
-  // Deck identity changed (refetch/invalidate after an action): restart at
-  // the top so position never strands past the end of a reshuffled deck.
-  const deckKey = useMemo(() => orderedDeck.map((d) => d.user_id).join(','), [orderedDeck]);
-  const [seenDeckKey, setSeenDeckKey] = useState(deckKey);
-  if (seenDeckKey !== deckKey) {
-    setSeenDeckKey(deckKey);
-    setPosition(0);
-  }
+  const orderedDeck = useMemo(
+    () => (applyCompat ? orderByScore(deck, (d) => d.user_id, compatScores) : deck),
+    [applyCompat, deck, compatScores],
+  );
+  // Direct index: acting past the last card empties the deck (correct).
+  // Filter/compat changes restart at the top via applyFilters below.
   const current = orderedDeck[position];
   const currentId = current?.user_id;
   // Stable callbacks so memoized UserCard skips re-renders on unrelated
@@ -102,7 +126,8 @@ export default function DiscoverScreen(): React.JSX.Element {
 
   // One paint, already ordered: when my survey is done we also wait for
   // scores, so the first card never swaps under the user mid-read.
-  if (deckQuery.isPending || (completed && compatQuery.isPending)) {
+  // Filters load first — the deck query stays disabled until prefs arrive.
+  if (deckQuery.isPending || filtersQuery.isPending || (completed && compatQuery.isPending)) {
     return <LoadingState label="Loading profiles…" />;
   }
   if (loaded && !loaded.ok) {
@@ -126,6 +151,11 @@ export default function DiscoverScreen(): React.JSX.Element {
     setView(null);
     safety.reset();
   };
+  // New prefs = new deck: restart at the top (event handler, not an effect).
+  const applyFilters = (next: Parameters<typeof saver.save>[0]): void => {
+    setPosition(0);
+    saver.save(next);
+  };
   const submitReport = async (userId: string, reason: string, description: string): Promise<void> => {
     if (await safety.report(userId, reason, description)) {
       show('Report sent.');
@@ -139,10 +169,40 @@ export default function DiscoverScreen(): React.JSX.Element {
     }
   };
 
+  const filtersActive =
+    filters !== undefined &&
+    ((filters.age_min ?? null) !== null ||
+      (filters.age_max ?? null) !== null ||
+      (filters.wilayas ?? []).length > 0 ||
+      (filters.sort ?? 'default') !== 'default');
+
   return (
     <ScrollView className="bg-void">
       <View className="grow px-4 py-6">
-        <Text className="mb-4 text-2xl font-bold text-text">Discover</Text>
+        <View className="mb-4 flex-row items-center justify-between">
+          <Text className="text-2xl font-bold text-text">Discover</Text>
+          <View className="flex-row items-center">
+            {filtersActive ? (
+              <Text testID="discover-filters-dot" className="mr-1 text-base text-primary">
+                •
+              </Text>
+            ) : null}
+            <IconButton
+              name="options"
+              label="Filters"
+              onPress={() => {
+                saver.reset();
+                setFilterOpen(true);
+              }}
+              testID="discover-filters-open"
+            />
+          </View>
+        </View>
+        {filtersFailed ? (
+          <Text testID="discover-filters-fallback" className="mb-2 text-center text-xs text-faint">
+            Filters unavailable — showing everyone.
+          </Text>
+        ) : null}
         {showPrompt ? (
           <SurveyPrompt
             onStart={() => router.push('/survey')}
@@ -247,6 +307,36 @@ export default function DiscoverScreen(): React.JSX.Element {
                 className="mt-2 text-center text-sm text-destructive"
               >
                 {safety.error}
+              </Text>
+            ) : null}
+          </>
+        ) : null}
+      </Sheet>
+      <Sheet
+        visible={filterOpen}
+        onClose={() => setFilterOpen(false)}
+        title="Filters"
+        testID="discover-filters"
+      >
+        {filters !== undefined ? (
+          <>
+            <FilterSheet
+              key={JSON.stringify(filters)}
+              initial={filters}
+              compatAvailable={completed}
+              fieldErrors={saver.fieldErrors}
+              pending={saver.status === 'pending'}
+              onApply={applyFilters}
+              onReset={() => applyFilters({ age_min: null, age_max: null, wilayas: null, sort: 'default' })}
+              testID="discover-filter-form"
+            />
+            {saver.error ? (
+              <Text
+                testID="discover-filters-error"
+                accessibilityRole="alert"
+                className="mt-2 text-center text-sm text-destructive"
+              >
+                {saver.error}
               </Text>
             ) : null}
           </>

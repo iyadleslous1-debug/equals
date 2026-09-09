@@ -249,6 +249,10 @@ export type Database = {
           bio: string | null;
           created_at: string;
           display_name: string;
+          filter_age_max: number | null;
+          filter_age_min: number | null;
+          filter_sort: string | null;
+          filter_wilayas: number[] | null;
           gender: string;
           id: string;
           updated_at: string;
@@ -260,6 +264,10 @@ export type Database = {
           bio?: string | null;
           created_at?: string;
           display_name: string;
+          filter_age_max?: number | null;
+          filter_age_min?: number | null;
+          filter_sort?: string | null;
+          filter_wilayas?: number[] | null;
           gender: string;
           id?: string;
           updated_at?: string;
@@ -271,6 +279,10 @@ export type Database = {
           bio?: string | null;
           created_at?: string;
           display_name?: string;
+          filter_age_max?: number | null;
+          filter_age_min?: number | null;
+          filter_sort?: string | null;
+          filter_wilayas?: number[] | null;
           gender?: string;
           id?: string;
           updated_at?: string;
@@ -469,7 +481,13 @@ export type Database = {
         }[];
       };
       get_discovery_candidates: {
-        Args: { p_limit?: number };
+        Args: {
+          p_age_max?: number;
+          p_age_min?: number;
+          p_limit?: number;
+          p_sort?: string;
+          p_wilayas?: number[];
+        };
         Returns: {
           age: number;
           bio: string;

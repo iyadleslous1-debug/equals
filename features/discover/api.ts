@@ -1,6 +1,7 @@
 import { supabase } from '@/lib/supabase';
 import { getCurrentUserId as currentUserId } from '@/lib/auth';
 import { err, ok, toAppError, type ApiResult } from '@/lib/result';
+import { deckFiltersSchema, parseWith, type DeckFilters } from '@/lib/validation/schemas';
 
 export interface DeckProfile {
   user_id: string;
@@ -39,12 +40,79 @@ export function mapDbError(error: DbError | null): { code: string; message: stri
 }
 
 /** Deck for the signed-in viewer — exclusions enforced in SQL, not in app code. */
-export async function fetchDeck(limit = 20): Promise<ApiResult<DeckProfile[]>> {
-  const { data, error } = await supabase.rpc('get_discovery_candidates', { p_limit: limit });
+export async function fetchDeck(limit = 20, filters?: DeckFilters): Promise<ApiResult<DeckProfile[]>> {
+  const parsed = filters === undefined ? ok({ ...EMPTY_FILTERS }) : parseWith(deckFiltersSchema, filters);
+  if (!parsed.ok) {
+    return err('discover/filters-invalid', 'Filters look wrong. Reset them and try again.');
+  }
+  // p_limit is clamped: crafted callers can't turn the deck into a table scan.
+  const { data, error } = await supabase.rpc('get_discovery_candidates', {
+    p_limit: Math.min(Math.max(Math.floor(limit), 1), 50),
+    p_age_min: parsed.data.age_min ?? undefined,
+    p_age_max: parsed.data.age_max ?? undefined,
+    p_wilayas: parsed.data.wilayas ?? undefined,
+    p_sort: parsed.data.sort ?? 'default',
+  });
   if (error !== null || data === null) {
     return err('discover/deck-failed', "Couldn't load discovery. Try again.", toAppError(error));
   }
   return ok(data as DeckProfile[]);
+}
+
+export const EMPTY_FILTERS: DeckFilters = { age_min: null, age_max: null, wilayas: null, sort: 'default' };
+
+/** My persisted filter preferences (defaults when unset or corrupt). */
+export async function getMyFilters(): Promise<ApiResult<DeckFilters>> {
+  const me = await currentUserId();
+  if (!me.ok) return me;
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('filter_age_min, filter_age_max, filter_wilayas, filter_sort')
+    .eq('user_id', me.data)
+    .maybeSingle();
+  if (error !== null) {
+    return err('discover/filters-failed', "Couldn't load filters. Try again.", toAppError(error));
+  }
+  if (data === null) return ok({ ...EMPTY_FILTERS });
+  const row = data as {
+    filter_age_min: unknown;
+    filter_age_max: unknown;
+    filter_wilayas: unknown;
+    filter_sort: unknown;
+  };
+  // Corrupt rows (direct writes bypassing zod) fail closed to defaults —
+  // never let a bad row narrow the deck to nothing silently.
+  const parsed = parseWith(deckFiltersSchema, {
+    age_min: row.filter_age_min,
+    age_max: row.filter_age_max,
+    wilayas: Array.isArray(row.filter_wilayas) && row.filter_wilayas.length === 0 ? null : row.filter_wilayas,
+    sort: row.filter_sort,
+  });
+  if (!parsed.ok) return ok({ ...EMPTY_FILTERS });
+  return ok({ ...parsed.data, sort: parsed.data.sort ?? 'default' });
+}
+
+/** Persist filter preferences (validated; undefined clears to NULL). */
+export async function saveFilters(filters: DeckFilters): Promise<ApiResult<void>> {
+  const parsed = parseWith(deckFiltersSchema, filters);
+  if (!parsed.ok) return parsed;
+  const me = await currentUserId();
+  if (!me.ok) return me;
+  const { error } = await supabase
+    .from('profiles')
+    .update({
+      filter_age_min: parsed.data.age_min ?? null,
+      filter_age_max: parsed.data.age_max ?? null,
+      // Generated update types reject null for arrays: [] means "no filter"
+      // (the RPC treats NULL and empty identically).
+      filter_wilayas: parsed.data.wilayas ?? [],
+      filter_sort: parsed.data.sort ?? 'default',
+    })
+    .eq('user_id', me.data);
+  if (error !== null) {
+    return err('discover/filters-save-failed', "Couldn't save filters. Try again.", toAppError(error));
+  }
+  return ok(undefined);
 }
 
 /**

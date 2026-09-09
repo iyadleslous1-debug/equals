@@ -5,6 +5,8 @@ const mockRefetch = jest.fn();
 const mockRequest = jest.fn();
 const mockSkip = jest.fn();
 const mockPush = jest.fn();
+const mockFilterSave = jest.fn();
+let mockSaverStatus: string = 'idle';
 const mockSafetyReport = jest.fn();
 const mockSafetyBlock = jest.fn();
 let mockDeckQuery: { data?: unknown; isPending: boolean } = { data: undefined, isPending: true };
@@ -33,6 +35,14 @@ jest.mock('@/features/discover/hooks', () => ({
   }),
   useCardPhotoUrls: () => ({ 'u-2': 'https://picsum.photos/300' }),
   useCompatibility: (ids: string[]) => mockCompatImpl(ids),
+  useFilters: () => mockFilters,
+  useSaveFilters: () => ({
+    save: mockFilterSave,
+    reset: jest.fn(),
+    status: mockSaverStatus,
+    error: null,
+    fieldErrors: {},
+  }),
   useAct: () => ({}),
 }));
 
@@ -48,6 +58,10 @@ jest.mock('@/features/safety/hooks', () => ({
 }));
 
 let mockSurvey: { data?: unknown; isPending: boolean } = { data: undefined, isPending: true };
+let mockFilters: { data?: unknown; isPending: boolean } = {
+  data: { ok: true, data: { age_min: null, age_max: null, wilayas: null, sort: 'default' } },
+  isPending: false,
+};
 
 jest.mock('@/features/survey/hooks', () => ({
   useSurvey: () => mockSurvey,
@@ -66,9 +80,14 @@ const PROFILE = {
 
 beforeEach(() => {
   jest.clearAllMocks();
+  mockSaverStatus = 'idle';
   mockDeckQuery = { data: undefined, isPending: true };
   mockActions = { acting: false, error: null };
   mockSurvey = { data: undefined, isPending: true };
+  mockFilters = {
+    data: { ok: true, data: { age_min: null, age_max: null, wilayas: null, sort: 'default' } },
+    isPending: false,
+  };
   mockCompatImpl = () => ({ data: undefined, isPending: true });
 });
 
@@ -239,6 +258,32 @@ describe('DiscoverScreen', () => {
     expect(screen.getByText('Low Match, 24')).toBeTruthy();
   });
 
+  it('keeps server recency order for sort=newest despite scores', async () => {
+    const low = { ...PROFILE, user_id: 'u-low', display_name: 'Low Match' };
+    const high = { ...PROFILE, user_id: 'u-high', display_name: 'High Match' };
+    mockDeckQuery = { isPending: false, data: { ok: true, data: [low, high] } };
+    mockSurvey = {
+      data: { ok: true, data: { profile_id: 'p-9', answers: {}, completed_at: '2026-09-09T00:00:00Z' } },
+      isPending: false,
+    };
+    mockFilters = {
+      data: { ok: true, data: { age_min: null, age_max: null, wilayas: null, sort: 'newest' } },
+      isPending: false,
+    };
+    mockCompatImpl = () => ({
+      data: {
+        ok: true,
+        data: new Map([
+          ['u-low', 20],
+          ['u-high', 95],
+        ]),
+      },
+      isPending: false,
+    });
+    await render(<DiscoverScreen />);
+    expect(screen.getByText('Low Match, 24')).toBeTruthy();
+  });
+
   it('opens the full profile with deck params on photo tap', async () => {
     mockDeckQuery = { isPending: false, data: { ok: true, data: [PROFILE] } };
     await render(<DiscoverScreen />);
@@ -249,5 +294,45 @@ describe('DiscoverScreen', () => {
         params: expect.objectContaining({ user_id: 'u-2', name: 'Yasmine Haddad' }),
       }),
     );
+  });
+
+  it('opens filters, applies them, and shows the active dot', async () => {
+    mockDeckQuery = { isPending: false, data: { ok: true, data: [PROFILE] } };
+    await render(<DiscoverScreen />);
+    expect(() => screen.getByTestId('discover-filters-dot')).toThrow();
+    await fireEvent.press(screen.getByTestId('discover-filters-open'));
+    await fireEvent.changeText(screen.getByTestId('discover-filter-form-age-min'), '25');
+    await fireEvent.changeText(screen.getByTestId('discover-filter-form-wilaya-search'), '31');
+    await fireEvent.press(screen.getByTestId('discover-filter-form-wilaya-31'));
+    await fireEvent.press(screen.getByTestId('discover-filter-form-apply'));
+    expect(mockFilterSave).toHaveBeenCalledWith(expect.objectContaining({ age_min: 25, wilayas: [31] }));
+  });
+
+  it('resets filters to defaults', async () => {
+    mockDeckQuery = { isPending: false, data: { ok: true, data: [PROFILE] } };
+    mockFilters = {
+      data: { ok: true, data: { age_min: 25, age_max: null, wilayas: [31], sort: 'newest' } },
+      isPending: false,
+    };
+    await render(<DiscoverScreen />);
+    expect(screen.getByTestId('discover-filters-dot')).toBeTruthy();
+    await fireEvent.press(screen.getByTestId('discover-filters-open'));
+    await fireEvent.press(screen.getByTestId('discover-filter-form-reset'));
+    expect(mockFilterSave).toHaveBeenCalledWith({
+      age_min: null,
+      age_max: null,
+      wilayas: null,
+      sort: 'default',
+    });
+  });
+
+  it('closes the sheet on save success', async () => {
+    mockDeckQuery = { isPending: false, data: { ok: true, data: [PROFILE] } };
+    const { rerender } = await render(<DiscoverScreen />);
+    await fireEvent.press(screen.getByTestId('discover-filters-open'));
+    expect(screen.getByTestId('discover-filter-form-apply')).toBeTruthy();
+    mockSaverStatus = 'success';
+    await rerender(<DiscoverScreen />);
+    expect(() => screen.getByTestId('discover-filter-form-apply')).toThrow();
   });
 });

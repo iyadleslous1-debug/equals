@@ -126,3 +126,31 @@ export const surveyAnswersSchema = z
   })
   .strict();
 export type SurveyAnswers = z.infer<typeof surveyAnswersSchema>;
+
+/**
+ * MVP2 deck filters. Everything nullable = no filter. Persisted on the
+ * profile row (server-side, cross-device); `compat` sort is applied
+ * client-side from RPC scores, the rest inside get_discovery_candidates.
+ */
+export const FILTER_SORTS = ['default', 'newest', 'compat'] as const;
+
+export const deckFiltersSchema = z
+  .object({
+    age_min: z.number().int().min(18).max(100).nullish(),
+    age_max: z.number().int().min(18).max(100).nullish(),
+    wilayas: z.array(z.number().int().min(1).max(58)).max(58).nullish(),
+    sort: z.enum(FILTER_SORTS).nullish(),
+  })
+  .refine(
+    (f) =>
+      f.age_min === null ||
+      f.age_min === undefined ||
+      f.age_max === null ||
+      f.age_max === undefined ||
+      f.age_min <= f.age_max,
+    {
+      message: 'Min age must be below max age.',
+      path: ['age_min'],
+    },
+  );
+export type DeckFilters = z.infer<typeof deckFiltersSchema>;
