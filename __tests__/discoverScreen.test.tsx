@@ -39,6 +39,13 @@ jest.mock('@/features/safety/hooks', () => ({
   }),
 }));
 
+let mockSurvey: { data?: unknown; isPending: boolean } = { data: undefined, isPending: true };
+
+jest.mock('@/features/survey/hooks', () => ({
+  useSurvey: () => mockSurvey,
+  useSaveSurvey: () => ({ save: jest.fn(), reset: jest.fn(), status: 'idle', error: null, fieldErrors: {} }),
+}));
+
 const PROFILE = {
   user_id: 'u-2',
   display_name: 'Yasmine Haddad',
@@ -53,6 +60,7 @@ beforeEach(() => {
   jest.clearAllMocks();
   mockDeckQuery = { data: undefined, isPending: true };
   mockActions = { acting: false, error: null };
+  mockSurvey = { data: undefined, isPending: true };
 });
 
 describe('DiscoverScreen', () => {
@@ -118,5 +126,47 @@ describe('DiscoverScreen', () => {
     await fireEvent.press(screen.getByText('Spam'));
     await fireEvent.press(screen.getByTestId('discover-report-confirm'));
     expect(mockSafetyReport).toHaveBeenCalledWith('u-2', 'Spam', '');
+  });
+
+  it('shows the survey prompt until completed, Later dismisses for the session', async () => {
+    mockDeckQuery = { isPending: false, data: { ok: true, data: [PROFILE] } };
+    mockSurvey = { data: { ok: true, data: null }, isPending: false };
+    await render(<DiscoverScreen />);
+    expect(screen.getByTestId('discover-survey-prompt')).toBeTruthy();
+    await fireEvent.press(screen.getByTestId('discover-survey-prompt-later'));
+    expect(() => screen.getByTestId('discover-survey-prompt')).toThrow();
+    // Discovery itself is untouched by dismissal.
+    expect(screen.getByText('Yasmine Haddad, 24')).toBeTruthy();
+  });
+
+  it('hides the survey prompt once the survey is completed', async () => {
+    mockDeckQuery = { isPending: false, data: { ok: true, data: [PROFILE] } };
+    mockSurvey = {
+      data: { ok: true, data: { profile_id: 'p-9', answers: {}, completed_at: '2026-09-09T00:00:00Z' } },
+      isPending: false,
+    };
+    await render(<DiscoverScreen />);
+    expect(() => screen.getByTestId('discover-survey-prompt')).toThrow();
+  });
+
+  it('offers resume on a started-but-unfinished survey', async () => {
+    mockDeckQuery = { isPending: false, data: { ok: true, data: [PROFILE] } };
+    mockSurvey = {
+      data: { ok: true, data: { profile_id: 'p-9', answers: {}, completed_at: null } },
+      isPending: false,
+    };
+    await render(<DiscoverScreen />);
+    expect(screen.getByText('Continue your survey')).toBeTruthy();
+  });
+
+  it('hides the survey prompt when the survey fetch fails', async () => {
+    mockDeckQuery = { isPending: false, data: { ok: true, data: [PROFILE] } };
+    mockSurvey = {
+      data: { ok: false, error: { message: 'Down.' } },
+      isPending: false,
+    };
+    await render(<DiscoverScreen />);
+    expect(() => screen.getByTestId('discover-survey-prompt')).toThrow();
+    expect(screen.getByText('Yasmine Haddad, 24')).toBeTruthy();
   });
 });

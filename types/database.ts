@@ -162,6 +162,45 @@ export type Database = {
           },
         ];
       };
+      personality_surveys: {
+        Row: {
+          answers: Json;
+          completed_at: string | null;
+          created_at: string;
+          profile_id: string;
+          updated_at: string;
+        };
+        Insert: {
+          answers?: Json;
+          completed_at?: string | null;
+          created_at?: string;
+          profile_id: string;
+          updated_at?: string;
+        };
+        Update: {
+          answers?: Json;
+          completed_at?: string | null;
+          created_at?: string;
+          profile_id?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'personality_surveys_profile_id_fkey';
+            columns: ['profile_id'];
+            isOneToOne: true;
+            referencedRelation: 'active_profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'personality_surveys_profile_id_fkey';
+            columns: ['profile_id'];
+            isOneToOne: true;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       profile_photos: {
         Row: {
           id: string;

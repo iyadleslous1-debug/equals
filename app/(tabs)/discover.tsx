@@ -1,5 +1,6 @@
 import { useCallback, useState } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
+import { useRouter } from 'expo-router';
 import { EmptyState } from '@/components/EmptyState';
 import { ErrorState } from '@/components/ErrorState';
 import { LoadingState } from '@/components/LoadingState';
@@ -11,11 +12,14 @@ import type { DeckProfile } from '@/features/discover/api';
 import { BlockConfirm } from '@/features/safety/components/BlockConfirm';
 import { ReportSheet } from '@/features/safety/components/ReportSheet';
 import { useSafety } from '@/features/safety/hooks';
+import { SurveyPrompt } from '@/features/survey/components/SurveyPrompt';
+import { useSurvey } from '@/features/survey/hooks';
 import { useForegroundRefetch } from '@/hooks/useForegroundRefetch';
 
 type SafetyView = { mode: 'menu' } | { mode: 'report' } | { mode: 'block' } | null;
 
 export default function DiscoverScreen(): React.JSX.Element {
+  const router = useRouter();
   const deckQuery = useDeck();
   const [position, setPosition] = useState(0);
   const advance = useCallback(() => setPosition((p) => p + 1), []);
@@ -28,6 +32,14 @@ export default function DiscoverScreen(): React.JSX.Element {
   const { show } = useToast();
   const [target, setTarget] = useState<DeckProfile | null>(null);
   const [view, setView] = useState<SafetyView>(null);
+  const [promptDismissed, setPromptDismissed] = useState(false);
+  const surveyQuery = useSurvey();
+  const surveyRow = surveyQuery.data?.ok ? surveyQuery.data.data : undefined;
+  // Deferrable prompt only: hidden on fetch error, once a survey is completed,
+  // or dismissed this session; resumable while unfinished. Discovery stays
+  // fully usable without the survey.
+  const completed = surveyRow?.completed_at !== null && surveyRow?.completed_at !== undefined;
+  const showPrompt = !promptDismissed && surveyQuery.data?.ok === true && !completed;
 
   useForegroundRefetch(
     useCallback(() => {
@@ -93,6 +105,14 @@ export default function DiscoverScreen(): React.JSX.Element {
     <ScrollView className="bg-void">
       <View className="grow px-4 py-6">
         <Text className="mb-4 text-2xl font-bold text-text">Discover</Text>
+        {showPrompt ? (
+          <SurveyPrompt
+            onStart={() => router.push('/survey')}
+            onLater={() => setPromptDismissed(true)}
+            resume={surveyRow !== null && surveyRow !== undefined}
+            testID="discover-survey-prompt"
+          />
+        ) : null}
         {current === undefined ? (
           <EmptyState
             title="No more profiles for now"

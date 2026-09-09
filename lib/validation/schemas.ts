@@ -15,7 +15,7 @@ import { err, ok, type ApiResult } from '../result';
 /**
  * Neutralise invisible control characters, collapse runaway newlines, trim.
  * Deliberately conservative: keeps newlines/tabs and all languages/emoji
- * (DZ users write in Arabic, French, Darja, English).
+ * (users write in whatever language they use).
  */
 export function sanitizeText(input: string): string {
   const stripped = [...input]
@@ -85,6 +85,44 @@ export function parseWith<T>(schema: z.ZodType<T>, input: unknown): ApiResult<T>
   const result = schema.safeParse(input);
   if (result.success) return ok(result.data);
   const first = result.error.issues[0];
-  const message = first?.message ?? 'Saisie invalide.';
+  const message = first?.message ?? 'Invalid input.';
   return err('validation/failed', message, result.error.issues);
 }
+
+/**
+ * MVP2 personality survey (10 questions, tap-only). Strict: unknown keys are
+ * rejected so compatibility scoring always sees a deterministic shape.
+ * Stored opaque as `personality_surveys.answers` jsonb.
+ */
+export const SURVEY_HOBBIES = [
+  'outdoors',
+  'cooking',
+  'sports',
+  'reading',
+  'gaming',
+  'music',
+  'travel',
+  'art',
+] as const;
+
+const scale15 = (label: string) => z.number().int(`${label} must be 1–5.`).min(1).max(5);
+
+export const surveyAnswersSchema = z
+  .object({
+    hobbies: z
+      .array(z.enum(SURVEY_HOBBIES))
+      .min(1, 'Pick at least 1 hobby.')
+      .max(3, 'Pick at most 3 hobbies.')
+      .refine((picked) => new Set(picked).size === picked.length, 'Pick each hobby once.'),
+    vibe: z.enum(['homebody', 'cafes', 'restaurants', 'outdoors', 'events']),
+    rhythm: scale15('Rhythm'),
+    sports: z.enum(['never', 'sometimes', 'regular']),
+    cooking: z.enum(['love', 'sometimes', 'never']),
+    travel: z.enum(['essential', 'nice', 'low']),
+    family: scale15('Family'),
+    career: scale15('Career'),
+    kids: z.enum(['yes', 'maybe', 'no']),
+    smoking: z.enum(['no', 'occasionally', 'regularly']),
+  })
+  .strict();
+export type SurveyAnswers = z.infer<typeof surveyAnswersSchema>;
