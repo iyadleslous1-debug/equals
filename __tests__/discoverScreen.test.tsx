@@ -8,6 +8,12 @@ const mockSafetyReport = jest.fn();
 const mockSafetyBlock = jest.fn();
 let mockDeckQuery: { data?: unknown; isPending: boolean } = { data: undefined, isPending: true };
 let mockActions: { acting: boolean; error: string | null } = { acting: false, error: null };
+// Faithful `enabled` simulation: empty id list (survey incomplete) → the
+// real hook stays pending with no data; non-empty → canned scores.
+let mockCompatImpl: (ids: string[]) => { data?: unknown; isPending: boolean } = () => ({
+  data: undefined,
+  isPending: true,
+});
 
 jest.mock('expo-router', () => ({
   useRouter: () => ({ replace: jest.fn(), push: jest.fn(), back: jest.fn() }),
@@ -25,6 +31,7 @@ jest.mock('@/features/discover/hooks', () => ({
     error: mockActions.error,
   }),
   useCardPhotoUrls: () => ({ 'u-2': 'https://picsum.photos/300' }),
+  useCompatibility: (ids: string[]) => mockCompatImpl(ids),
   useAct: () => ({}),
 }));
 
@@ -61,6 +68,7 @@ beforeEach(() => {
   mockDeckQuery = { data: undefined, isPending: true };
   mockActions = { acting: false, error: null };
   mockSurvey = { data: undefined, isPending: true };
+  mockCompatImpl = () => ({ data: undefined, isPending: true });
 });
 
 describe('DiscoverScreen', () => {
@@ -168,5 +176,65 @@ describe('DiscoverScreen', () => {
     await render(<DiscoverScreen />);
     expect(() => screen.getByTestId('discover-survey-prompt')).toThrow();
     expect(screen.getByText('Yasmine Haddad, 24')).toBeTruthy();
+  });
+
+  it('orders the deck by compatibility only when my survey is completed', async () => {
+    const low = { ...PROFILE, user_id: 'u-low', display_name: 'Low Match' };
+    const high = { ...PROFILE, user_id: 'u-high', display_name: 'High Match' };
+    mockDeckQuery = { isPending: false, data: { ok: true, data: [low, high] } };
+    mockSurvey = {
+      data: { ok: true, data: { profile_id: 'p-9', answers: {}, completed_at: '2026-09-09T00:00:00Z' } },
+      isPending: false,
+    };
+    mockCompatImpl = () => ({
+      data: {
+        ok: true,
+        data: new Map([
+          ['u-low', 20],
+          ['u-high', 95],
+        ]),
+      },
+      isPending: false,
+    });
+    await render(<DiscoverScreen />);
+    expect(screen.getByText('High Match, 24')).toBeTruthy();
+    expect(() => screen.getByText('Low Match, 24')).toThrow();
+  });
+
+  it('keeps default order without my survey even when scores exist', async () => {
+    const low = { ...PROFILE, user_id: 'u-low', display_name: 'Low Match' };
+    const high = { ...PROFILE, user_id: 'u-high', display_name: 'High Match' };
+    mockDeckQuery = { isPending: false, data: { ok: true, data: [low, high] } };
+    mockSurvey = { data: { ok: true, data: null }, isPending: false };
+    mockCompatImpl = (ids: string[]) =>
+      ids.length === 0
+        ? { data: undefined, isPending: true }
+        : {
+            data: {
+              ok: true,
+              data: new Map([
+                ['u-low', 20],
+                ['u-high', 95],
+              ]),
+            },
+            isPending: false,
+          };
+    const { unmount } = await render(<DiscoverScreen />);
+    // Hook stays disabled without my survey: empty ids → no scores → server order.
+    expect(screen.getByText('Low Match, 24')).toBeTruthy();
+    await unmount();
+  });
+
+  it('falls back to server order when scores fail', async () => {
+    const low = { ...PROFILE, user_id: 'u-low', display_name: 'Low Match' };
+    const high = { ...PROFILE, user_id: 'u-high', display_name: 'High Match' };
+    mockDeckQuery = { isPending: false, data: { ok: true, data: [low, high] } };
+    mockSurvey = {
+      data: { ok: true, data: { profile_id: 'p-9', answers: {}, completed_at: '2026-09-09T00:00:00Z' } },
+      isPending: false,
+    };
+    mockCompatImpl = () => ({ data: { ok: false, error: { message: 'Down.' } }, isPending: false });
+    await render(<DiscoverScreen />);
+    expect(screen.getByText('Low Match, 24')).toBeTruthy();
   });
 });

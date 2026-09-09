@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { EmptyState } from '@/components/EmptyState';
@@ -7,13 +7,14 @@ import { LoadingState } from '@/components/LoadingState';
 import { Sheet } from '@/components/Sheet';
 import { useToast } from '@/components/Toast';
 import { UserCard } from '@/features/discover/components/UserCard';
-import { useCardPhotoUrls, useDeck, useDeckActions } from '@/features/discover/hooks';
+import { useCardPhotoUrls, useCompatibility, useDeck, useDeckActions } from '@/features/discover/hooks';
 import type { DeckProfile } from '@/features/discover/api';
 import { BlockConfirm } from '@/features/safety/components/BlockConfirm';
 import { ReportSheet } from '@/features/safety/components/ReportSheet';
 import { useSafety } from '@/features/safety/hooks';
 import { SurveyPrompt } from '@/features/survey/components/SurveyPrompt';
 import { useSurvey } from '@/features/survey/hooks';
+import { orderByScore } from '@/lib/compatibility';
 import { useForegroundRefetch } from '@/hooks/useForegroundRefetch';
 
 type SafetyView = { mode: 'menu' } | { mode: 'report' } | { mode: 'block' } | null;
@@ -25,7 +26,7 @@ export default function DiscoverScreen(): React.JSX.Element {
   const advance = useCallback(() => setPosition((p) => p + 1), []);
   const { acting, request, skip, error } = useDeckActions(advance);
   const loaded = deckQuery.data;
-  const deck = loaded?.ok ? loaded.data : [];
+  const deck = useMemo(() => (loaded?.ok ? loaded.data : []), [loaded]);
   const urls = useCardPhotoUrls(deck);
   const { refetch } = deckQuery;
   const safety = useSafety();
@@ -48,7 +49,17 @@ export default function DiscoverScreen(): React.JSX.Element {
     }, [refetch, target]),
   );
 
-  const current = deck[position];
+  // Compatibility ordering (MVP2 piece 2): active ONLY when my own survey
+  // is completed. Survey-less viewers keep the default deck — no penalty,
+  // no different treatment. Unscored profiles keep server order.
+  const compatIds = useMemo(() => deck.map((d) => d.user_id), [deck]);
+  const compatQuery = useCompatibility(completed ? compatIds : []);
+  const compatScores = useMemo(
+    () => (compatQuery.data?.ok === true ? compatQuery.data.data : new Map<string, number>()),
+    [compatQuery.data],
+  );
+  const orderedDeck = useMemo(() => orderByScore(deck, (d) => d.user_id, compatScores), [deck, compatScores]);
+  const current = orderedDeck[position];
   const currentId = current?.user_id;
   // Stable callbacks so memoized UserCard skips re-renders on unrelated
   // parent churn (toast notices, safety-sheet state). All hooks stay above
@@ -66,7 +77,11 @@ export default function DiscoverScreen(): React.JSX.Element {
     }
   }, [current]);
 
-  if (deckQuery.isPending) return <LoadingState label="Loading profiles…" />;
+  // One paint, already ordered: when my survey is done we also wait for
+  // scores, so the first card never swaps under the user mid-read.
+  if (deckQuery.isPending || (completed && compatQuery.isPending)) {
+    return <LoadingState label="Loading profiles…" />;
+  }
   if (loaded && !loaded.ok) {
     return (
       <View className="flex-1 bg-void">

@@ -16,6 +16,7 @@
     "test:ci": "jest --ci --coverage",
     "prepare": "husky",
     "gen:types": "supabase gen types typescript --linked > types/database.ts",
+    "gen:types:local": "node scripts/gen-types-local.mjs",
     "db:new": "supabase migration new",
     "db:reset": "supabase db reset",
     "seed:dev": "node scripts/seed-dev.mjs"

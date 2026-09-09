@@ -4,12 +4,29 @@ import { LIST_STALE_TIME_MS } from '@/constants/app';
 import { useAct } from '@/hooks/useAct';
 import { reportError } from '@/lib/reporting';
 import { useSignedUrls } from '@/hooks/useSignedUrls';
-import { fetchDeck, sendRequest, skipProfile, type DeckProfile } from './api';
+import { fetchDeck, fetchCompatibility, sendRequest, skipProfile, type DeckProfile } from './api';
 
 export const DECK_KEY = ['deck'] as const;
+export const COMPAT_KEY = ['compat'] as const;
 
 export function useDeck() {
   return useQuery({ queryKey: DECK_KEY, queryFn: () => fetchDeck(), staleTime: LIST_STALE_TIME_MS });
+}
+
+/**
+ * Compatibility scores for deck user ids. Disabled (default deck order) when
+ * the id list is empty — the screen passes [] unless the viewer's own survey
+ * is completed, so survey-less viewers never pay for or see reordering.
+ */
+export function useCompatibility(userIds: string[]) {
+  // Sorted copy: cache key must not fragment on benign server reorders.
+  const key = [...userIds].sort().join(',');
+  return useQuery({
+    queryKey: [...COMPAT_KEY, key],
+    queryFn: () => fetchCompatibility(userIds),
+    staleTime: LIST_STALE_TIME_MS,
+    enabled: userIds.length > 0,
+  });
 }
 
 /** Signed display URLs for deck card photos (bucket paths stay private). */

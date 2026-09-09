@@ -447,6 +447,13 @@ export type Database = {
         };
         Returns: boolean;
       };
+      get_compatibility: {
+        Args: { p_user_ids: string[] };
+        Returns: {
+          score: number;
+          user_id: string;
+        }[];
+      };
       get_conversation_previews: {
         Args: never;
         Returns: {
@@ -495,6 +502,7 @@ export type Database = {
         Returns: boolean;
       };
       set_card_photo: { Args: { p_photo_id: string }; Returns: boolean };
+      survey_score: { Args: { a: Json; b: Json }; Returns: number };
     };
     Enums: {
       [_ in never]: never;

@@ -41,6 +41,27 @@ export async function fetchDeck(limit = 20): Promise<ApiResult<DeckProfile[]>> {
   return ok(data as DeckProfile[]);
 }
 
+/**
+ * Compatibility scores for deck user ids. The RPC takes user ids (what the
+ * deck carries), resolves surveys inside, and returns scores only — raw
+ * answers never leave the database.
+ */
+export async function fetchCompatibility(userIds: string[]): Promise<ApiResult<Map<string, number>>> {
+  const unique = [...new Set(userIds)].slice(0, 25);
+  if (unique.length === 0) return ok(new Map());
+  const { data, error } = await supabase.rpc('get_compatibility', { p_user_ids: unique });
+  if (error !== null || data === null || !Array.isArray(data)) {
+    return err('discover/compat-failed', "Couldn't load matches. Try again.", toAppError(error));
+  }
+  const scores = new Map<string, number>();
+  for (const row of data as { user_id?: unknown; score?: unknown }[]) {
+    if (typeof row.user_id === 'string' && typeof row.score === 'number') {
+      scores.set(row.user_id, row.score);
+    }
+  }
+  return ok(scores);
+}
+
 async function recordSwipe(
   swiperId: string,
   swipedId: string,

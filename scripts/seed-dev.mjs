@@ -108,7 +108,44 @@ for (let i = 0; i < profiles.length; i += 1) {
   if (error) fail(`photos ${i}`, error);
 }
 
-// 5. social graph: swipes everywhere, requests 0→1 (accepted), 2→3 (accepted), 4→5 (pending)
+// 5. surveys: dev-01 (the usual login) + dev-02 identical (100), dev-03
+// partial overlap (68), dev-06 different tastes (low score), rest none.
+const SURVEY_BASE = {
+  hobbies: ['music', 'travel'],
+  vibe: 'cafes',
+  rhythm: 3,
+  sports: 'never',
+  cooking: 'sometimes',
+  travel: 'essential',
+  family: 4,
+  career: 2,
+  kids: 'no',
+  smoking: 'no',
+};
+const SURVEYS = [
+  SURVEY_BASE,
+  SURVEY_BASE,
+  { ...SURVEY_BASE, hobbies: ['music', 'sports'], vibe: 'homebody', rhythm: 5 },
+  null,
+  null,
+  { ...SURVEY_BASE, hobbies: ['gaming'], vibe: 'events', rhythm: 5, sports: 'regular', kids: 'yes', smoking: 'regularly' },
+  null,
+  null,
+];
+for (let i = 0; i < profiles.length; i += 1) {
+  if (SURVEYS[i] === null) continue;
+  const { error } = await supabase.from('personality_surveys').upsert(
+    {
+      profile_id: profiles[i],
+      answers: SURVEYS[i],
+      completed_at: new Date().toISOString(),
+    },
+    { onConflict: 'profile_id' },
+  );
+  if (error) fail(`survey ${i}`, error);
+}
+
+// 6. social graph: swipes everywhere, requests 0→1 (accepted), 2→3 (accepted), 4→5 (pending)
 const req = async (a, b, status) => {
   const { data, error } = await supabase
     .from('friend_requests')
@@ -136,7 +173,7 @@ await req(0, 1, 'accepted');
 await req(2, 3, 'accepted');
 await req(4, 5, 'pending');
 
-// 6. conversations + messages for the accepted pairs (canonical a<b ordering)
+// 7. conversations + messages for the accepted pairs (canonical a<b ordering)
 const convo = async (a, b) => {
   const [x, y] = userIds[a] < userIds[b] ? [userIds[a], userIds[b]] : [userIds[b], userIds[a]];
   const { data, error } = await supabase
@@ -168,6 +205,6 @@ await say(c2, 3, 'Azul Riyad ! Oui, presque chaque mois. On s’organise une sor
 }
 
 console.log(
-  'seed complete: 8 users, 8 profiles, 24 photos, swipes, 3 requests, 2 convos, 5 messages, 1 block.',
+  'seed complete: 8 users, 8 profiles, 24 photos, 4 surveys, swipes, 3 requests, 2 convos, 5 messages, 1 block.',
 );
 console.log('log in with any dev-0X@seed.local / Seedpass123!');
