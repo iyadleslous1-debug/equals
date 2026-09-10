@@ -70,4 +70,10 @@ Maintained after every finished step. Newest at the bottom.
 - Gate: 305/305 tests, lint, typecheck green.
 - UI WORK PAUSED by decision: final finish pass comes last. Following ROADMAP.
 
-## MVP3 — retention backend: IN PROGRESS
+## MVP3 — retention backend: IN PROGRESS (`0bf6577`)
+
+- `user_stats` (own-read only) + `record_login()` (UTC-day streaks,
+  race-safe, future-proof) + `touch_activity()` (5-min throttle both
+  sides) + anti-forgery trigger on `users.last_active_at`. 9/9 probes.
+- Client: `lib/activity.ts` (never-throws), `useActivity` (claim once per
+  user/day, foreground heartbeat) wired in root layout. 314/314 tests.
