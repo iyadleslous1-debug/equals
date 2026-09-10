@@ -14,14 +14,18 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { ErrorBoundary } from '../components/ErrorBoundary';
 import { ToastProvider } from '../components/Toast';
 import { COLORS } from '../constants/theme';
+import { useActivity } from '../hooks/useActivity';
 import { useSupabaseAuth } from '../hooks/useSupabaseAuth';
 import { config, reportOptionalEnv } from '../lib/config';
 import { setMinLevel } from '../lib/logger';
 import { queryClient } from '../lib/query-client';
+import { useSessionStore } from '../store/sessionStore';
 import '../global.css';
 
 export default function RootLayout(): React.JSX.Element {
   useSupabaseAuth();
+  const userId = useSessionStore((s) => s.session?.user?.id);
+  useActivity(userId);
 
   useEffect(() => {
     setMinLevel(config.logLevel);

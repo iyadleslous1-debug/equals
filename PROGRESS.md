@@ -68,3 +68,6 @@ Maintained after every finished step. Newest at the bottom.
   badge, restyled bubbles/rows/tiles, Reveal + form shake, stack
   transitions, jest native mocks. Adaptations logged in commit.
 - Gate: 305/305 tests, lint, typecheck green.
+- UI WORK PAUSED by decision: final finish pass comes last. Following ROADMAP.
+
+## MVP3 — retention backend: IN PROGRESS

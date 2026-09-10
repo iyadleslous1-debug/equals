@@ -401,12 +401,48 @@ export type Database = {
           },
         ];
       };
+      user_stats: {
+        Row: {
+          created_at: string;
+          current_streak: number;
+          last_login_date: string | null;
+          longest_streak: number;
+          updated_at: string;
+          user_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          current_streak?: number;
+          last_login_date?: string | null;
+          longest_streak?: number;
+          updated_at?: string;
+          user_id: string;
+        };
+        Update: {
+          created_at?: string;
+          current_streak?: number;
+          last_login_date?: string | null;
+          longest_streak?: number;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'user_stats_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: true;
+            referencedRelation: 'users';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       users: {
         Row: {
           account_status: string;
           created_at: string;
           deleted_at: string | null;
           id: string;
+          last_active_at: string | null;
           phone_number: string | null;
         };
         Insert: {
@@ -414,6 +450,7 @@ export type Database = {
           created_at?: string;
           deleted_at?: string | null;
           id: string;
+          last_active_at?: string | null;
           phone_number?: string | null;
         };
         Update: {
@@ -421,6 +458,7 @@ export type Database = {
           created_at?: string;
           deleted_at?: string | null;
           id?: string;
+          last_active_at?: string | null;
           phone_number?: string | null;
         };
         Relationships: [];
@@ -498,6 +536,13 @@ export type Database = {
           wilaya: number;
         }[];
       };
+      get_my_blocks: {
+        Args: never;
+        Returns: {
+          blocked_id: string;
+          display_name: string;
+        }[];
+      };
       get_profile_gallery: {
         Args: { p_user_id: string };
         Returns: {
@@ -527,8 +572,17 @@ export type Database = {
         Args: { convo_id: string };
         Returns: boolean;
       };
+      record_login: {
+        Args: never;
+        Returns: {
+          current_streak: number;
+          longest_streak: number;
+        }[];
+      };
       set_card_photo: { Args: { p_photo_id: string }; Returns: boolean };
       survey_score: { Args: { a: Json; b: Json }; Returns: number };
+      touch_activity: { Args: never; Returns: undefined };
+      valid_wilaya_set: { Args: { w: number[] }; Returns: boolean };
     };
     Enums: {
       [_ in never]: never;
